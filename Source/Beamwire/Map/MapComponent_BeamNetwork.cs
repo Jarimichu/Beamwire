@@ -28,6 +28,7 @@ namespace Beamwire
         private BeamGraph graph;
         private bool dirty = true;
         private bool planDirty = true;
+        private int lastSolveTick = -1;
 
         public MapComponent_BeamNetwork(Map map) : base(map)
         {
@@ -81,6 +82,46 @@ namespace Beamwire
             {
                 MarkPlanDirty();
             }
+        }
+
+        private readonly HashSet<IntVec3> tmpGuarded = new HashSet<IntVec3>();
+
+        /// <summary>
+        /// True when a non-hostile pawn stands in, or is stepping into, the path a shutter's beam takes once it
+        /// passes through. The path is worked out from the beams arriving at the shutter, so it's known whether the
+        /// shutter is open or closed.
+        /// </summary>
+        public bool FriendlyInPath(CompBeamNode shutter)
+        {
+            if (graph == null) return false;
+            tmpGuarded.Clear();
+            var grid = new MapBeamGrid(map, BeamwireMod.Settings);
+            float range = BeamwireMod.Settings.maxRange;
+            int id = shutter.parent.thingIDNumber;
+            foreach (BeamSegment s in graph.Segments)
+            {
+                if (s.To == null || s.To.Id != id) continue;
+                GridPos p = s.To.Pos;
+                float travelled = 0f;
+                while (true)
+                {
+                    p = p.Step(s.Dir);
+                    travelled += s.Dir.StepLength();
+                    if (travelled > range || !grid.InBounds(p) || grid.IsBlocked(p)) break;
+                    IntVec3 c = MapBeamGrid.ToCell(p);
+                    if (c.GetFirstThing<Building_BeamNode>(map) != null) break;
+                    tmpGuarded.Add(c);
+                }
+            }
+            if (tmpGuarded.Count == 0) return false;
+
+            foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
+            {
+                if (pawn.Dead || pawn.HostileTo(Faction.OfPlayer)) continue;
+                if (tmpGuarded.Contains(pawn.Position)) return true;
+                if (pawn.pather != null && pawn.pather.Moving && tmpGuarded.Contains(pawn.pather.nextCell)) return true;
+            }
+            return false;
         }
 
         public IEnumerable<Thing> DustyNodes()
@@ -188,6 +229,15 @@ namespace Beamwire
             BeamwireSettings settings = BeamwireMod.Settings;
             BeamSettings beamSettings = settings.ToBeamSettings();
 
+            // Capacitors charge or drain at the last solve's rate for the time since then.
+            int now = Find.TickManager.TicksGame;
+            int elapsed = lastSolveTick < 0 ? 0 : now - lastSolveTick;
+            lastSolveTick = now;
+            foreach (CompBeamNode c in nodes)
+            {
+                c.IntegrateStorage(elapsed);
+            }
+
             var snapshot = new List<BeamNode>(nodes.Count);
             foreach (CompBeamNode c in nodes)
             {
@@ -199,6 +249,12 @@ namespace Beamwire
                     Efficiency = c.Efficiency,
                     MaxThroughput = c.MaxThroughput,
                     Upkeep = c.Props.upkeep,
+                    Closed = c.ShutterClosed,
+                    Stored = c.Stored,
+                    Capacity = c.Props.capacity,
+                    MaxCharge = c.Props.maxCharge,
+                    MaxDischarge = c.Props.maxDischarge,
+                    ChargeEfficiency = c.Props.chargeEfficiency,
                 };
                 if (c.Kind == NodeKind.Receiver)
                 {

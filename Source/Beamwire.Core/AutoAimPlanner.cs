@@ -189,6 +189,24 @@ namespace Beamwire.Core
             }
 
             foreach (BeamNode t in targets) plan.UnreachedReceivers.Add(t.Id);
+
+            // Every auto emitter that no route used joins in: it is aimed at the cheapest receiver it can reach,
+            // so several emitters can share one receiver's load instead of sitting idle.
+            var allReceivers = new HashSet<BeamNode>();
+            foreach (BeamNode n in nodes)
+            {
+                if (n.Kind == NodeKind.Receiver && n.Operational) allReceivers.Add(n);
+            }
+            foreach (BeamNode e in nodes)
+            {
+                if (e.Kind != NodeKind.Emitter || !IsAuto(e) || commits.ContainsKey(e)) continue;
+                Arrival found = Search(nodes, rays, fixedFacing, commits, allReceivers, settings, e);
+                if (found != null && TryCommit(found, commits))
+                {
+                    totalCost += found.Cost;
+                }
+            }
+
             foreach (BeamNode n in nodes)
             {
                 if (IsAuto(n))
@@ -199,7 +217,10 @@ namespace Beamwire.Core
             return plan;
         }
 
-        private static bool IsAuto(BeamNode n) => n.AutoAim && n.Operational && n.Kind != NodeKind.Receiver;
+        /// <summary>Nodes the planner may turn. Receivers, prisms and shutters work the same at any facing.</summary>
+        private static bool IsAuto(BeamNode n) =>
+            n.AutoAim && n.Operational &&
+            n.Kind != NodeKind.Receiver && n.Kind != NodeKind.Prism && n.Kind != NodeKind.Shutter;
 
         private static Arrival Search(
             List<BeamNode> nodes,
@@ -207,30 +228,37 @@ namespace Beamwire.Core
             Dictionary<BeamNode, Dir8> fixedFacing,
             Dictionary<BeamNode, Commitment> commits,
             HashSet<BeamNode> targets,
-            BeamSettings settings)
+            BeamSettings settings,
+            BeamNode onlySource = null)
         {
             var heap = new MinHeap<Arrival>();
             var settled = new HashSet<long>();
             var outputs = new List<Dir8>(2);
 
-            // Seeds: every working emitter. Manual or already-committed ones fire one way; free auto emitters any way.
+            // Seeds: every working emitter, plus charged capacitors (which cost a bounce, so emitter routes win).
+            // Manual or already-committed sources fire one way; free auto sources may fire any way.
             foreach (BeamNode e in nodes)
             {
-                if (e.Kind != NodeKind.Emitter || !e.Operational) continue;
+                bool emitter = e.Kind == NodeKind.Emitter;
+                bool charged = e.Kind == NodeKind.Capacitor && e.HasCharge;
+                if (!(emitter || charged) || !e.Operational) continue;
+                if (onlySource != null && e != onlySource) continue;
+                float baseCost = emitter ? 0f : NodeCost;
                 if (fixedFacing.TryGetValue(e, out Dir8 f))
                 {
-                    Launch(heap, rays, null, e, f, settings.MaxRange, 0f, null, default, false, default);
+                    Launch(heap, rays, null, e, f, settings.MaxRange, baseCost, null, default, false, default);
                 }
                 else if (commits.TryGetValue(e, out Commitment c))
                 {
-                    Launch(heap, rays, null, e, c.Facing, settings.MaxRange, 0f, e, c.Facing, false, default);
+                    // Already aimed by an earlier route: it fires that way.
+                    Launch(heap, rays, null, e, c.Facing, settings.MaxRange, baseCost, e, c.Facing, false, default);
                 }
                 else
                 {
                     for (int d = 0; d < 8; d++)
                     {
                         float bonus = (Dir8)d == e.Facing ? -KeepBonus : 0f;
-                        Launch(heap, rays, null, e, (Dir8)d, settings.MaxRange, bonus, e, (Dir8)d, false, default);
+                        Launch(heap, rays, null, e, (Dir8)d, settings.MaxRange, baseCost + bonus, e, (Dir8)d, false, default);
                     }
                 }
             }
@@ -252,7 +280,7 @@ namespace Beamwire.Core
                     continue; // absorbed
                 }
 
-                float range = n.Kind == NodeKind.Relay ? settings.MaxRange : a.RangeLeft;
+                float range = n.ResetsRange ? settings.MaxRange : a.RangeLeft;
 
                 if (fixedFacing.TryGetValue(n, out Dir8 fixedF))
                 {
@@ -363,6 +391,7 @@ namespace Beamwire.Core
             return true;
         }
 
+        // Shutters are always planned as open, so a shutter closing for a passing colonist doesn't re-aim anything.
         private static BeamNode WithFacing(BeamNode n, Dir8 f) =>
             new BeamNode(n.Id, n.Kind, n.Pos, f) { Operational = n.Operational };
 

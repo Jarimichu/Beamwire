@@ -18,7 +18,28 @@ namespace Beamwire.Core
     {
         private const float Epsilon = 1e-4f;
 
+        /// <summary>Re-solves needed at most, when some beams feeding a shared node turn out to be capped.</summary>
+        private const int MaxPasses = 4;
+
         public static void Solve(BeamGraph graph, BeamSettings settings)
+        {
+            List<BeamNode> order = TopologicalOrder(graph);
+
+            // When several beams feed one node, its demand is shared between them. If one of them can't deliver
+            // its share (its emitter is capped, or it shares a splitter with other demand), the next pass caps it
+            // at what it actually delivered and asks the others for the rest.
+            var caps = new Dictionary<BeamSegment, float>();
+            for (int pass = 0; pass < MaxPasses; pass++)
+            {
+                RunPasses(graph, settings, order, caps);
+                if (!UpdateCaps(graph, caps))
+                {
+                    break;
+                }
+            }
+        }
+
+        private static void RunPasses(BeamGraph graph, BeamSettings settings, List<BeamNode> order, Dictionary<BeamSegment, float> caps)
         {
             foreach (BeamNode n in graph.Nodes)
             {
@@ -30,9 +51,8 @@ namespace Beamwire.Core
                 s.RequiredWatts = 0f;
             }
 
-            List<BeamNode> order = TopologicalOrder(graph);
-
             // ---- Demand pass: sinks first ----
+            var feeders = new List<BeamSegment>();
             for (int i = order.Count - 1; i >= 0; i--)
             {
                 BeamNode n = order[i];
@@ -46,23 +66,16 @@ namespace Beamwire.Core
                     continue;
                 }
 
-                // Share the requirement between the beams feeding this node.
-                IReadOnlyList<BeamSegment> incoming = graph.IncomingOf(n);
-                int feeders = 0;
-                foreach (BeamSegment s in incoming)
+                feeders.Clear();
+                foreach (BeamSegment s in graph.IncomingOf(n))
                 {
-                    if (!s.IsCycle) feeders++;
+                    if (!s.IsCycle) feeders.Add(s);
                 }
-                if (feeders == 0 || required <= 0f)
+                if (feeders.Count == 0 || required <= 0f)
                 {
                     continue;
                 }
-                float perFeeder = required / feeders;
-                foreach (BeamSegment s in incoming)
-                {
-                    if (s.IsCycle) continue;
-                    s.RequiredWatts = perFeeder / Math.Max(s.Transmittance, Epsilon);
-                }
+                ShareRequirement(feeders, required, caps);
             }
 
             // ---- Supply pass: emitters first ----
@@ -74,8 +87,98 @@ namespace Beamwire.Core
                     n.DeliveredWatts = n.Operational ? n.InputWatts * n.Efficiency : 0f;
                     continue;
                 }
+                if (n.Kind == NodeKind.Capacitor)
+                {
+                    available = CapacitorOutput(graph, n, settings);
+                }
                 Distribute(graph, n, available);
             }
+        }
+
+        /// <summary>
+        /// Splits what a node needs between the beams feeding it: equal shares, except that a beam known to
+        /// deliver less gets only what it can, and the rest goes to the others ("water filling").
+        /// </summary>
+        private static void ShareRequirement(List<BeamSegment> feeders, float required, Dictionary<BeamSegment, float> caps)
+        {
+            var open = new List<BeamSegment>(feeders);
+            float remaining = required;
+            bool changed = true;
+            while (changed && open.Count > 0)
+            {
+                changed = false;
+                float share = remaining / open.Count;
+                for (int i = open.Count - 1; i >= 0; i--)
+                {
+                    BeamSegment s = open[i];
+                    if (caps.TryGetValue(s, out float cap) && cap < share)
+                    {
+                        s.RequiredWatts = cap / Math.Max(s.Transmittance, Epsilon);
+                        remaining -= cap;
+                        open.RemoveAt(i);
+                        changed = true;
+                    }
+                }
+            }
+            if (open.Count == 0) return;
+            float each = Math.Max(0f, remaining) / open.Count;
+            foreach (BeamSegment s in open)
+            {
+                s.RequiredWatts = each / Math.Max(s.Transmittance, Epsilon);
+            }
+        }
+
+        /// <summary>
+        /// Caps every feeding beam that delivered less than it was asked for, at what it delivered. Only matters for
+        /// nodes with more than one feeder. Returns true if any cap is new, so another pass is worthwhile.
+        /// </summary>
+        private static bool UpdateCaps(BeamGraph graph, Dictionary<BeamSegment, float> caps)
+        {
+            bool any = false;
+            foreach (BeamNode n in graph.Nodes)
+            {
+                IReadOnlyList<BeamSegment> incoming = graph.IncomingOf(n);
+                if (incoming.Count < 2) continue;
+                foreach (BeamSegment s in incoming)
+                {
+                    if (s.IsCycle) continue;
+                    float asked = s.RequiredWatts * s.Transmittance;
+                    float arrived = s.Watts * s.Transmittance;
+                    if (arrived < asked - 0.01f && (!caps.TryGetValue(s, out float old) || arrived < old - 0.01f))
+                    {
+                        caps[s] = arrived;
+                        any = true;
+                    }
+                }
+            }
+            return any;
+        }
+
+        /// <summary>
+        /// A capacitor sends downstream what is needed, using its input first and storage for any shortfall.
+        /// Whatever input is left over charges it. Sets <see cref="BeamNode.StoredDeltaWatts"/>.
+        /// </summary>
+        private static float CapacitorOutput(BeamGraph graph, BeamNode n, BeamSettings settings)
+        {
+            if (!n.Operational)
+            {
+                return 0f;
+            }
+            float inflow = n.InputWatts * n.Efficiency * (1f - settings.NodeLoss);
+            float need = SumRequired(graph, n);
+            float discharge = n.HasCharge ? n.MaxDischarge : 0f;
+            float output = Math.Min(need, inflow + discharge);
+            float surplus = inflow - output;
+
+            if (surplus >= 0f)
+            {
+                n.StoredDeltaWatts = n.HasRoom ? Math.Min(surplus * n.ChargeEfficiency, n.MaxCharge) : 0f;
+            }
+            else
+            {
+                n.StoredDeltaWatts = surplus; // drawing on storage
+            }
+            return output;
         }
 
         private static float SumRequired(BeamGraph graph, BeamNode n)
@@ -102,9 +205,21 @@ namespace Beamwire.Core
 
                 case NodeKind.Mirror:
                 case NodeKind.Splitter:
+                case NodeKind.Prism:
                 {
                     float need = SumRequired(graph, n);
                     return need / (eff * (1f - settings.NodeLoss));
+                }
+
+                case NodeKind.Shutter:
+                    return n.Closed ? 0f : SumRequired(graph, n) / eff;
+
+                case NodeKind.Capacitor:
+                {
+                    // Ask for what downstream needs plus enough to charge at full rate while there is room.
+                    float need = SumRequired(graph, n);
+                    float charge = n.HasRoom ? n.MaxCharge / Math.Max(n.ChargeEfficiency, Epsilon) : 0f;
+                    return (need + charge) / (eff * (1f - settings.NodeLoss));
                 }
 
                 case NodeKind.Relay:
@@ -132,7 +247,10 @@ namespace Beamwire.Core
                     return n.DrawWatts * n.Efficiency;
                 case NodeKind.Mirror:
                 case NodeKind.Splitter:
+                case NodeKind.Prism:
                     return n.InputWatts * n.Efficiency * (1f - settings.NodeLoss);
+                case NodeKind.Shutter:
+                    return n.Closed ? 0f : n.InputWatts * n.Efficiency;
                 case NodeKind.Relay:
                     return Math.Max(0f, n.InputWatts * n.Efficiency * (1f - settings.NodeLoss) - n.Upkeep);
                 default:

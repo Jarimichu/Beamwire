@@ -23,6 +23,17 @@
   <Beamwire_InspectNoRoute>No beam route: no emitter can reach this receiver. Add mirrors, splitters or relays, or clear the way.</Beamwire_InspectNoRoute>
   <Beamwire_InspectDust>Optics dust: {0} (efficiency {1})</Beamwire_InspectDust>
 
+  <Beamwire_InspectCapacitor>Stored: {0} / {1} Wd ({2})</Beamwire_InspectCapacitor>
+  <Beamwire_CapCharging>charging {0} W</Beamwire_CapCharging>
+  <Beamwire_CapDischarging>supplying {0} W from storage</Beamwire_CapDischarging>
+  <Beamwire_CapIdle>idle</Beamwire_CapIdle>
+  <Beamwire_ShutterIsOpen>open</Beamwire_ShutterIsOpen>
+  <Beamwire_ShutterIsClosed>closed</Beamwire_ShutterIsClosed>
+  <Beamwire_ShutterMode_Auto>Shutter: auto</Beamwire_ShutterMode_Auto>
+  <Beamwire_ShutterMode_Open>Shutter: always open</Beamwire_ShutterMode_Open>
+  <Beamwire_ShutterMode_Closed>Shutter: always closed</Beamwire_ShutterMode_Closed>
+  <Beamwire_ShutterModeDesc>Cycle the shutter mode. Auto closes while a colonist, colony animal, prisoner or guest is in the beam beyond the shutter, and reopens when they're clear; hostiles don't trigger it. Always open and always closed ignore everyone.</Beamwire_ShutterModeDesc>
+
   <!-- Messages -->
   <Beamwire_Misaligned>The blast knocked the {0} out of alignment. If it is on auto-aim, it will re-aim itself in about an hour.</Beamwire_Misaligned>
 

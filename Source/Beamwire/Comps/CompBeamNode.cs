@@ -11,12 +11,27 @@ namespace Beamwire
     /// Makes a building part of the beam network. A single comp class covers every node kind; the
     /// kind comes from <see cref="CompProperties_BeamNode.kind"/>.
     /// </summary>
+    public enum ShutterMode
+    {
+        Auto,
+        Open,
+        Closed,
+    }
+
     public class CompBeamNode : ThingComp
     {
         private int throughputIndex = -1;
         private int orientation = -1;
         private bool autoAim = true;
         private int realignAtTick = -1;
+
+        // Shutter
+        private ShutterMode shutterMode = ShutterMode.Auto;
+        private bool shutterClosed;
+
+        // Capacitor
+        private float stored;
+        private float storedDeltaWatts;
 
         private CompPowerTrader_BeamEmitter emitterPower;
         private CompBeamReceiver receiverPower;
@@ -45,6 +60,19 @@ namespace Beamwire
         /// </summary>
         public bool AutoAimActive =>
             AutoAim && BeamwireMod.Settings.autoAim && (realignAtTick < 0 || Find.TickManager.TicksGame >= realignAtTick);
+
+        public bool ShutterClosed => Kind == NodeKind.Shutter && shutterClosed;
+
+        public float Stored => stored;
+
+        public float StoredFraction => Props.capacity > 0f ? stored / Props.capacity : 0f;
+
+        /// <summary>Capacitor: adds the last solve's charge or drain over the ticks since then.</summary>
+        public void IntegrateStorage(int elapsedTicks)
+        {
+            if (Kind != NodeKind.Capacitor || elapsedTicks <= 0) return;
+            stored = Mathf.Clamp(stored + storedDeltaWatts * elapsedTicks / (float)GenDate.TicksPerDay, 0f, Props.capacity);
+        }
 
         /// <summary>Receiver only: the last plan found no route to it.</summary>
         public bool NoRoute;
@@ -138,6 +166,9 @@ namespace Beamwire
             Scribe_Values.Look(ref orientation, "beamwireOrientation", -1);
             Scribe_Values.Look(ref autoAim, "beamwireAutoAim", true);
             Scribe_Values.Look(ref realignAtTick, "beamwireRealignAt", -1);
+            Scribe_Values.Look(ref shutterMode, "beamwireShutterMode", ShutterMode.Auto);
+            Scribe_Values.Look(ref shutterClosed, "beamwireShutterClosed", false);
+            Scribe_Values.Look(ref stored, "beamwireStored", 0f);
         }
 
         public override void ReceiveCompSignal(string signal)
@@ -160,6 +191,10 @@ namespace Beamwire
                     LastWatts = solved.DeliveredWatts;
                     receiverPower?.SetDelivered(solved.DeliveredWatts);
                     break;
+                case NodeKind.Capacitor:
+                    LastWatts = solved.InputWatts;
+                    storedDeltaWatts = solved.StoredDeltaWatts;
+                    break;
                 default:
                     LastWatts = solved.InputWatts;
                     break;
@@ -174,6 +209,10 @@ namespace Beamwire
                 // The shaken node has settled; let auto-aim straighten it out.
                 realignAtTick = -1;
                 Network?.MarkPlanDirty();
+            }
+            if (Kind == NodeKind.Shutter && parent.IsHashIntervalTick(ShutterSensorInterval))
+            {
+                UpdateShutter();
             }
             if (Kind != NodeKind.Emitter)
             {
@@ -190,6 +229,25 @@ namespace Beamwire
             else
             {
                 EndHum();
+            }
+        }
+
+        private const int ShutterSensorInterval = 15;
+
+        /// <summary>Opens or closes the shutter for its mode. In Auto, it closes while a non-hostile pawn is in its beam's path.</summary>
+        private void UpdateShutter()
+        {
+            bool closed;
+            switch (shutterMode)
+            {
+                case ShutterMode.Open: closed = false; break;
+                case ShutterMode.Closed: closed = true; break;
+                default: closed = Network != null && Network.FriendlyInPath(this); break;
+            }
+            if (closed != shutterClosed)
+            {
+                shutterClosed = closed;
+                Network?.MarkDirty(); // re-trace only: auto-aim plans shutters as open
             }
         }
 
@@ -265,6 +323,21 @@ namespace Beamwire
                 };
             }
 
+            if (Kind == NodeKind.Shutter && parent.Faction == Faction.OfPlayer)
+            {
+                yield return new Command_Action
+                {
+                    defaultLabel = ("Beamwire_ShutterMode_" + shutterMode).Translate(),
+                    defaultDesc = "Beamwire_ShutterModeDesc".Translate(),
+                    icon = shutterClosed ? BeamwireTex.ShutterClosed : BeamwireTex.ShutterOpen,
+                    action = () =>
+                    {
+                        shutterMode = (ShutterMode)(((int)shutterMode + 1) % 3);
+                        UpdateShutter();
+                    },
+                };
+            }
+
             if (Kind == NodeKind.Emitter && parent.Faction == Faction.OfPlayer && Props.throughputSteps.Count > 1)
             {
                 yield return new Command_Action
@@ -318,6 +391,16 @@ namespace Beamwire
                     return "Beamwire_InspectReceiver".Translate(LastWatts.ToString("0"), LastDemand.ToString("0"));
                 case NodeKind.Relay:
                     return "Beamwire_InspectRelay".Translate(LastWatts.ToString("0"), Props.upkeep.ToString("0"));
+                case NodeKind.Shutter:
+                    return ("Beamwire_ShutterMode_" + shutterMode).Translate() + ": " +
+                           (shutterClosed ? "Beamwire_ShutterIsClosed" : "Beamwire_ShutterIsOpen").Translate();
+                case NodeKind.Capacitor:
+                {
+                    string flow = storedDeltaWatts > 0.5f ? "Beamwire_CapCharging".Translate(storedDeltaWatts.ToString("0"))
+                        : storedDeltaWatts < -0.5f ? "Beamwire_CapDischarging".Translate((-storedDeltaWatts).ToString("0"))
+                        : "Beamwire_CapIdle".Translate();
+                    return "Beamwire_InspectCapacitor".Translate(stored.ToString("0"), Props.capacity.ToString("0"), flow);
+                }
                 default:
                     return "Beamwire_InspectPassive".Translate(LastWatts.ToString("0"));
             }

@@ -9,7 +9,7 @@
   <ResearchProjectDef>
     <defName>Beamwire_Optics</defName>
     <label>beam optics</label>
-    <description>Turn electricity into a coherent beam and back again. Unlocks the beam emitter, the beam receiver and the beam mirror.</description>
+    <description>Turn electricity into a coherent beam and back again. Unlocks the beam emitter, receiver, mirror, safety shutter and beam window.</description>
     <baseCost>800</baseCost>
     <techLevel>Industrial</techLevel>
     <tab>Beamwire</tab>
@@ -23,7 +23,7 @@
   <ResearchProjectDef>
     <defName>Beamwire_Splitting</defName>
     <label>beam splitting</label>
-    <description>Half-silvered optics that split one beam into two and share the power between them. Unlocks the beam splitter.</description>
+    <description>Half-silvered optics and crystal prisms that split one beam into several and share the power between them. Unlocks the beam splitter and the beam prism.</description>
     <baseCost>1200</baseCost>
     <techLevel>Industrial</techLevel>
     <tab>Beamwire</tab>
@@ -46,6 +46,21 @@
       <li>Beamwire_Splitting</li>
     </prerequisites>
     <researchViewX>2</researchViewX>
+    <researchViewY>0</researchViewY>
+  </ResearchProjectDef>
+
+  <ResearchProjectDef>
+    <defName>Beamwire_Capacitors</defName>
+    <label>beam capacitors</label>
+    <description>Bank beam power in the network itself, so it keeps flowing when emitters can't keep up. Unlocks the beam capacitor.</description>
+    <baseCost>1800</baseCost>
+    <techLevel>Industrial</techLevel>
+    <tab>Beamwire</tab>
+    <prerequisites>
+      <li>Beamwire_CoherentRelays</li>
+      <li>Batteries</li>
+    </prerequisites>
+    <researchViewX>3</researchViewX>
     <researchViewY>0</researchViewY>
   </ResearchProjectDef>
 

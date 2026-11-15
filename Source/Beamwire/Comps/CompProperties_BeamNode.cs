@@ -23,6 +23,18 @@ namespace Beamwire
         /// <summary>Whether players can rotate the node in place with a gizmo.</summary>
         public bool rotatable = true;
 
+        /// <summary>Capacitor: the most energy it stores, in watt-days.</summary>
+        public float capacity = 600f;
+
+        /// <summary>Capacitor: fastest charge rate, in watts going into storage.</summary>
+        public float maxCharge = 1000f;
+
+        /// <summary>Capacitor: fastest discharge rate, in watts.</summary>
+        public float maxDischarge = 1000f;
+
+        /// <summary>Capacitor: fraction of charging power that ends up stored.</summary>
+        public float chargeEfficiency = 0.85f;
+
         /// <summary>Chance that an explosion knocks this node out of alignment (random rotation).</summary>
         public float misalignChance = 0.5f;
 

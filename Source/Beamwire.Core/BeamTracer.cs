@@ -30,11 +30,13 @@ namespace Beamwire.Core
 
             var queue = new Queue<Launch>();
             var launched = new HashSet<long>();
-            var outputs = new List<Dir8>(2);
+            var outputs = new List<Dir8>(3);
 
             foreach (var n in graph.Nodes)
             {
-                if (n.Kind == NodeKind.Emitter && n.Operational)
+                // Emitters always fire. Charged capacitors fire too, so stored power flows even with no input.
+                bool source = n.Kind == NodeKind.Emitter || (n.Kind == NodeKind.Capacitor && n.HasCharge);
+                if (source && n.Operational)
                 {
                     Enqueue(queue, launched, n, n.Facing, settings.MaxRange);
                 }
@@ -52,7 +54,7 @@ namespace Beamwire.Core
                 }
 
                 BeamOptics.Outputs(seg.To, seg.Dir, outputs);
-                float rangeLeft = seg.To.Kind == NodeKind.Relay ? settings.MaxRange : l.RangeLeft - seg.Length;
+                float rangeLeft = seg.To.ResetsRange ? settings.MaxRange : l.RangeLeft - seg.Length;
                 if (rangeLeft <= 0)
                 {
                     continue;

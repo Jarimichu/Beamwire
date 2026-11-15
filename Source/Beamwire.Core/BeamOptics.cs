@@ -61,8 +61,22 @@ namespace Beamwire.Core
                     break;
                 }
 
+                case NodeKind.Prism:
+                    result.Add(travel);
+                    result.Add(travel.Rotate(2));
+                    result.Add(travel.Rotate(-2));
+                    break;
+
+                case NodeKind.Shutter:
+                    if (!node.Closed)
+                    {
+                        result.Add(travel);
+                    }
+                    break;
+
                 case NodeKind.Relay:
-                    // A relay won't take a beam fired straight into its output lens.
+                case NodeKind.Capacitor:
+                    // Neither takes a beam fired straight into its output lens.
                     if (travel != node.Facing.Opposite())
                     {
                         result.Add(node.Facing);

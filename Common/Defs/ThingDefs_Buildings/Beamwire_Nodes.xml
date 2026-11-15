@@ -229,4 +229,170 @@
     </modExtensions>
   </ThingDef>
 
+  <!-- ===================== Prism ===================== -->
+  <ThingDef ParentName="Beamwire_NodeBase">
+    <defName>Beamwire_Prism</defName>
+    <label>beam prism</label>
+    <description>A three-way crystal. Every beam that enters goes straight on and also turns 90° to both sides, so one beam can feed receivers on either side of it. Power is shared between the three branches according to demand. It works the same from every side, so it never needs aiming.</description>
+    <graphicData>
+      <texPath>Beamwire/Styles/Standard/Things/Prism_Base</texPath>
+    </graphicData>
+    <uiIconPath>Beamwire/Styles/Standard/Things/Prism_Icon</uiIconPath>
+    <costList>
+      <Steel>30</Steel>
+      <Silver>40</Silver>
+      <ComponentIndustrial>1</ComponentIndustrial>
+    </costList>
+    <statBases>
+      <WorkToBuild>1400</WorkToBuild>
+    </statBases>
+    <researchPrerequisites>
+      <li>Beamwire_Splitting</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="Beamwire.CompProperties_BeamNode">
+        <kind>Prism</kind>
+        <rotatable>false</rotatable>
+      </li>
+      <li Class="Beamwire.CompProperties_OpticalDust"/>
+    </comps>
+    <modExtensions>
+      <li Class="Beamwire.BeamNodeGraphicExtension">
+        <node>Prism</node>
+      </li>
+    </modExtensions>
+  </ThingDef>
+
+  <!-- ===================== Safety shutter ===================== -->
+  <ThingDef ParentName="Beamwire_NodeBase">
+    <defName>Beamwire_Shutter</defName>
+    <label>beam safety shutter</label>
+    <description>An iris gate for beams. While open, beams pass straight through it with no loss. On Auto, it snaps shut whenever a colonist, colony animal, prisoner or guest walks into the beam beyond it, and reopens once they are clear. Hostiles don't trigger it. It can also be set to stay open or stay closed.
+
+Place it just past an emitter or mirror, on the stretch of beam you want to guard.</description>
+    <graphicData>
+      <texPath>Beamwire/Styles/Standard/Things/Shutter_Base</texPath>
+    </graphicData>
+    <uiIconPath>Beamwire/Styles/Standard/Things/Shutter_Icon</uiIconPath>
+    <costList>
+      <Steel>40</Steel>
+      <ComponentIndustrial>2</ComponentIndustrial>
+    </costList>
+    <statBases>
+      <WorkToBuild>1200</WorkToBuild>
+    </statBases>
+    <researchPrerequisites>
+      <li>Beamwire_Optics</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="Beamwire.CompProperties_BeamNode">
+        <kind>Shutter</kind>
+        <rotatable>false</rotatable>
+      </li>
+      <li Class="Beamwire.CompProperties_OpticalDust"/>
+    </comps>
+    <modExtensions>
+      <li Class="Beamwire.BeamNodeGraphicExtension">
+        <node>Shutter</node>
+      </li>
+    </modExtensions>
+  </ThingDef>
+
+  <!-- ===================== Capacitor ===================== -->
+  <ThingDef ParentName="Beamwire_NodeBase">
+    <defName>Beamwire_Capacitor</defName>
+    <label>beam capacitor</label>
+    <description>Stores energy in the beam network. Like a relay, it collects beams from any side except its output and fires one beam out of its facing, with the range restored. Spare beam power charges it, up to 600 Wd at 1,000 W. When the incoming beams can't cover demand, it makes up the difference from storage, and it keeps powering receivers when no beam reaches it at all.</description>
+    <graphicData>
+      <texPath>Beamwire/Styles/Standard/Things/Capacitor_Base</texPath>
+    </graphicData>
+    <uiIconPath>Beamwire/Styles/Standard/Things/Capacitor_Icon</uiIconPath>
+    <costList>
+      <Steel>80</Steel>
+      <Silver>20</Silver>
+      <ComponentIndustrial>4</ComponentIndustrial>
+    </costList>
+    <statBases>
+      <MaxHitPoints>150</MaxHitPoints>
+      <WorkToBuild>2400</WorkToBuild>
+      <Mass>20</Mass>
+    </statBases>
+    <researchPrerequisites>
+      <li>Beamwire_Capacitors</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="Beamwire.CompProperties_BeamNode">
+        <kind>Capacitor</kind>
+        <capacity>600</capacity>
+        <maxCharge>1000</maxCharge>
+        <maxDischarge>1000</maxDischarge>
+        <chargeEfficiency>0.85</chargeEfficiency>
+      </li>
+      <li Class="Beamwire.CompProperties_OpticalDust"/>
+    </comps>
+    <modExtensions>
+      <li Class="Beamwire.BeamNodeGraphicExtension">
+        <node>Capacitor</node>
+      </li>
+    </modExtensions>
+  </ThingDef>
+
+  <!-- ===================== Beam window (a wall beams pass through) ===================== -->
+  <ThingDef ParentName="BuildingBase">
+    <defName>Beamwire_Window</defName>
+    <label>beam window</label>
+    <description>A wall with a thick glass slit. It keeps out people, gas and weather, holds up the roof and seals rooms like any wall, but power beams pass straight through it. Use it to bring beams into your base without leaving a door open.</description>
+    <thingClass>Beamwire.Building_BeamWindow</thingClass>
+    <category>Building</category>
+    <graphicData>
+      <texPath>Beamwire/Styles/Standard/Things/Window_Base</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(1,1)</drawSize>
+    </graphicData>
+    <uiIconPath>Beamwire/Styles/Standard/Things/Window_Icon</uiIconPath>
+    <altitudeLayer>Building</altitudeLayer>
+    <passability>Impassable</passability>
+    <blockWind>true</blockWind>
+    <blockLight>false</blockLight>
+    <castEdgeShadows>true</castEdgeShadows>
+    <fillPercent>1</fillPercent>
+    <coversFloor>true</coversFloor>
+    <holdsRoof>true</holdsRoof>
+    <staticSunShadowHeight>1.0</staticSunShadowHeight>
+    <canOverlapZones>false</canOverlapZones>
+    <rotatable>false</rotatable>
+    <selectable>true</selectable>
+    <neverMultiSelect>false</neverMultiSelect>
+    <tickerType>Never</tickerType>
+    <size>(1,1)</size>
+    <designationCategory>Power</designationCategory>
+    <stuffCategories>
+      <li>Metallic</li>
+      <li>Stony</li>
+    </stuffCategories>
+    <costStuffCount>8</costStuffCount>
+    <costList>
+      <Silver>10</Silver>
+    </costList>
+    <statBases>
+      <MaxHitPoints>220</MaxHitPoints>
+      <WorkToBuild>400</WorkToBuild>
+      <Flammability>0</Flammability>
+      <Beauty>1</Beauty>
+    </statBases>
+    <building>
+      <isInert>true</isInert>
+      <ai_chillDestination>false</ai_chillDestination>
+    </building>
+    <researchPrerequisites>
+      <li>Beamwire_Optics</li>
+    </researchPrerequisites>
+    <modExtensions>
+      <li Class="Beamwire.BeamTransparentExtension"/>
+      <li Class="Beamwire.BeamNodeGraphicExtension">
+        <node>Window</node>
+      </li>
+    </modExtensions>
+  </ThingDef>
+
 </Defs>

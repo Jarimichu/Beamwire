@@ -30,7 +30,8 @@ namespace Beamwire
         {
             IntVec3 c = ToCell(pos);
             Building edifice = c.GetEdifice(map);
-            if (edifice != null && edifice.def.passability == Traversability.Impassable)
+            if (edifice != null && edifice.def.passability == Traversability.Impassable &&
+                !edifice.def.HasModExtension<BeamTransparentExtension>())
             {
                 return true;
             }

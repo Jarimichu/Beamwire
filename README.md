@@ -13,14 +13,19 @@ Put a **beam emitter** on one power grid and a **beam receiver** on another, and
 | Mirror | 45° | One-sided pane. A beam striking it at an angle turns 90°; head-on it bounces straight back. The back absorbs; a beam running along the pane passes by. |
 | Splitter | 45° | Glass beam-splitter cube: every beam both passes through and turns 90°. Power is shared between the branches by downstream demand. |
 | Relay | 45° | Re-fires every incoming beam as one, with full range. Uses 30 W of the beam's power. |
+| Prism | – | Every beam goes straight on and turns 90° to both sides; power shared by demand. Feeds receivers on both sides of a beam. |
+| Safety shutter | – | Lossless inline gate. On Auto it closes while a non-hostile pawn is in the beam beyond it. Can be set to always open or always closed. |
+| Beam capacitor | 45° | Stores 600 Wd. Fires one beam out of its facing (range restored), charges from spare power at up to 1 kW, and covers shortfalls from storage. |
+| Beam window | – | A wall (seals rooms, holds the roof) that beams pass through. Built from metal or stone. |
 
 - **Auto-aim:** every node except the receiver has an Auto/Manual toggle. Auto nodes are aimed by the network so beams reach as many receivers as possible, using the fewest bounces and then the shortest paths. They re-aim whenever the layout changes: nodes built or removed, walls in a possible beam path, switches or breakdowns. Rotating a node by hand locks it to Manual, and auto-aim routes around it. A receiver that no emitter can reach says so in its inspect pane. Auto-aim can be turned off for the whole game in the mod settings.
+- Several emitters can feed one receiver: spare auto emitters are aimed at receivers they can reach, and the load is shared. If one emitter is capped, the others cover the shortfall.
 - Beams and nodes point in **8 directions** (45° steps). Diagonal steps count as √2 tiles, and a diagonal beam can't squeeze between two walls that touch at their corners.
 - **Losses:** 5% per mirror, splitter or relay, and 1% per 10 tiles. Fog, rain and smoke dim outdoor beams. Range is 60 tiles from an emitter or relay. All of this can be changed in the mod settings.
 - Walls, rock and other impassable buildings block beams. Roofs can block them too if you turn that setting on.
 - Powered beams **burn** anyone standing in them. You can turn this off or scale it in the settings.
 - Optics gather **dust** (faster outdoors), and colonists clean them under the Cleaning work type. Explosions can knock nodes **out of alignment**, and emitters and receivers can **break down**.
-- Research has its own tab: *Beam optics* → *Beam splitting* → *Coherent relays*.
+- Research has its own tab: *Beam optics* → *Beam splitting* → *Coherent relays* → *Beam capacitors*.
 
 ## Art styles
 

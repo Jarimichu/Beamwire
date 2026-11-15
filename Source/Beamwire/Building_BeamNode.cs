@@ -36,10 +36,43 @@ namespace Beamwire
 
             Vector3 topPos = drawLoc;
             topPos.y += Altitudes.AltInc;
+            string topPart = Node.ShutterClosed ? "TopClosed" : "Top";
             Graphics.DrawMesh(MeshPool.plane10,
                 Matrix4x4.TRS(topPos, Quaternion.AngleAxis(Node.AngleDegrees, Vector3.up), scale),
-                BeamwireStyles.Mat(Ext.node, "Top"), 0);
+                BeamwireStyles.Mat(Ext.node, topPart), 0);
+
+            if (Node.Kind == Core.NodeKind.Capacitor)
+            {
+                GenDraw.DrawFillableBar(new GenDraw.FillableBarRequest
+                {
+                    center = drawLoc + new Vector3(0f, Altitudes.AltInc * 2f, -0.36f),
+                    size = new Vector2(0.7f, 0.1f),
+                    fillPercent = Node.StoredFraction,
+                    filledMat = ChargeFilled,
+                    unfilledMat = ChargeEmpty,
+                    margin = 0.02f,
+                    rotation = Rot4.North,
+                });
+            }
         }
+
+        private static readonly Material ChargeFilled = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.35f, 0.85f, 0.45f));
+        private static readonly Material ChargeEmpty = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.12f, 0.12f, 0.12f));
+    }
+
+    /// <summary>
+    /// A beam window: a wall that beams pass through. It looks up its graphic from the chosen art style, so
+    /// switching style re-skins windows that are already built.
+    /// </summary>
+    public class Building_BeamWindow : Building
+    {
+        public override Graphic Graphic =>
+            GraphicDatabase.Get<Graphic_Single>(BeamwireStyles.TexPath("Window", "Base"), ShaderDatabase.Cutout, def.graphicData.drawSize, Color.white);
+    }
+
+    /// <summary>XML: marks a building that beams pass straight through, even though it is impassable.</summary>
+    public class BeamTransparentExtension : DefModExtension
+    {
     }
 
     /// <summary>XML: which node art set this building uses (Emitter, Receiver, Mirror, Splitter or Relay).</summary>

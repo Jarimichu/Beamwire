@@ -94,6 +94,15 @@ namespace Beamwire
                     CachedGraphicField?.SetValue(def.graphicData, null);
                 }
             }
+
+            // Beam windows are baked into the map mesh, so redraw it.
+            if (Verse.Current.ProgramState == ProgramState.Playing && Find.Maps != null)
+            {
+                foreach (Map map in Find.Maps)
+                {
+                    map.mapDrawer.RegenerateEverythingNow();
+                }
+            }
         }
     }
 }

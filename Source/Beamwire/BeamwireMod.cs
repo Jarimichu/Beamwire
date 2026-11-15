@@ -149,5 +149,7 @@ namespace Beamwire
         public static readonly Texture2D ShowBeams = ContentFinder<Texture2D>.Get("Beamwire/UI/ShowBeams");
         public static readonly Texture2D Throughput = ContentFinder<Texture2D>.Get("Beamwire/UI/Throughput");
         public static readonly Texture2D AutoAim = ContentFinder<Texture2D>.Get("Beamwire/UI/AutoAim");
+        public static readonly Texture2D ShutterOpen = ContentFinder<Texture2D>.Get("Beamwire/UI/ShutterOpen");
+        public static readonly Texture2D ShutterClosed = ContentFinder<Texture2D>.Get("Beamwire/UI/ShutterClosed");
     }
 }

@@ -26,6 +26,25 @@ namespace Beamwire.Core
         /// Resets the beam's range and consumes a small upkeep from the beam.
         /// </summary>
         Relay,
+
+        /// <summary>
+        /// Every incoming beam goes straight on and also turns 90° to both sides: three outputs, with power
+        /// shared by demand. It has no facing.
+        /// </summary>
+        Prism,
+
+        /// <summary>
+        /// An inline gate. Open, beams pass straight through with no loss; <see cref="BeamNode.Closed"/>, it
+        /// absorbs them. It has no facing.
+        /// </summary>
+        Shutter,
+
+        /// <summary>
+        /// Stores energy. Like a relay, it takes beams from any side except its output and fires one beam out of
+        /// <see cref="BeamNode.Facing"/>, with full range. Surplus input charges it, and when input falls short
+        /// it makes up the difference from storage.
+        /// </summary>
+        Capacitor,
     }
 
     /// <summary>A snapshot of one optical node, built fresh before each trace.</summary>
@@ -70,6 +89,30 @@ namespace Beamwire.Core
         /// <summary>Relay only: watts it consumes from the beam while passing power on.</summary>
         public float Upkeep { get; set; }
 
+        /// <summary>Shutter only: closed shutters absorb beams.</summary>
+        public bool Closed { get; set; }
+
+        /// <summary>Capacitor only: energy stored now, in watt-days.</summary>
+        public float Stored { get; set; }
+
+        /// <summary>Capacitor only: the most it can store, in watt-days.</summary>
+        public float Capacity { get; set; }
+
+        /// <summary>Capacitor only: the fastest it charges, in watts going into storage.</summary>
+        public float MaxCharge { get; set; }
+
+        /// <summary>Capacitor only: the fastest it discharges, in watts.</summary>
+        public float MaxDischarge { get; set; }
+
+        /// <summary>Capacitor only: fraction of charging power that ends up stored.</summary>
+        public float ChargeEfficiency { get; set; } = 1f;
+
+        /// <summary>Capacitor only: true when it has energy to give.</summary>
+        public bool HasCharge => Stored > 1e-3f;
+
+        /// <summary>Capacitor only: true when it has room to charge.</summary>
+        public bool HasRoom => Capacity - Stored > 1e-3f;
+
         // ---- Solver outputs ----
 
         /// <summary>Emitter: watts drawn from its power net to feed the beam.</summary>
@@ -84,8 +127,18 @@ namespace Beamwire.Core
         /// <summary>Watts this node needs at its input to meet downstream demand (computed by the solver).</summary>
         public float RequiredInput { get; internal set; }
 
+        /// <summary>
+        /// Capacitor: watts flowing into storage (positive) or out of it (negative). The solver never changes
+        /// <see cref="Stored"/>; the caller adds this × elapsed time between solves.
+        /// </summary>
+        public float StoredDeltaWatts { get; internal set; }
+
+        /// <summary>True for nodes that restore a beam's full range when re-firing it.</summary>
+        public bool ResetsRange => Kind == NodeKind.Relay || Kind == NodeKind.Capacitor;
+
         internal void ResetOutputs()
         {
+            StoredDeltaWatts = 0f;
             DrawWatts = 0f;
             InputWatts = 0f;
             DeliveredWatts = 0f;

@@ -20,7 +20,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEX = os.path.join(ROOT, "Common", "Textures", "Beamwire")
 S = 256          # working resolution
 FINAL = 128      # saved resolution
-NODES = ["Emitter", "Receiver", "Mirror", "Splitter", "Relay"]
+NODES = ["Emitter", "Receiver", "Mirror", "Splitter", "Relay", "Prism", "Shutter", "Capacitor"]
 
 # Folder name -> style. The folder names must match BeamwireStyles.All in Source/Beamwire/BeamwireStyles.cs.
 STYLES = {
@@ -28,7 +28,7 @@ STYLES = {
     beam=(255, 214, 120), outline=(28, 26, 24), ow=10, radius=18,
     plate=(118, 112, 104), plate_hi=(146, 140, 131), plate_lo=(92, 87, 81),
     metal=(160, 156, 148), metal_dark=(84, 80, 75), glass=(255, 214, 120), mirror=(214, 222, 228),
-    accents={"Emitter": (196, 120, 52), "Receiver": (110, 150, 92), "Mirror": (150, 150, 150), "Splitter": (190, 170, 90), "Relay": (130, 110, 150)},
+    accents={"Emitter": (196, 120, 52), "Receiver": (110, 150, 92), "Mirror": (150, 150, 150), "Splitter": (190, 170, 90), "Relay": (130, 110, 150), "Prism": (110, 160, 190), "Shutter": (196, 72, 60), "Capacitor": (96, 160, 110)},
     deco="bolts", ground="dirt"),
   "Industrial": dict(
     beam=(255, 150, 40), outline=(22, 20, 18), ow=8, radius=6,
@@ -226,7 +226,84 @@ def top(st, kind):
             d.polygon([(128, 100), (152, 140), (104, 140)], fill=rgba(st["accents"]["Relay"]), outline=o, width=3)
         img.alpha_composite(lens(st, [112, 16, 144, 48]))
         img.alpha_composite(lens(st, [116, 116, 140, 140], 6))
+    elif kind == "Prism":
+        # A triangular crystal with exit marks on three sides (straight on, left, right).
+        c = 128
+        tri = [(c, 42), (c + 86, c + 66), (c - 86, c + 66)]
+        glass = blank(); gd = ImageDraw.Draw(glass)
+        gd.polygon(tri, fill=rgba(st["beam"], 120))
+        img.alpha_composite(glow_layer(glass, 10))
+        d.polygon([(c, 42), (c, c + 66), (c - 86, c + 66)], fill=rgba(st["mirror"], 90))
+        d.line(tri + [tri[0]], fill=rgba(st["metal_dark"]), width=max(6, st["ow"]), joint="curve")
+        d.line(tri + [tri[0]], fill=rgba(st["metal"]), width=max(3, st["ow"] - 4), joint="curve")
+        core = blank(); ImageDraw.Draw(core).ellipse([c - 14, c + 4, c + 14, c + 32], fill=(255, 255, 255, 255))
+        img.alpha_composite(glow_layer(core, 8))
+        for (x, y) in [(c, 26), (30, c + 22), (S - 30, c + 22)]:
+            d.ellipse([x - 9, y - 9, x + 9, y + 9], fill=rgba(st["glass"]), outline=o, width=3)
+    elif kind == "Shutter":
+        draw_shutter(d, img, st, o, ow, closed=False)
+    elif kind == "Capacitor":
+        # A drum of stacked cells with charge lights and an output lens.
+        r = 12 if sharp else 30
+        d.rounded_rectangle([58, 50, 198, 214], radius=r, fill=rgba(st["metal"]), outline=o, width=ow)
+        for i, y in enumerate(range(76, 200, 30)):
+            d.rounded_rectangle([74, y, 182, y + 18], radius=min(r, 8), fill=rgba(st["metal_dark"]))
+            cell = blank(); ImageDraw.Draw(cell).rounded_rectangle([82, y + 5, 82 + 22 + i * 18, y + 13], radius=3, fill=rgba(st["glass"]))
+            img.alpha_composite(glow_layer(cell, 4))
+        d.rectangle([108, 22, 148, 56], fill=rgba(st["metal_dark"]), outline=o, width=ow)
+        img.alpha_composite(lens(st, [114, 10, 142, 38]))
     return img
+
+
+def draw_shutter(d, img, st, o, ow, closed):
+    """Sliding blast gates in a frame. Open: gates pulled aside with a lit gap. Closed: gates meet, warning stripes."""
+    r = 6 if st["radius"] < 20 else 18
+    d.rounded_rectangle([20, 58, S - 20, S - 58], radius=r, fill=rgba(st["metal"]), outline=o, width=ow)
+    d.rectangle([42, 84, S - 42, S - 84], fill=rgba(st["metal_dark"]))
+    warn = st["accents"]["Shutter"] if st["deco"] == "hazard" else (214, 64, 52)
+    if closed:
+        gates = [(42, 84, 128, S - 84), (128, 84, S - 42, S - 84)]
+        for g in gates:
+            d.rectangle(g, fill=rgba(st["plate_hi"]), outline=o, width=3)
+        stripes = blank(); sd = ImageDraw.Draw(stripes)
+        for x in range(-S, S * 2, 28):
+            sd.polygon([(x, 84), (x + 14, 84), (x + 14 - 88, S - 84), (x - 88, S - 84)], fill=rgba(warn))
+        mask = blank(); ImageDraw.Draw(mask).rectangle([46, 92, S - 46, S - 92], fill=(255, 255, 255, 255))
+        img.alpha_composite(Image.composite(stripes, blank(), mask.split()[3]))
+        d.line([(128, 84), (128, S - 84)], fill=o, width=4)
+        lamp_col = warn
+    else:
+        gap = blank(); ImageDraw.Draw(gap).rectangle([80, 90, S - 80, S - 90], fill=rgba(st["glass"], 170))
+        img.alpha_composite(glow_layer(gap, 8))
+        for g in [(42, 84, 74, S - 84), (S - 74, 84, S - 42, S - 84)]:
+            d.rectangle(g, fill=rgba(st["plate_hi"]), outline=o, width=3)
+        lamp_col = (90, 220, 110)
+    lamp = blank(); ImageDraw.Draw(lamp).ellipse([118, 34, 138, 54], fill=rgba(lamp_col))
+    img.alpha_composite(glow_layer(lamp, 6))
+    d.ellipse([118, 34, 138, 54], outline=o, width=2)
+
+
+def top_closed(st, kind):
+    img = blank(); d = ImageDraw.Draw(img)
+    draw_shutter(d, img, st, rgba(st["outline"]), max(3, st["ow"] - 2), closed=True)
+    return img
+
+
+def window(st):
+    """A wall block with a glass slit; beams pass through."""
+    img = blank(); d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, S, S], fill=rgba(st["plate_lo"]), outline=rgba(st["outline"]), width=max(4, st["ow"] - 2))
+    d.rectangle([0, 0, S, 22], fill=rgba(st["plate_hi"]))
+    if st["deco"] == "hazard":
+        for x in range(-S, S * 2, 36):
+            d.polygon([(x, S - 26), (x + 18, S - 26), (x + 8, S), (x - 10, S)], fill=rgba(st["accents"]["Emitter"]))
+    slit = blank(); sd = ImageDraw.Draw(slit)
+    sd.rounded_rectangle([20, 104, S - 20, 152], radius=8, fill=rgba(st["beam"], 120))
+    img.alpha_composite(glow_layer(slit, 6))
+    d.rounded_rectangle([20, 104, S - 20, 152], radius=8, outline=rgba(st["metal_dark"]), width=6)
+    d.line([(32, 114), (S - 60, 114)], fill=(255, 255, 255, 200), width=4)
+    return img
+
 
 def icon(st, kind):
     i = base(st, kind); i.alpha_composite(top(st, kind)); return i
@@ -384,6 +461,14 @@ def main():
             save(down(base(st, k)), "Styles", folder, "Things", f"{k}_Base.png")
             save(down(top(st, k)), "Styles", folder, "Things", f"{k}_Top.png")
             save(down(icon(st, k)), "Styles", folder, "Things", f"{k}_Icon.png")
+        closed_icon = base(st, "Shutter")
+        closed_icon.alpha_composite(top_closed(st, "Shutter"))
+        save(down(top_closed(st, "Shutter")), "Styles", folder, "Things", "Shutter_TopClosed.png")
+        save(down(window(st)), "Styles", folder, "Things", "Window_Base.png")
+        save(down(window(st)), "Styles", folder, "Things", "Window_Icon.png")
+        if folder == "Standard":
+            save(down(icon(st, "Shutter")), "UI", "ShutterOpen.png")
+            save(down(closed_icon), "UI", "ShutterClosed.png")
     save(beam_core(), "Effects", "BeamCore.png")
     save(beam_glow(), "Effects", "BeamGlow.png")
     save(icon_show_beams(), "UI", "ShowBeams.png")
