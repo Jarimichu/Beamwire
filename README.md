@@ -39,7 +39,7 @@ Put a **beam emitter** on one power grid and a **beam receiver** on another, and
 
 When the Odyssey expansion is active (RimWorld 1.6), the `Odyssey/` folder loads automatically through `LoadFolders.xml`:
 
-- **Beam mining laser** (research *Beam mining laser*: Beam optics + Deep drilling). A three-barrelled cutting laser (three thin red beams that pulse independently) that mines the nearest rock or ore marked for mining on one of its 8 lines, within 30 tiles, for full yield. It cuts about 60 HP per second per kW, ×1.5 in vacuum. It uses beam power first and tops up from a power conduit, so it also runs on the grid alone. It only asks for beams while it has work, so auto-aim routes them to it as needed. Its cutting beam burns like other beams, and a safety shutter on the line pauses it.
+- **Beam mining laser** (research *Beam mining laser*: Beam optics + Deep drilling). A three-barrelled cutting laser (three thin red beams that pulse independently and never go dark) that mines the nearest rock or ore marked for mining on one of its 8 lines, within 30 tiles, for full yield. It cuts about 60 HP per second per kW, ×1.5 in vacuum. It uses beam power first and tops up from a power conduit, so it also runs on the grid alone. It only asks for beams while it has work, so auto-aim routes them to it as needed. Its cutting beam burns like other beams, and a safety shutter on the line pauses it.
 - **Vacuum optics:** nodes standing in vacuum never gather dust.
 
 Without Odyssey these don't appear, and nothing else changes.

@@ -75,7 +75,7 @@ namespace Beamwire
 
         /// <summary>
         /// A mining laser's trigun: three thin red beams from its three barrels converging on the rock face.
-        /// Each pulses on its own rhythm (looks only; the cutting rate is steady).
+        /// Each pulses on its own rhythm but never fades out (looks only; the cutting rate is steady).
         /// </summary>
         public static void DrawCut(IntVec3 from, IntVec3 to, float watts, int seed)
         {
@@ -91,8 +91,8 @@ namespace Beamwire
             for (int i = 0; i < 3; i++)
             {
                 float phase = (seed * 0.618f + i * 2.1f) % (Mathf.PI * 2f);
-                float pulse = 0.5f + 0.5f * Mathf.Sin(time * PulseFreqs[i] + phase);
-                if (pulse < 0.3f) continue; // this barrel is between pulses
+                // Each beam swells and dims on its own rhythm but never fades out: brightness stays between 40% and 100%.
+                float pulse = 0.4f + 0.6f * (0.5f + 0.5f * Mathf.Sin(time * PulseFreqs[i] + phase));
 
                 Vector3 a = a0 + dir * 0.42f + side * BarrelOffsets[i];
                 Vector3 b = b0 - dir * 0.45f + side * FaceOffsets[i];
