@@ -38,7 +38,9 @@ namespace Beamwire
         private const int CutInterval = 60;
 
         private IntVec3 target = IntVec3.Invalid;
-        private float headAngle;
+        private float targetAngle;   // angle to the current target
+        private float headAngle = float.NaN; // angle the head is drawn at; turns smoothly
+        private const float TurnDegreesPerTick = 6f; // a full turn in a second at normal speed
         private float delivered;
         private CompPowerTrader_MiningLaser power;
         private bool cutting;
@@ -60,16 +62,28 @@ namespace Beamwire
         /// <summary>All the power it is cutting with: beams first, then the grid.</summary>
         public float TotalWatts => delivered + GridWatts;
 
-        /// <summary>True while it is actually cutting: it has a target, power, and no closed shutter in the way.</summary>
-        public bool Cutting => cutting;
+        /// <summary>
+        /// True while it is actually firing: it has a target, power, no closed shutter in the way, and its head has
+        /// swung round to face the target.
+        /// </summary>
+        public bool Cutting => cutting && OnTarget;
 
         public IntVec3 Target => target;
 
         /// <summary>Cells on the straight line between the laser and its target (not including either).</summary>
         public List<IntVec3> LineCells => lineCells;
 
-        /// <summary>Degrees clockwise from North toward the target, at any angle.</summary>
-        public float HeadAngle => headAngle;
+        /// <summary>
+        /// The angle the head is drawn at, in degrees clockwise from North. It turns toward the target while
+        /// cutting and back to its rest position (the direction it was placed facing) when not in use.
+        /// </summary>
+        public float HeadAngle => float.IsNaN(headAngle) ? RestAngle : headAngle;
+
+        /// <summary>True once the head has swung round to face its target.</summary>
+        public bool OnTarget => Mathf.Abs(Mathf.DeltaAngle(HeadAngle, targetAngle)) < 3f;
+
+        /// <summary>Where the head points when idle: the rotation chosen when it was placed.</summary>
+        public float RestAngle => parent.Rotation.AsAngle;
 
         private MapComponent_BeamNetwork Network => parent.Map?.GetComponent<MapComponent_BeamNetwork>();
 
@@ -109,7 +123,7 @@ namespace Beamwire
         {
             base.PostExposeData();
             Scribe_Values.Look(ref target, "beamwireLaserTarget", IntVec3.Invalid);
-            Scribe_Values.Look(ref headAngle, "beamwireLaserAngle", 0f);
+            Scribe_Values.Look(ref headAngle, "beamwireLaserAngle", float.NaN);
             Scribe_Values.Look(ref delivered, "beamwireLaserWatts", 0f);
         }
 
@@ -124,7 +138,11 @@ namespace Beamwire
             }
 
             cutting = target.IsValid && TotalWatts > 1f && LineOpen();
-            if (cutting)
+
+            // Swing toward the target while cutting, back to rest otherwise.
+            float want = cutting ? targetAngle : RestAngle;
+            headAngle = Mathf.MoveTowardsAngle(HeadAngle, want, TurnDegreesPerTick);
+            if (Cutting)
             {
                 if (sound == null || sound.Ended)
                 {
@@ -201,7 +219,7 @@ namespace Beamwire
             if (!target.IsValid) return;
             CellsBetween(parent.Position, target, lineCells);
             IntVec3 d = target - parent.Position;
-            headAngle = Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg;
+            targetAngle = Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg;
         }
 
         private static readonly List<IntVec3> tmpLine = new List<IntVec3>();
