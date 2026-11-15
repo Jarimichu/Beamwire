@@ -287,3 +287,53 @@ namespace Beamwire.Tests
         }
     }
 }
+
+namespace Beamwire.Tests
+{
+    public class PlannerLookaheadTests
+    {
+        [Fact]
+        public void Emitter_UsesPrism_InsteadOfSpendingItsBeamOnOneDiagonalReceiver()
+        {
+            // Both receivers sit on the emitter's diagonals, so either could be hit directly, but then the other
+            // goes dark. Firing east into the prism serves both.
+            var s = new BeamSettings { NodeLoss = 0f, LossPerTile = 0f, MaxRange = 60f };
+            var nodes = new[]
+            {
+                new BeamNode(1, NodeKind.Emitter, new GridPos(0, 5), Dir8.North) { AutoAim = true },
+                new BeamNode(2, NodeKind.Prism, new GridPos(4, 5), Dir8.North) { AutoAim = true },
+                new BeamNode(3, NodeKind.Receiver, new GridPos(4, 9), Dir8.North) { AutoAim = true },
+                new BeamNode(4, NodeKind.Receiver, new GridPos(4, 1), Dir8.North) { AutoAim = true },
+            };
+            AimPlan plan = AutoAimPlanner.Plan(new TestGrid(), nodes, s);
+            Assert.Equal(Dir8.East, plan.Facings[1]);
+            Assert.Equal(2, plan.ReachedReceivers.Count);
+        }
+    }
+}
+
+namespace Beamwire.Tests
+{
+    public class CapacitorPriorityTests
+    {
+        [Fact]
+        public void Charging_OnlyUsesSparePower()
+        {
+            // A 500 W emitter feeds a prism: one branch to a 300 W receiver, one to an empty capacitor.
+            var s = new BeamSettings { NodeLoss = 0f, LossPerTile = 0f, MaxRange = 60f };
+            var e = new BeamNode(1, NodeKind.Emitter, new GridPos(0, 5), Dir8.East) { MaxThroughput = 500f };
+            var p = new BeamNode(2, NodeKind.Prism, new GridPos(4, 5), Dir8.North);
+            var r = new BeamNode(3, NodeKind.Receiver, new GridPos(4, 9), Dir8.North) { Demand = 300f };
+            var c = new BeamNode(4, NodeKind.Capacitor, new GridPos(4, 1), Dir8.South)
+            {
+                Capacity = 600f, MaxCharge = 1000f, MaxDischarge = 1000f, ChargeEfficiency = 1f,
+            };
+            BeamGraph g = BeamTracer.Trace(new TestGrid(), new[] { e, p, r, c }, s);
+            PowerSolver.Solve(g, s);
+
+            Assert.Equal(300f, r.DeliveredWatts, 0);
+            Assert.True(c.StoredDeltaWatts > 190f, $"capacitor charged only {c.StoredDeltaWatts} W from 200 W spare");
+            Assert.True(e.DrawWatts > 490f);
+        }
+    }
+}

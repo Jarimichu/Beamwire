@@ -25,13 +25,56 @@ namespace Beamwire.Core
         {
             List<BeamNode> order = TopologicalOrder(graph);
 
+            bool anyCharging = false;
+            foreach (BeamNode n in graph.Nodes)
+            {
+                if (n.Kind == NodeKind.Capacitor && n.Operational && n.HasRoom) anyCharging = true;
+            }
+            if (!anyCharging)
+            {
+                SolveWithCharge(graph, settings, order, 1f);
+                return;
+            }
+
+            // Capacitors should charge from spare power only, never at a receiver's expense. Find what every
+            // receiver gets with no charging at all, then the largest charging allowance that keeps all of that.
+            SolveWithCharge(graph, settings, order, 0f);
+            var baseline = new Dictionary<BeamNode, float>();
+            foreach (BeamNode n in graph.Nodes)
+            {
+                if (n.Kind == NodeKind.Receiver) baseline[n] = n.DeliveredWatts;
+            }
+            bool Keeps()
+            {
+                foreach (var kv in baseline)
+                {
+                    if (kv.Key.DeliveredWatts < kv.Value - 0.5f) return false;
+                }
+                return true;
+            }
+
+            SolveWithCharge(graph, settings, order, 1f);
+            if (Keeps()) return;
+
+            float lo = 0f, hi = 1f;
+            for (int i = 0; i < 7; i++)
+            {
+                float mid = (lo + hi) / 2f;
+                SolveWithCharge(graph, settings, order, mid);
+                if (Keeps()) lo = mid; else hi = mid;
+            }
+            SolveWithCharge(graph, settings, order, lo);
+        }
+
+        private static void SolveWithCharge(BeamGraph graph, BeamSettings settings, List<BeamNode> order, float chargeAllowance)
+        {
             // When several beams feed one node, its demand is shared between them. If one of them can't deliver
             // its share (its emitter is capped, or it shares a splitter with other demand), the next pass caps it
             // at what it actually delivered and asks the others for the rest.
             var caps = new Dictionary<BeamSegment, float>();
             for (int pass = 0; pass < MaxPasses; pass++)
             {
-                RunPasses(graph, settings, order, caps);
+                RunPasses(graph, settings, order, caps, chargeAllowance);
                 if (!UpdateCaps(graph, caps))
                 {
                     break;
@@ -39,7 +82,7 @@ namespace Beamwire.Core
             }
         }
 
-        private static void RunPasses(BeamGraph graph, BeamSettings settings, List<BeamNode> order, Dictionary<BeamSegment, float> caps)
+        private static void RunPasses(BeamGraph graph, BeamSettings settings, List<BeamNode> order, Dictionary<BeamSegment, float> caps, float chargeAllowance)
         {
             foreach (BeamNode n in graph.Nodes)
             {
@@ -56,7 +99,7 @@ namespace Beamwire.Core
             for (int i = order.Count - 1; i >= 0; i--)
             {
                 BeamNode n = order[i];
-                float required = RequiredInputFor(graph, n, settings);
+                float required = RequiredInputFor(graph, n, settings, chargeAllowance);
                 n.RequiredInput = required;
 
                 if (n.Kind == NodeKind.Emitter)
@@ -191,7 +234,7 @@ namespace Beamwire.Core
             return sum;
         }
 
-        private static float RequiredInputFor(BeamGraph graph, BeamNode n, BeamSettings settings)
+        private static float RequiredInputFor(BeamGraph graph, BeamNode n, BeamSettings settings, float chargeAllowance)
         {
             if (!n.Operational)
             {
@@ -218,7 +261,7 @@ namespace Beamwire.Core
                 {
                     // Ask for what downstream needs plus enough to charge at full rate while there is room.
                     float need = SumRequired(graph, n);
-                    float charge = n.HasRoom ? n.MaxCharge / Math.Max(n.ChargeEfficiency, Epsilon) : 0f;
+                    float charge = n.HasRoom ? chargeAllowance * n.MaxCharge / Math.Max(n.ChargeEfficiency, Epsilon) : 0f;
                     return (need + charge) / (eff * (1f - settings.NodeLoss));
                 }
 

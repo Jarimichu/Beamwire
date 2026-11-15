@@ -71,6 +71,9 @@ namespace Beamwire.Core
         /// <summary>How many extra attempts the planner makes when its first plan leaves receivers dark.</summary>
         private const int MaxRetries = 6;
 
+        /// <summary>Most "force this emitter that way" attempts the planner makes when receivers are left dark.</summary>
+        private const int MaxForcedAttempts = 64;
+
         public static AimPlan Plan(IBeamGrid grid, IEnumerable<BeamNode> nodeSource, BeamSettings settings)
         {
             var nodes = new List<BeamNode>();
@@ -89,7 +92,7 @@ namespace Beamwire.Core
             // Greedy planning can paint itself into a corner (for example by spending an emitter's only beam on
             // the nearest receiver). If receivers are left dark, retry with those receivers served first, and
             // keep the attempt that reaches the most receivers, then the one with the lowest total cost.
-            AimPlan best = Attempt(nodes, rays, settings, new List<int>(), out float bestCost);
+            AimPlan best = Attempt(nodes, rays, settings, new List<int>(), null, out float bestCost);
             var tried = new HashSet<string>();
             for (int i = 0; i < MaxRetries && best.UnreachedReceivers.Count > 0; i++)
             {
@@ -103,7 +106,7 @@ namespace Beamwire.Core
                 }
                 if (!tried.Add(string.Join(",", priority))) break;
 
-                AimPlan candidate = Attempt(nodes, rays, settings, priority, out float cost);
+                AimPlan candidate = Attempt(nodes, rays, settings, priority, null, out float cost);
                 if (candidate.ReachedReceivers.Count > best.ReachedReceivers.Count ||
                     (candidate.ReachedReceivers.Count == best.ReachedReceivers.Count && cost < bestCost - 1e-3f))
                 {
@@ -116,6 +119,28 @@ namespace Beamwire.Core
                 }
             }
 
+            // Still receivers left dark? An emitter may have spent its one beam on a receiver it could hit
+            // directly, when aiming it elsewhere (say, into a prism) would serve more. Try forcing each auto
+            // emitter in each direction, within a budget, and keep the plan that reaches the most receivers.
+            int budget = MaxForcedAttempts;
+            foreach (BeamNode e in nodes)
+            {
+                if (best.UnreachedReceivers.Count == 0 || budget <= 0) break;
+                if (e.Kind != NodeKind.Emitter || !IsAuto(e)) continue;
+                for (int d = 0; d < 8 && budget > 0; d++)
+                {
+                    if (best.Facings.TryGetValue(e.Id, out Dir8 current) && (int)current == d) continue;
+                    budget--;
+                    var forced = new Dictionary<BeamNode, Dir8> { [e] = (Dir8)d };
+                    AimPlan candidate = Attempt(nodes, rays, settings, new List<int>(), forced, out float cost);
+                    if (candidate.ReachedReceivers.Count > best.ReachedReceivers.Count)
+                    {
+                        best = candidate;
+                        bestCost = cost;
+                    }
+                }
+            }
+
             foreach (GridPos p in watched) best.WatchedCells.Add(p);
             return best;
         }
@@ -125,6 +150,7 @@ namespace Beamwire.Core
             Dictionary<BeamNode, Ray[]> rays,
             BeamSettings settings,
             List<int> priority,
+            Dictionary<BeamNode, Dir8> forced,
             out float totalCost)
         {
             var plan = new AimPlan();
@@ -137,6 +163,13 @@ namespace Beamwire.Core
                 if (!IsAuto(n)) fixedFacing[n] = n.Facing;
             }
             var commits = new Dictionary<BeamNode, Commitment>();
+            if (forced != null)
+            {
+                foreach (var kv in forced)
+                {
+                    commits[kv.Key] = new Commitment { Facing = kv.Value, EmitterOut = kv.Value };
+                }
+            }
 
             var targets = new HashSet<BeamNode>();
             var byId = new Dictionary<int, BeamNode>();
