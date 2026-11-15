@@ -3,7 +3,7 @@
   <!-- Gizmos -->
   <Beamwire_RotateLeft>Rotate left</Beamwire_RotateLeft>
   <Beamwire_RotateRight>Rotate right</Beamwire_RotateRight>
-  <Beamwire_RotateDesc>Turn this node {0}° to re-aim its beam. Takes effect immediately.</Beamwire_RotateDesc>
+  <Beamwire_RotateDesc>Turn this node 45° to re-aim its beam. Takes effect immediately.</Beamwire_RotateDesc>
   <Beamwire_Throughput>Limit: {0} W</Beamwire_Throughput>
   <Beamwire_ThroughputDesc>Cycle the most power this emitter will put into its beam.</Beamwire_ThroughputDesc>
   <Beamwire_ShowBeams>Show beams</Beamwire_ShowBeams>
@@ -20,6 +20,10 @@
   <Beamwire_Misaligned>The blast knocked the {0} out of alignment.</Beamwire_Misaligned>
 
   <!-- Settings -->
+  <Beamwire_Setting_ArtStyle>Art style</Beamwire_Setting_ArtStyle>
+  <Beamwire_Style_Standard>Rim Standard (vanilla look, warm beams)</Beamwire_Style_Standard>
+  <Beamwire_Style_Industrial>Hazard Industrial (hazard stripes, orange beams)</Beamwire_Style_Industrial>
+  <Beamwire_Style_Spacer>Glitterworld Spacer (white ceramic, teal beams)</Beamwire_Style_Spacer>
   <Beamwire_Setting_Damage>Beams burn creatures</Beamwire_Setting_Damage>
   <Beamwire_Setting_Damage_Desc>Anyone standing in a powered beam takes burn damage that grows with the power it carries.</Beamwire_Setting_Damage_Desc>
   <Beamwire_Setting_DamageMult>Beam damage: {0}</Beamwire_Setting_DamageMult>

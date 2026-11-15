@@ -127,7 +127,7 @@ namespace Beamwire
             {
                 if (c.parent.Destroyed || !c.parent.Spawned) continue;
 
-                var n = new BeamNode(c.parent.thingIDNumber, c.Kind, MapBeamGrid.ToGrid(c.parent.Position), c.Orientation)
+                var n = new BeamNode(c.parent.thingIDNumber, c.Kind, MapBeamGrid.ToGrid(c.parent.Position), c.Facing)
                 {
                     Operational = c.Operational,
                     Efficiency = c.Efficiency,

@@ -31,6 +31,17 @@ namespace Beamwire
             }
             l.GapLine();
 
+            l.Label("Beamwire_Setting_ArtStyle".Translate());
+            foreach (BeamwireStyle style in BeamwireStyles.All)
+            {
+                if (l.RadioButton(style.Label, Settings.artStyle == style.Folder, 12f))
+                {
+                    Settings.artStyle = style.Folder;
+                    BeamwireStyles.Apply();
+                }
+            }
+            l.GapLine();
+
             l.CheckboxLabeled("Beamwire_Setting_ShowBeams".Translate(), ref Settings.showBeams, "Beamwire_Setting_ShowBeams_Desc".Translate());
             l.CheckboxLabeled("Beamwire_Setting_Weather".Translate(), ref Settings.weatherAffects, "Beamwire_Setting_Weather_Desc".Translate());
             l.CheckboxLabeled("Beamwire_Setting_RoofBlocks".Translate(), ref Settings.roofsBlock, "Beamwire_Setting_RoofBlocks_Desc".Translate());
@@ -48,6 +59,7 @@ namespace Beamwire
             if (l.ButtonText("Beamwire_Setting_Reset".Translate()))
             {
                 Settings.Reset();
+                BeamwireStyles.Apply();
             }
 
             l.End();
@@ -62,6 +74,7 @@ namespace Beamwire
 
     public class BeamwireSettings : ModSettings
     {
+        public string artStyle = "Standard";
         public bool beamDamage = true;
         public float damageMultiplier = 1f;
         public bool showBeams = true;
@@ -74,6 +87,7 @@ namespace Beamwire
 
         public void Reset()
         {
+            artStyle = "Standard";
             beamDamage = true;
             damageMultiplier = 1f;
             showBeams = true;
@@ -95,6 +109,7 @@ namespace Beamwire
         public override void ExposeData()
         {
             base.ExposeData();
+            Scribe_Values.Look(ref artStyle, "artStyle", "Standard");
             Scribe_Values.Look(ref beamDamage, "beamDamage", true);
             Scribe_Values.Look(ref damageMultiplier, "damageMultiplier", 1f);
             Scribe_Values.Look(ref showBeams, "showBeams", true);

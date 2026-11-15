@@ -9,9 +9,9 @@ namespace Beamwire.Core
         Receiver,
 
         /// <summary>
-        /// One-sided flat mirror that turns in 22.5° steps. Its <see cref="BeamNode.Orientation"/> is the direction
-        /// its reflective face points. Beams bounce off it like light off a real mirror, so the turn is 45°,
-        /// 90°, 135° or 180° depending on the angle. The back absorbs beams; a beam grazing the edge passes by.
+        /// One-sided flat mirror. <see cref="BeamNode.Facing"/> is the direction its reflective face points.
+        /// A beam hitting the face at 45° turns 90°; a beam hitting it head-on goes straight back. The back
+        /// absorbs beams, and a beam running along the pane passes by.
         /// </summary>
         Mirror,
 
@@ -31,18 +31,12 @@ namespace Beamwire.Core
     /// <summary>A snapshot of one optical node, built fresh before each trace.</summary>
     public sealed class BeamNode
     {
-        /// <param name="orientation">Direction in 22.5° steps (0 = North, clockwise, 0..15).</param>
-        public BeamNode(int id, NodeKind kind, GridPos pos, int orientation)
+        public BeamNode(int id, NodeKind kind, GridPos pos, Dir8 facing)
         {
             Id = id;
             Kind = kind;
             Pos = pos;
-            Orientation = Dir8Ext.Mod(orientation, 16);
-        }
-
-        public BeamNode(int id, NodeKind kind, GridPos pos, Dir8 facing)
-            : this(id, kind, pos, facing.To16())
-        {
+            Facing = facing;
         }
 
         public int Id { get; }
@@ -50,14 +44,10 @@ namespace Beamwire.Core
         public GridPos Pos { get; }
 
         /// <summary>
-        /// The node's angle in 22.5° steps (0..15, 0 = North, clockwise). Mirrors and splitters use the full
-        /// precision: it is the direction of the reflective face's normal. Emitters and relays aim in
-        /// <see cref="Facing"/>, which rounds down to a 45° step.
+        /// Which way the node points: the beam direction for emitters and relays, and the direction the
+        /// reflective face points for mirrors and splitters.
         /// </summary>
-        public int Orientation { get; }
-
-        /// <summary>The beam direction for emitters and relays.</summary>
-        public Dir8 Facing => (Dir8)(Orientation / 2);
+        public Dir8 Facing { get; }
 
         /// <summary>When false, the node absorbs incoming beams and emits nothing (broken, unpowered, switched off).</summary>
         public bool Operational { get; set; } = true;

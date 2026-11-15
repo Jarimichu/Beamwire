@@ -31,14 +31,11 @@ namespace Beamwire
 
         public NodeKind Kind => Props.kind;
 
-        /// <summary>Direction in 22.5° steps (0 = North, clockwise). Emitters and relays only use even values.</summary>
-        public int Orientation => orientation < 0 ? parent.Rotation.AsInt * 4 : orientation;
-
-        /// <summary>How many 22.5° steps one press of the rotate gizmo turns this node.</summary>
-        public int RotationStep => Kind == NodeKind.Mirror || Kind == NodeKind.Splitter ? 1 : 2;
+        /// <summary>Which of the 8 directions the node points (45° steps, 0 = North, clockwise).</summary>
+        public Dir8 Facing => (Dir8)(orientation < 0 ? parent.Rotation.AsInt * 2 : orientation);
 
         /// <summary>The angle the top sprite is drawn at.</summary>
-        public float AngleDegrees => Orientation * 22.5f;
+        public float AngleDegrees => (int)Facing * 45f;
 
         public float Efficiency => dust != null && BeamwireMod.Settings.dustEnabled ? dust.Efficiency : 1f;
 
@@ -83,7 +80,7 @@ namespace Beamwire
             if (orientation < 0)
             {
                 // Newly placed: start from the rotation chosen while placing it (R key).
-                orientation = parent.Rotation.AsInt * 4;
+                orientation = parent.Rotation.AsInt * 2;
             }
             Network?.Register(this);
         }
@@ -171,14 +168,10 @@ namespace Beamwire
             hum = null;
         }
 
-        /// <summary>Turns the node by <paramref name="steps"/> x 22.5° (positive = clockwise).</summary>
+        /// <summary>Turns the node by <paramref name="steps"/> x 45° (positive = clockwise).</summary>
         public void Rotate(int steps)
         {
-            orientation = Dir8Ext.Mod(Orientation + steps, 16);
-            if (RotationStep == 2 && (orientation & 1) == 1)
-            {
-                orientation = Dir8Ext.Mod(orientation + (steps > 0 ? 1 : -1), 16);
-            }
+            orientation = (int)Facing.Rotate(steps);
             Network?.MarkDirty();
         }
 
@@ -194,16 +187,16 @@ namespace Beamwire
                 yield return new Command_Action
                 {
                     defaultLabel = "Beamwire_RotateLeft".Translate(),
-                    defaultDesc = "Beamwire_RotateDesc".Translate((RotationStep * 22.5f).ToString("0.#")),
+                    defaultDesc = "Beamwire_RotateDesc".Translate(),
                     icon = TexUI.RotLeftTex,
-                    action = () => Rotate(-RotationStep),
+                    action = () => Rotate(-1),
                 };
                 yield return new Command_Action
                 {
                     defaultLabel = "Beamwire_RotateRight".Translate(),
-                    defaultDesc = "Beamwire_RotateDesc".Translate((RotationStep * 22.5f).ToString("0.#")),
+                    defaultDesc = "Beamwire_RotateDesc".Translate(),
                     icon = TexUI.RotRightTex,
-                    action = () => Rotate(RotationStep),
+                    action = () => Rotate(1),
                 };
             }
 
@@ -256,7 +249,7 @@ namespace Beamwire
             }
             if (Rand.Chance(Props.misalignChance))
             {
-                Rotate(Rand.Bool ? RotationStep : -RotationStep);
+                Rotate(Rand.Bool ? 1 : -1);
                 if (parent.Faction == Faction.OfPlayer)
                 {
                     Messages.Message("Beamwire_Misaligned".Translate(parent.LabelShort), parent, MessageTypeDefOf.NegativeEvent);

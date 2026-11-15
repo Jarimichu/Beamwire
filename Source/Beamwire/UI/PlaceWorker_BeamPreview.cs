@@ -18,7 +18,7 @@ namespace Beamwire
             Dir8 dir = (Dir8)(rot.AsInt * 2);
             if (thing is ThingWithComps twc && twc.GetComp<CompBeamNode>() is CompBeamNode node)
             {
-                dir = (Dir8)(node.Orientation / 2);
+                dir = node.Facing;
             }
 
             var grid = new MapBeamGrid(map, BeamwireMod.Settings);
@@ -33,7 +33,7 @@ namespace Beamwire
                 if (travelled > range || !grid.InBounds(p) || grid.IsBlocked(p)) break;
                 Cells.Add(MapBeamGrid.ToCell(p));
             }
-            GenDraw.DrawFieldEdges(Cells, BeamRenderer.BeamColor);
+            GenDraw.DrawFieldEdges(Cells, BeamwireStyles.Current.BeamColor);
         }
     }
 }

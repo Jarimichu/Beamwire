@@ -10,16 +10,28 @@ Put a **beam emitter** on one power grid and a **beam receiver** on another, and
 |---|---|---|
 | Emitter | 45° | Draws from its grid and fires a beam. It only draws what receivers downstream need, up to its throughput limit (250 W – 4 kW gizmo). |
 | Receiver | – | Catches beams from any side. It asks for its grid's shortfall, or its full intake (4 kW) while a battery can charge. |
-| Mirror | 22.5° | One-sided pane that reflects like a real mirror: 45°, 90°, 135° or straight back. The back absorbs; a beam grazing the edge passes by. |
-| Splitter | 22.5° | Half-silvered: transmits and reflects. Power is shared between the branches by downstream demand. |
+| Mirror | 45° | One-sided pane. A beam striking it at an angle turns 90°; head-on it bounces straight back. The back absorbs; a beam running along the pane passes by. |
+| Splitter | 45° | Glass beam-splitter cube: every beam both passes through and turns 90°. Power is shared between the branches by downstream demand. |
 | Relay | 45° | Re-fires every incoming beam as one, with full range. Uses 30 W of the beam's power. |
 
-- Beams travel in **8 directions**. Diagonal steps count as √2 tiles, and a diagonal beam can't squeeze between two walls that touch at their corners.
+- Beams and nodes point in **8 directions** (45° steps). Diagonal steps count as √2 tiles, and a diagonal beam can't squeeze between two walls that touch at their corners.
 - **Losses:** 5% per mirror, splitter or relay, and 1% per 10 tiles. Fog, rain and smoke dim outdoor beams. Range is 60 tiles from an emitter or relay. All of this can be changed in the mod settings.
 - Walls, rock and other impassable buildings block beams. Roofs can block them too if you turn that setting on.
 - Powered beams **burn** anyone standing in them. You can turn this off or scale it in the settings.
 - Optics gather **dust** (faster outdoors), and colonists clean them under the Cleaning work type. Explosions can knock nodes **out of alignment**, and emitters and receivers can **break down**.
 - Research has its own tab: *Beam optics* → *Beam splitting* → *Coherent relays*.
+
+## Art styles
+
+Players pick one in the mod settings, and it switches live: node art, architect icons, build ghosts and beam colour.
+
+| Style | Look | Beam |
+|---|---|---|
+| Rim Standard (default) | Close to vanilla: muted flat colours, thick outlines | Warm yellow |
+| Hazard Industrial | Hazard stripes, rivets, amber lamps | Orange |
+| Glitterworld Spacer | White ceramic, teal light strips | Teal |
+
+`python3 Tools/generate_art.py` regenerates every style. Each style is a folder under `Common/Textures/Beamwire/Styles/`. To add one, add it to `STYLES` in the script and to `BeamwireStyles.All` in `Source/Beamwire/BeamwireStyles.cs`.
 
 ## Repository layout
 

@@ -21,11 +21,12 @@ namespace Beamwire
         private static readonly MaterialPropertyBlock Block = new MaterialPropertyBlock();
         private static readonly int ColorId = Shader.PropertyToID("_Color");
 
-        public static readonly Color BeamColor = new Color(0.35f, 0.85f, 1f);
-
         public static void Draw(BeamGraph graph)
         {
             float altitude = AltitudeLayer.Projectile.AltitudeFor();
+            Color beam = BeamwireStyles.Current.BeamColor;
+            // The core is mostly white with a hint of the style's colour; the halo carries the colour.
+            Color coreTint = Color.Lerp(Color.white, beam, 0.25f);
             float time = Time.realtimeSinceStartup;
 
             foreach (BeamSegment s in graph.Segments)
@@ -53,12 +54,12 @@ namespace Beamwire
                 Quaternion rot = Quaternion.AngleAxis((int)s.Dir * 45f, Vector3.up);
 
                 // Glow first, then the core on top.
-                Block.SetColor(ColorId, new Color(BeamColor.r, BeamColor.g, BeamColor.b, glowAlpha));
+                Block.SetColor(ColorId, new Color(beam.r, beam.g, beam.b, glowAlpha));
                 Graphics.DrawMesh(MeshPool.plane10,
                     Matrix4x4.TRS(mid, rot, new Vector3(coreWidth * GlowWidthFactor, 1f, length + coreWidth)),
                     BeamwireTex.BeamGlow, 0, null, 0, Block);
 
-                Block.SetColor(ColorId, new Color(1f, 1f, 1f, coreAlpha));
+                Block.SetColor(ColorId, new Color(coreTint.r, coreTint.g, coreTint.b, coreAlpha));
                 Graphics.DrawMesh(MeshPool.plane10,
                     Matrix4x4.TRS(mid + new Vector3(0f, 0.001f, 0f), rot, new Vector3(coreWidth, 1f, length)),
                     BeamwireTex.BeamCore, 0, null, 0, Block);

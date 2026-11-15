@@ -21,107 +21,101 @@ namespace Beamwire.Tests
 
     public class OpticsTests
     {
-        // Orientations are in 22.5° steps: 0 = N, 2 = NE, 4 = E, 6 = SE, 8 = S, 10 = SW, 12 = W, 14 = NW.
-        private static List<Dir8> Out(NodeKind kind, int orientation, Dir8 travel)
+        private static List<Dir8> Out(NodeKind kind, Dir8 facing, Dir8 travel)
         {
             var result = new List<Dir8>();
-            BeamOptics.Outputs(new BeamNode(1, kind, new GridPos(0, 0), orientation), travel, result);
+            BeamOptics.Outputs(new BeamNode(1, kind, new GridPos(0, 0), facing), travel, result);
             return result;
         }
 
         [Fact]
-        public void Mirror_At45_TurnsBeam90()
+        public void Mirror_TurnsStraightBeam90()
         {
             // A mirror whose face points NE works like a "\" pane seen from the north-east.
-            Assert.Equal(new[] { Dir8.East }, Out(NodeKind.Mirror, 2, Dir8.South));
-            Assert.Equal(new[] { Dir8.North }, Out(NodeKind.Mirror, 2, Dir8.West));
-        }
-
-        [Fact]
-        public void Mirror_At22_5_TurnsBeam45()
-        {
-            // Face pointing NNW (orientation 15): an eastbound beam leaves heading north-east.
-            Assert.Equal(new[] { Dir8.NorthEast }, Out(NodeKind.Mirror, 15, Dir8.East));
-            // Face pointing NNE (orientation 1): a westbound beam leaves heading north-west.
-            Assert.Equal(new[] { Dir8.NorthWest }, Out(NodeKind.Mirror, 1, Dir8.West));
+            Assert.Equal(new[] { Dir8.East }, Out(NodeKind.Mirror, Dir8.NorthEast, Dir8.South));
+            Assert.Equal(new[] { Dir8.North }, Out(NodeKind.Mirror, Dir8.NorthEast, Dir8.West));
         }
 
         [Fact]
         public void Mirror_FacingBeam_ReflectsStraightBack()
         {
-            Assert.Equal(new[] { Dir8.West }, Out(NodeKind.Mirror, 12, Dir8.East));
+            Assert.Equal(new[] { Dir8.West }, Out(NodeKind.Mirror, Dir8.West, Dir8.East));
         }
 
         [Fact]
         public void Mirror_DiagonalBeam_Turns90()
         {
             // A NE-bound beam off a south-facing mirror (horizontal pane) leaves heading SE.
-            Assert.Equal(new[] { Dir8.SouthEast }, Out(NodeKind.Mirror, 8, Dir8.NorthEast));
+            Assert.Equal(new[] { Dir8.SouthEast }, Out(NodeKind.Mirror, Dir8.South, Dir8.NorthEast));
         }
 
         [Fact]
         public void Mirror_AbsorbsOnBack()
         {
-            Assert.Empty(Out(NodeKind.Mirror, 2, Dir8.North));
-            Assert.Empty(Out(NodeKind.Mirror, 2, Dir8.East));
+            Assert.Empty(Out(NodeKind.Mirror, Dir8.NorthEast, Dir8.North));
+            Assert.Empty(Out(NodeKind.Mirror, Dir8.NorthEast, Dir8.East));
         }
 
         [Fact]
         public void Mirror_GrazingBeam_PassesBy()
         {
             // The pane lies along the N-S line (face points E); a northbound beam runs along it.
-            Assert.Equal(new[] { Dir8.North }, Out(NodeKind.Mirror, 4, Dir8.North));
+            Assert.Equal(new[] { Dir8.North }, Out(NodeKind.Mirror, Dir8.East, Dir8.North));
         }
 
         [Fact]
         public void Splitter_PassesThroughAndReflects()
         {
-            var a = Out(NodeKind.Splitter, 2, Dir8.South);
+            var a = Out(NodeKind.Splitter, Dir8.NorthEast, Dir8.South);
             Assert.Contains(Dir8.South, a);
             Assert.Contains(Dir8.East, a);
 
             // Its back is also half-silvered.
-            var b = Out(NodeKind.Splitter, 2, Dir8.North);
+            var b = Out(NodeKind.Splitter, Dir8.NorthEast, Dir8.North);
             Assert.Contains(Dir8.North, b);
             Assert.Contains(Dir8.West, b);
         }
 
         [Fact]
-        public void Splitter_At22_5_SplitsInto45()
-        {
-            var r = Out(NodeKind.Splitter, 15, Dir8.East);
-            Assert.Contains(Dir8.East, r);
-            Assert.Contains(Dir8.NorthEast, r);
-        }
-
-        [Fact]
         public void Relay_RedirectsToFacing_ButNotFromItsOutput()
         {
-            Assert.Equal(new[] { Dir8.East }, Out(NodeKind.Relay, 4, Dir8.North));
-            Assert.Equal(new[] { Dir8.SouthEast }, Out(NodeKind.Relay, 6, Dir8.East));
-            Assert.Empty(Out(NodeKind.Relay, 4, Dir8.West));
+            Assert.Equal(new[] { Dir8.East }, Out(NodeKind.Relay, Dir8.East, Dir8.North));
+            Assert.Equal(new[] { Dir8.SouthEast }, Out(NodeKind.Relay, Dir8.SouthEast, Dir8.East));
+            Assert.Empty(Out(NodeKind.Relay, Dir8.East, Dir8.West));
         }
 
         [Fact]
         public void BrokenNode_Absorbs()
         {
             var result = new List<Dir8>();
-            var n = new BeamNode(1, NodeKind.Splitter, new GridPos(0, 0), 2) { Operational = false };
+            var n = new BeamNode(1, NodeKind.Splitter, new GridPos(0, 0), Dir8.NorthEast) { Operational = false };
             BeamOptics.Outputs(n, Dir8.South, result);
             Assert.Empty(result);
         }
 
         [Fact]
-        public void EveryReflection_LandsOnABeamDirection()
+        public void EightWayMirror_OnlyTurns90_BouncesBack_OrPassesBy()
         {
-            for (int o = 0; o < 16; o++)
+            var result = new List<Dir8>();
+            for (int f = 0; f < 8; f++)
             {
                 for (int d = 0; d < 8; d++)
                 {
-                    Dir8 r = BeamOptics.Reflect(o, (Dir8)d);
-                    Assert.InRange((int)r, 0, 7);
+                    BeamOptics.Outputs(new BeamNode(1, NodeKind.Mirror, new GridPos(0, 0), (Dir8)f), (Dir8)d, result);
+                    foreach (Dir8 o in result)
+                    {
+                        int turn = Dir8Ext.Mod((int)o - d, 8);
+                        Assert.Contains(turn, new[] { 0, 2, 4, 6 }); // straight on, 90° either way, or back
+                    }
                 }
             }
+        }
+
+        [Fact]
+        public void Mirror_TurnsDiagonalBeamOntoOtherDiagonal()
+        {
+            // A NE-bound beam off a west-facing mirror (vertical pane) leaves heading NW.
+            Assert.Equal(new[] { Dir8.NorthWest }, Out(NodeKind.Mirror, Dir8.West, Dir8.NorthEast));
         }
     }
 
@@ -220,9 +214,9 @@ namespace Beamwire.Tests
         {
             var s = new BeamSettings { NodeLoss = 0.05f, LossPerTile = 0f, MaxRange = 60 };
             // The emitter fires East into a mirror at (5,5). The beam enters the mirror's West side.
-            // A mirror whose face points SW (orientation 10) sends it South.
+            // A mirror whose face points SW sends it South.
             var e = Emitter(1, 0, 5, Dir8.East);
-            var m = new BeamNode(2, NodeKind.Mirror, new GridPos(5, 5), 10);
+            var m = new BeamNode(2, NodeKind.Mirror, new GridPos(5, 5), Dir8.SouthWest);
             var r = Receiver(3, 5, 0, 950f);
             var g = Run(new TestGrid(), s, e, m, r);
 
@@ -238,7 +232,7 @@ namespace Beamwire.Tests
             // The emitter fires East into a splitter at (5,5) whose pane faces NE/SW.
             // The beam passes through East and reflects South.
             var e = Emitter(1, 0, 5, Dir8.East);
-            var sp = new BeamNode(2, NodeKind.Splitter, new GridPos(5, 5), 2);
+            var sp = new BeamNode(2, NodeKind.Splitter, new GridPos(5, 5), Dir8.NorthEast);
             var east = Receiver(3, 10, 5, 300f);
             var south = Receiver(4, 5, 0, 100f);
             Run(new TestGrid(), Lossless, e, sp, east, south);
@@ -252,7 +246,7 @@ namespace Beamwire.Tests
         public void Splitter_WhenCapped_SharesProportionally()
         {
             var e = Emitter(1, 0, 5, Dir8.East, max: 200f);
-            var sp = new BeamNode(2, NodeKind.Splitter, new GridPos(5, 5), 2);
+            var sp = new BeamNode(2, NodeKind.Splitter, new GridPos(5, 5), Dir8.NorthEast);
             var east = Receiver(3, 10, 5, 300f);
             var south = Receiver(4, 5, 0, 100f);
             Run(new TestGrid(), Lossless, e, sp, east, south);
@@ -289,10 +283,10 @@ namespace Beamwire.Tests
         {
             // Four splitters in a square, so beams can go round and round.
             var e = Emitter(1, 0, 5, Dir8.East);
-            var a = new BeamNode(2, NodeKind.Splitter, new GridPos(5, 5), 2);
-            var b = new BeamNode(3, NodeKind.Splitter, new GridPos(10, 5), 2);
-            var c = new BeamNode(4, NodeKind.Splitter, new GridPos(10, 0), 2);
-            var d = new BeamNode(5, NodeKind.Splitter, new GridPos(5, 0), 2);
+            var a = new BeamNode(2, NodeKind.Splitter, new GridPos(5, 5), Dir8.NorthEast);
+            var b = new BeamNode(3, NodeKind.Splitter, new GridPos(10, 5), Dir8.NorthEast);
+            var c = new BeamNode(4, NodeKind.Splitter, new GridPos(10, 0), Dir8.NorthEast);
+            var d = new BeamNode(5, NodeKind.Splitter, new GridPos(5, 0), Dir8.NorthEast);
             var r = Receiver(6, 15, 5, 200f);
             var g = Run(new TestGrid(), Lossless, e, a, b, c, d, r);
 
@@ -321,7 +315,7 @@ namespace Beamwire.Tests
             var e1 = Emitter(1, 0, 5, Dir8.East, max: 100f);
             var e2 = Emitter(2, 5, 0, Dir8.North, max: 1000f);
             // The splitter at (5,5) is fed from the West and from the South.
-            var sp = new BeamNode(3, NodeKind.Splitter, new GridPos(5, 5), 2);
+            var sp = new BeamNode(3, NodeKind.Splitter, new GridPos(5, 5), Dir8.NorthEast);
             var r = Receiver(4, 10, 5, 400f);
             Run(new TestGrid(), Lossless, e1, e2, sp, r);
 
@@ -386,15 +380,15 @@ namespace Beamwire.Tests
         }
 
         [Fact]
-        public void Mirror_45DegreeTurn_EndToEnd()
+        public void Mirror_DiagonalTurn_EndToEnd()
         {
-            // East from (0,5), a mirror at (5,5) with orientation 15 turns it NE, to a receiver at (9,9).
-            var e = Emitter(1, 0, 5, Dir8.East);
-            var m = new BeamNode(2, NodeKind.Mirror, new GridPos(5, 5), 15);
-            var r = Receiver(3, 9, 9, 200f);
+            // NE from (0,0) into a south-facing mirror (horizontal pane) at (4,4): it turns SE, down to (8,0).
+            var e = Emitter(1, 0, 0, Dir8.NorthEast);
+            var m = new BeamNode(2, NodeKind.Mirror, new GridPos(4, 4), Dir8.South);
+            var r = Receiver(3, 8, 0, 200f);
             var g = Run(new TestGrid(), Lossless, e, m, r);
 
-            Assert.Equal(Dir8.NorthEast, g.Segments[1].Dir);
+            Assert.Equal(Dir8.SouthEast, g.Segments[1].Dir);
             Assert.Same(r, g.Segments[1].To);
             Assert.Equal(200f, r.DeliveredWatts, 2);
         }
@@ -403,7 +397,7 @@ namespace Beamwire.Tests
         public void RetroReflection_EndsAtEmitter()
         {
             var e = Emitter(1, 0, 5, Dir8.East);
-            var m = new BeamNode(2, NodeKind.Mirror, new GridPos(5, 5), 12);
+            var m = new BeamNode(2, NodeKind.Mirror, new GridPos(5, 5), Dir8.West);
             var g = Run(new TestGrid(), Lossless, e, m);
             Assert.Same(e, g.Segments[1].To);
             Assert.Equal(0f, e.DrawWatts);

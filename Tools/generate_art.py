@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Generates Beamwire's placeholder art and sound.
+"""Generates Beamwire's art in every selectable style, plus the beam textures, gizmo icons,
+the Workshop preview and the emitter hum.
 
 Run from the repo root:  python3 Tools/generate_art.py
-Needs Pillow (pip install pillow). Overwrites files under Common/Textures, Common/Sounds and About/.
-Replace the outputs with hand-drawn art whenever you like; the paths are what the Defs reference.
+Needs Pillow (pip install pillow). Overwrites the files it writes under Common/ and About/.
+
+Styles are chosen in the mod settings. Each style lives in Common/Textures/Beamwire/Styles/<Folder>/Things/
+as <Node>_Base.png (fixed plate), <Node>_Top.png (rotating part, drawn pointing North) and <Node>_Icon.png.
+To add a style: add an entry to STYLES here and to BeamwireStyles.All in the C# source.
 """
 import math
 import os
@@ -14,10 +18,31 @@ from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEX = os.path.join(ROOT, "Common", "Textures", "Beamwire")
-CYAN = (90, 215, 255)
-STEEL = (110, 116, 124)
-STEEL_DARK = (62, 66, 72)
-S = 128  # sprite resolution (drawn at 1x1 tile)
+S = 256          # working resolution
+FINAL = 128      # saved resolution
+NODES = ["Emitter", "Receiver", "Mirror", "Splitter", "Relay"]
+
+# Folder name -> style. The folder names must match BeamwireStyles.All in Source/Beamwire/BeamwireStyles.cs.
+STYLES = {
+  "Standard": dict(
+    beam=(255, 214, 120), outline=(28, 26, 24), ow=10, radius=18,
+    plate=(118, 112, 104), plate_hi=(146, 140, 131), plate_lo=(92, 87, 81),
+    metal=(160, 156, 148), metal_dark=(84, 80, 75), glass=(255, 214, 120), mirror=(214, 222, 228),
+    accents={"Emitter": (196, 120, 52), "Receiver": (110, 150, 92), "Mirror": (150, 150, 150), "Splitter": (190, 170, 90), "Relay": (130, 110, 150)},
+    deco="bolts", ground="dirt"),
+  "Industrial": dict(
+    beam=(255, 150, 40), outline=(22, 20, 18), ow=8, radius=6,
+    plate=(84, 86, 84), plate_hi=(112, 114, 110), plate_lo=(60, 61, 60),
+    metal=(140, 138, 128), metal_dark=(70, 68, 62), glass=(255, 160, 50), mirror=(200, 206, 210),
+    accents={k: (236, 186, 30) for k in NODES},
+    deco="hazard", ground="concrete"),
+  "Spacer": dict(
+    beam=(90, 240, 220), outline=(70, 86, 96), ow=5, radius=40,
+    plate=(222, 228, 232), plate_hi=(246, 249, 250), plate_lo=(184, 193, 200),
+    metal=(236, 240, 243), metal_dark=(150, 162, 172), glass=(90, 240, 220), mirror=(200, 255, 250),
+    accents={k: (90, 240, 220) for k in NODES},
+    deco="strips", ground="tile"),
+}
 
 
 def save(img, *parts):
@@ -26,112 +51,203 @@ def save(img, *parts):
     img.save(path)
 
 
-def blank(size=S):
-    return Image.new("RGBA", (size, size), (0, 0, 0, 0))
+def rgba(c, a=255): return tuple(c[:3]) + (a,)
+def blank(sz=S): return Image.new("RGBA", (sz, sz), (0, 0, 0, 0))
+def down(img): return img.resize((FINAL, FINAL), Image.LANCZOS)
 
+def glow_layer(img, radius):
+    out = blank(img.size[0]); out.alpha_composite(img.filter(ImageFilter.GaussianBlur(radius))); out.alpha_composite(img); return out
 
-def glow(img, radius=6):
-    """Adds a soft halo behind the bright parts of img."""
-    halo = img.filter(ImageFilter.GaussianBlur(radius))
-    out = blank(img.size[0])
-    out.alpha_composite(halo)
-    out.alpha_composite(img)
-    return out
-
+def shape(d, box, st, fill, outline=True, chamfer=False):
+    x0, y0, x1, y1 = box
+    ow = st["ow"] if outline else 0
+    if chamfer or st["radius"] == 0:
+        c = 22
+        pts = [(x0 + c, y0), (x1 - c, y0), (x1, y0 + c), (x1, y1 - c), (x1 - c, y1), (x0 + c, y1), (x0, y1 - c), (x0, y0 + c)]
+        d.polygon(pts, fill=rgba(fill), outline=rgba(st["outline"]) if ow else None, width=ow)
+    else:
+        d.rounded_rectangle(box, radius=st["radius"], fill=rgba(fill), outline=rgba(st["outline"]) if ow else None, width=ow)
 
 # ---------------------------------------------------------------- base plates
-def base_plate(accent):
-    img = blank()
-    d = ImageDraw.Draw(img)
-    d.rounded_rectangle([10, 10, S - 10, S - 10], radius=14, fill=STEEL_DARK + (255,), outline=(30, 32, 36, 255), width=4)
-    d.rounded_rectangle([20, 20, S - 20, S - 20], radius=10, outline=STEEL + (255,), width=3)
-    for x, y in [(22, 22), (S - 22, 22), (22, S - 22), (S - 22, S - 22)]:
-        d.ellipse([x - 5, y - 5, x + 5, y + 5], fill=(150, 156, 164, 255))
-    d.rectangle([S // 2 - 22, S - 18, S // 2 + 22, S - 13], fill=accent + (255,))
+def base(st, kind):
+    img = blank(); d = ImageDraw.Draw(img)
+    chamfer = st["deco"] == "vents"
+    shape(d, (14, 14, S - 14, S - 14), st, st["plate"], chamfer=chamfer)
+    # soft top highlight / bottom shade bands
+    if st["deco"] == "strips":
+        grad = blank(); gd = ImageDraw.Draw(grad)
+        for i in range(80):
+            gd.line([(30, 24 + i), (S - 30, 24 + i)], fill=rgba(st["plate_hi"], int(160 * (1 - i / 80))))
+        mask = blank(); ImageDraw.Draw(mask).rounded_rectangle((20, 20, S - 20, S - 20), radius=st["radius"] - 6, fill=(255, 255, 255, 255))
+        img.alpha_composite(Image.composite(grad, blank(), mask.split()[3]))
+    else:
+        d.line([(34, 30), (S - 34, 30)], fill=rgba(st["plate_hi"]), width=8)
+        d.line([(34, S - 30), (S - 34, S - 30)], fill=rgba(st["plate_lo"]), width=8)
+    acc = st["accents"][kind]
+    deco = st["deco"]
+    if deco == "bolts":
+        for x, y in [(40, 40), (S - 40, 40), (40, S - 40), (S - 40, S - 40)]:
+            d.ellipse([x - 9, y - 9, x + 9, y + 9], fill=rgba(st["metal"]), outline=rgba(st["outline"]), width=4)
+        d.rectangle([S // 2 - 40, S - 46, S // 2 + 40, S - 34], fill=rgba(acc), outline=rgba(st["outline"]), width=3)
+    elif deco == "hazard":
+        stripe = blank(); sd = ImageDraw.Draw(stripe)
+        for i in range(-S, S * 2, 36):
+            sd.polygon([(i, 0), (i + 18, 0), (i + 18 - S, S), (i - S, S)], fill=rgba(acc))
+        band = blank(); bd = ImageDraw.Draw(band)
+        bd.rectangle([22, 22, S - 22, 46], fill=(255, 255, 255, 255)); bd.rectangle([22, S - 46, S - 22, S - 22], fill=(255, 255, 255, 255))
+        dark = blank(); ImageDraw.Draw(dark).rectangle([22, 22, S - 22, S - 22], fill=rgba((30, 28, 24)))
+        img.alpha_composite(Image.composite(dark, blank(), band.split()[3]))
+        img.alpha_composite(Image.composite(stripe, blank(), band.split()[3]))
+        for x in range(36, S - 30, 46):
+            for y in (60, S - 60):
+                d.ellipse([x - 6, y - 6, x + 6, y + 6], fill=rgba(st["metal"]), outline=rgba(st["outline"]), width=2)
+        lamp = blank(); ImageDraw.Draw(lamp).ellipse([S - 58, 54, S - 38, 74], fill=rgba(st["glass"]))
+        img.alpha_composite(glow_layer(lamp, 6))
+    elif deco == "strips":
+        strip = blank(); ImageDraw.Draw(strip).rounded_rectangle([S // 2 - 50, S - 42, S // 2 + 50, S - 34], radius=4, fill=rgba(acc))
+        img.alpha_composite(glow_layer(strip, 8))
+    elif deco == "engrave":
+        d.rectangle([28, 28, S - 28, S - 28], outline=rgba(st["metal_dark"]), width=4)
+        d.rectangle([38, 38, S - 38, S - 38], outline=rgba(st["metal"]), width=3)
+        for x, y in [(28, 28), (S - 28, 28), (28, S - 28), (S - 28, S - 28)]:
+            d.polygon([(x, y - 12), (x + 12, y), (x, y + 12), (x - 12, y)], fill=rgba(st["glass"]), outline=rgba(st["outline"]))
+        # simple glyph band
+        for i, x in enumerate(range(60, S - 50, 28)):
+            g = i % 3
+            if g == 0: d.ellipse([x, S - 52, x + 14, S - 38], outline=rgba(st["plate_lo"]), width=3)
+            elif g == 1: d.line([(x + 7, S - 54), (x + 7, S - 36)], fill=rgba(st["plate_lo"]), width=3); d.line([(x, S - 48), (x + 14, S - 48)], fill=rgba(st["plate_lo"]), width=3)
+            else: d.polygon([(x, S - 38), (x + 7, S - 54), (x + 14, S - 38)], outline=rgba(st["plate_lo"]))
+    elif deco == "vents":
+        for y in range(40, 72, 10):
+            d.line([(40, y), (90, y)], fill=rgba(st["plate_lo"]), width=4)
+            d.line([(S - 90, y), (S - 40, y)], fill=rgba(st["plate_lo"]), width=4)
+        d.line([(30, S // 2), (60, S // 2)], fill=rgba(st["metal_dark"]), width=5)
+        d.line([(S - 60, S // 2), (S - 30, S // 2)], fill=rgba(st["metal_dark"]), width=5)
+        eye = blank(); ImageDraw.Draw(eye).rectangle([S // 2 - 30, S - 44, S // 2 + 30, S - 36], fill=rgba(acc))
+        img.alpha_composite(glow_layer(eye, 6))
     return img
 
+# ---------------------------------------------------------------- tops (pointing north)
+def lens(st, box, r=8):
+    l = blank(); ImageDraw.Draw(l).ellipse(box, fill=rgba(st["glass"])); return glow_layer(l, r)
 
-# ---------------------------------------------------------------- rotating tops (drawn pointing North)
-def top_emitter():
-    img = blank()
-    d = ImageDraw.Draw(img)
-    d.rounded_rectangle([42, 34, 86, 100], radius=10, fill=(150, 156, 164, 255), outline=(40, 42, 46, 255), width=4)
-    d.rectangle([52, 14, 76, 40], fill=(90, 96, 104, 255), outline=(40, 42, 46, 255), width=3)
-    lens = blank()
-    ImageDraw.Draw(lens).ellipse([54, 8, 74, 26], fill=CYAN + (255,))
-    img = glow(img)
-    img.alpha_composite(glow(lens, 4))
+def top(st, kind):
+    img = blank(); d = ImageDraw.Draw(img); o = rgba(st["outline"]); ow = max(3, st["ow"] - 2)
+    sharp = st["deco"] in ("vents", "engrave", "hazard")
+    if kind == "Emitter":
+        if st["deco"] == "engrave":   # obelisk
+            d.polygon([(98, 200), (158, 200), (146, 60), (128, 36), (110, 60)], fill=rgba(st["plate_hi"]), outline=o, width=ow)
+            d.polygon([(110, 60), (128, 36), (146, 60)], fill=rgba(st["metal"]), outline=o)
+            img.alpha_composite(lens(st, [116, 16, 140, 40]))
+        elif st["deco"] == "vents":   # angular sensor head
+            d.polygon([(84, 196), (172, 196), (160, 70), (128, 40), (96, 70)], fill=rgba(st["metal"]), outline=o, width=ow)
+            d.polygon([(104, 90), (152, 90), (146, 150), (110, 150)], fill=rgba(st["metal_dark"]))
+            img.alpha_composite(lens(st, [114, 26, 142, 54], 10))
+        else:
+            r = 10 if sharp else 22
+            d.rounded_rectangle([84, 70, 172, 200], radius=r, fill=rgba(st["metal"]), outline=o, width=ow)
+            d.rounded_rectangle([104, 30, 152, 84], radius=r // 2, fill=rgba(st["metal_dark"]), outline=o, width=ow)
+            if st["deco"] == "hazard":
+                d.rectangle([84, 150, 172, 168], fill=rgba(st["accents"]["Emitter"]), outline=o, width=3)
+            if st["deco"] == "strips":
+                s = blank(); ImageDraw.Draw(s).line([(128, 100), (128, 180)], fill=rgba(st["glass"]), width=6); img.alpha_composite(glow_layer(s, 6))
+            img.alpha_composite(lens(st, [110, 14, 146, 50]))
+    elif kind == "Receiver":
+        if st["deco"] == "engrave":   # sun disc
+            for a in range(0, 360, 30):
+                x = 128 + 92 * math.cos(math.radians(a)); y = 128 + 92 * math.sin(math.radians(a))
+                d.line([(128, 128), (x, y)], fill=rgba(st["metal_dark"]), width=8)
+            d.ellipse([56, 56, 200, 200], fill=rgba(st["metal"]), outline=o, width=ow)
+            d.ellipse([84, 84, 172, 172], fill=rgba(st["metal_dark"]))
+            img.alpha_composite(lens(st, [104, 104, 152, 152], 10))
+        elif st["deco"] == "vents":
+            d.regular_polygon((128, 128, 90), 6, fill=rgba(st["metal"]), outline=o, width=ow)
+            d.regular_polygon((128, 128, 60), 6, fill=rgba(st["metal_dark"]))
+            img.alpha_composite(lens(st, [108, 108, 148, 148], 12))
+        else:
+            d.ellipse([40, 40, S - 40, S - 40], fill=rgba(st["metal"]), outline=o, width=ow)
+            d.ellipse([66, 66, S - 66, S - 66], fill=rgba(st["metal_dark"]), outline=o, width=3)
+            for a in range(0, 360, 90):
+                x = 128 + 62 * math.cos(math.radians(a + 45)); y = 128 + 62 * math.sin(math.radians(a + 45))
+                d.line([(128, 128), (x, y)], fill=rgba(st["metal"]), width=5)
+            img.alpha_composite(lens(st, [102, 102, 154, 154], 10))
+    elif kind == "Mirror":
+        # pane lies E-W, reflective face to the north
+        y0 = 100
+        back = st["metal_dark"]
+        if st["deco"] == "engrave":
+            d.rectangle([24, y0 + 22, S - 24, y0 + 44], fill=rgba(st["plate_lo"]), outline=o, width=ow)
+            d.rectangle([24, y0, S - 24, y0 + 24], fill=rgba(st["mirror"]), outline=o, width=ow)
+            d.line([(34, y0 + 6), (S - 34, y0 + 6)], fill=(255, 250, 220, 255), width=4)
+        else:
+            if st["radius"] > 20:
+                d.rounded_rectangle([22, y0 + 14, S - 22, y0 + 46], radius=14, fill=rgba(back), outline=o, width=ow)
+                d.rounded_rectangle([22, y0, S - 22, y0 + 24], radius=12, fill=rgba(st["mirror"]), outline=o, width=ow)
+            else:
+                d.rectangle([22, y0 + 20, S - 22, y0 + 46], fill=rgba(back), outline=o, width=ow)
+                d.rectangle([22, y0, S - 22, y0 + 24], fill=rgba(st["mirror"]), outline=o, width=ow)
+            d.line([(36, y0 + 6), (S - 36, y0 + 6)], fill=(255, 255, 255, 255), width=4)
+            if st["deco"] == "hazard":
+                for x in range(30, S - 30, 28):
+                    d.polygon([(x, y0 + 46), (x + 14, y0 + 46), (x + 24, y0 + 22), (x + 10, y0 + 22)], fill=rgba(st["accents"]["Mirror"]))
+        d.rectangle([110, y0 + 46, 146, y0 + 92], fill=rgba(st["metal"]), outline=o, width=ow)
+    elif kind == "Splitter":
+        # A beam-splitter cube seen corner-on: a glass diamond whose horizontal diagonal is the
+        # half-silvered pane (lying E-W, like the mirror, so the facing maths matches).
+        c, r = 128, 92
+        diamond = [(c, c - r), (c + r, c), (c, c + r), (c - r, c)]
+        glass = blank(); gd = ImageDraw.Draw(glass)
+        gd.polygon(diamond, fill=rgba(st["beam"], 95))
+        img.alpha_composite(glow_layer(glass, 10))
+        # upper and lower prism faces, slightly different tints
+        d.polygon([(c, c - r), (c + r, c), (c - r, c)], fill=rgba(st["beam"], 70))
+        d.polygon([(c - r, c), (c + r, c), (c, c + r)], fill=rgba(st["plate_lo"], 90))
+        frame_w = max(4, st["ow"] - 2)
+        d.line(diamond + [diamond[0]], fill=rgba(st["metal_dark"]), width=frame_w + 4, joint="curve")
+        d.line(diamond + [diamond[0]], fill=rgba(st["metal"]), width=frame_w, joint="curve")
+        # the pane: a bright line across the diagonal
+        pane = blank(); ImageDraw.Draw(pane).line([(c - r + 8, c), (c + r - 8, c)], fill=(255, 255, 255, 255), width=6)
+        img.alpha_composite(glow_layer(pane, 6))
+        # clamps at the two corners where the pane meets the frame
+        clamp = st["accents"]["Splitter"] if st["deco"] == "hazard" else st["metal_dark"]
+        for x in (c - r, c + r):
+            d.rounded_rectangle([x - 14, c - 18, x + 14, c + 18], radius=0 if sharp else 6, fill=rgba(clamp), outline=o, width=3)
+        # small arrows on the glass showing "through" and "reflected"
+        d.polygon([(c - 6, c - r + 30), (c + 6, c - r + 30), (c, c - r + 20)], fill=rgba(st["outline"], 160))
+    elif kind == "Relay":
+        if st["radius"] > 20:
+            d.ellipse([52, 52, 204, 204], fill=rgba(st["metal"]), outline=o, width=ow)
+            d.ellipse([84, 84, 172, 172], fill=rgba(st["metal_dark"]))
+            d.polygon([(110, 60), (146, 60), (128, 28)], fill=rgba(st["metal"]), outline=o)
+        else:
+            d.polygon([(128, 34), (210, 128), (128, 222), (46, 128)], fill=rgba(st["metal"]), outline=o, width=ow)
+            d.polygon([(128, 64), (182, 128), (128, 192), (74, 128)], fill=rgba(st["metal_dark"]))
+        if st["deco"] == "hazard":
+            d.polygon([(128, 100), (152, 140), (104, 140)], fill=rgba(st["accents"]["Relay"]), outline=o, width=3)
+        img.alpha_composite(lens(st, [112, 16, 144, 48]))
+        img.alpha_composite(lens(st, [116, 116, 140, 140], 6))
     return img
 
-
-def top_receiver():
-    img = blank()
-    d = ImageDraw.Draw(img)
-    d.ellipse([22, 22, S - 22, S - 22], fill=(170, 176, 184, 255), outline=(40, 42, 46, 255), width=4)
-    d.ellipse([36, 36, S - 36, S - 36], fill=(120, 126, 134, 255))
-    core = blank()
-    ImageDraw.Draw(core).ellipse([52, 52, S - 52, S - 52], fill=CYAN + (255,))
-    img.alpha_composite(glow(core, 5))
-    return img
+def icon(st, kind):
+    i = base(st, kind); i.alpha_composite(top(st, kind)); return i
 
 
-def top_mirror():
-    # A flat pane lying East-West. Its reflective face (the normal) points North, toward the top of the sprite.
-    img = blank()
-    d = ImageDraw.Draw(img)
-    d.rectangle([14, 62, S - 14, 76], fill=(40, 42, 46, 255))          # dark backing (south side)
-    d.rectangle([14, 52, S - 14, 63], fill=(225, 235, 245, 255))       # silvered face (north side)
-    d.line([18, 54, S - 18, 54], fill=(255, 255, 255, 255), width=2)
-    d.rectangle([56, 76, 72, 96], fill=(90, 96, 104, 255))             # mount
-    return img
-
-
-def top_splitter():
-    img = blank()
-    d = ImageDraw.Draw(img)
-    pane = blank()
-    ImageDraw.Draw(pane).rectangle([14, 56, S - 14, 72], fill=CYAN + (150,))
-    img.alpha_composite(glow(pane, 4))
-    d.line([14, 56, S - 14, 56], fill=(235, 250, 255, 255), width=3)
-    d.line([14, 72, S - 14, 72], fill=(235, 250, 255, 255), width=3)
-    d.rectangle([10, 52, 18, 76], fill=(90, 96, 104, 255))
-    d.rectangle([S - 18, 52, S - 10, 76], fill=(90, 96, 104, 255))
-    return img
-
-
-def top_relay():
-    img = blank()
-    d = ImageDraw.Draw(img)
-    d.polygon([(64, 18), (104, 64), (64, 110), (24, 64)], fill=(150, 156, 164, 255), outline=(40, 42, 46, 255))
-    d.polygon([(64, 30), (92, 64), (64, 98), (36, 64)], fill=(100, 106, 114, 255))
-    lens = blank()
-    ld = ImageDraw.Draw(lens)
-    ld.ellipse([56, 10, 72, 26], fill=CYAN + (255,))
-    ld.ellipse([58, 56, 70, 68], fill=CYAN + (200,))
-    img.alpha_composite(glow(lens, 4))
-    return img
-
-
-# ---------------------------------------------------------------- beam textures
+# ---------------------------------------------------------------- beam textures (neutral; tinted per style in game)
 def beam_core():
-    """Thin, Portal-style laser: white-hot centre with cyan-tinted soft edges. Drawn very narrow in game."""
+    """Thin, Portal-style laser: opaque white centre with soft edges. Drawn very narrow in game."""
     w, h = 32, 64
     img = Image.new("RGBA", (w, h))
     px = img.load()
     for x in range(w):
-        t = abs((x + 0.5) / w - 0.5) * 2  # 0 at centre, 1 at edge
+        t = abs((x + 0.5) / w - 0.5) * 2
         a = max(0.0, 1 - t ** 2.2)
-        mix = min(1.0, t * 1.6)
-        r = int(255 * (1 - mix) + CYAN[0] * mix)
-        g = int(255 * (1 - mix) + CYAN[1] * mix)
-        b = int(255 * (1 - mix) + CYAN[2] * mix)
         for y in range(h):
-            px[x, y] = (r, g, b, int(255 * a))
+            px[x, y] = (255, 255, 255, int(255 * a))
     return img
 
 
 def beam_glow():
-    """Wide, faint additive halo; tinted cyan by the material colour at runtime."""
+    """Wide, faint additive halo; tinted with the style's beam colour in game."""
     w, h = 64, 64
     img = Image.new("RGBA", (w, h))
     px = img.load()
@@ -139,18 +255,21 @@ def beam_glow():
         t = ((x + 0.5) / w - 0.5) * 2
         v = math.exp(-(t * 2.2) ** 2)
         for y in range(h):
-            px[x, y] = (int(255 * v), int(255 * v), int(255 * v), int(255 * v))
+            px[x, y] = (int(255 * v),) * 4
     return img
 
 
-# ---------------------------------------------------------------- UI icons
+# ---------------------------------------------------------------- UI icons (style-neutral)
+UI_BLUE = (120, 200, 255)
+
+
 def icon_show_beams():
-    img = blank()
-    beam = blank()
+    img = blank(128)
+    beam = blank(128)
     bd = ImageDraw.Draw(beam)
-    bd.line([16, 100, 64, 52], fill=CYAN + (255,), width=6)
-    bd.line([64, 52, 112, 100], fill=CYAN + (255,), width=6)
-    img.alpha_composite(glow(beam, 6))
+    bd.line([16, 100, 64, 52], fill=rgba(UI_BLUE), width=6)
+    bd.line([64, 52, 112, 100], fill=rgba(UI_BLUE), width=6)
+    img.alpha_composite(glow_layer(beam, 6))
     d = ImageDraw.Draw(img)
     d.line([16, 100, 64, 52], fill=(255, 255, 255, 255), width=2)
     d.line([64, 52, 112, 100], fill=(255, 255, 255, 255), width=2)
@@ -159,42 +278,70 @@ def icon_show_beams():
 
 
 def icon_throughput():
-    img = blank()
+    img = blank(128)
     d = ImageDraw.Draw(img)
     for i, hgt in enumerate([24, 44, 64, 88]):
         x = 18 + i * 26
-        d.rectangle([x, 108 - hgt, x + 18, 108], fill=CYAN + (255,) if i < 3 else (220, 230, 240, 255))
-    return glow(img, 3)
+        d.rectangle([x, 108 - hgt, x + 18, 108], fill=rgba(UI_BLUE) if i < 3 else (220, 230, 240, 255))
+    return glow_layer(img, 3)
 
 
-# ---------------------------------------------------------------- preview image
-def preview():
-    w, h = 640, 360
-    img = Image.new("RGBA", (w, h), (34, 30, 26, 255))
+# ---------------------------------------------------------------- Workshop preview: the three styles side by side
+def mini_scene(st, w, h, t):
+    import random
+    col = {"dirt": (92, 74, 56), "concrete": (96, 96, 92), "tile": (178, 186, 192)}[st["ground"]]
+    img = Image.new("RGBA", (w, h), rgba(col))
     d = ImageDraw.Draw(img)
-    for x in range(0, w, 40):
-        d.line([x, 0, x, h], fill=(44, 40, 36, 255))
-    for y in range(0, h, 40):
-        d.line([0, y, w, y], fill=(44, 40, 36, 255))
-    beams = blank(w)
+    rnd = random.Random(7)
+    if st["ground"] == "dirt":
+        for _ in range(900):
+            x, y = rnd.randrange(w), rnd.randrange(h)
+            dv = rnd.randint(-14, 14)
+            d.point((x, y), fill=rgba(tuple(max(0, min(255, c + dv)) for c in col)))
+    else:
+        for x in range(0, w, t):
+            d.line([(x, 0), (x, h)], fill=rgba(tuple(c - 18 for c in col)), width=1)
+        for y in range(0, h, t):
+            d.line([(0, y), (w, y)], fill=rgba(tuple(c - 18 for c in col)), width=1)
+    cell = lambda cx, cy: (cx * t + t // 2, cy * t + t // 2)
+    # The emitter fires east into a splitter, which reflects north to a receiver and passes east to a mirror.
+    # The mirror turns the beam 90° north into a relay, which re-fires it diagonally north-east.
+    segs = [[cell(0, 3), cell(2, 3)], [cell(2, 3), cell(2, 0)], [cell(2, 3), cell(4, 3)],
+            [cell(4, 3), cell(4, 1)], [cell(4, 1), (6 * t, 0)]]
     beams = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     bd = ImageDraw.Draw(beams)
-    path = [(100, 260), (300, 260), (420, 140), (580, 140)]
-    branch = [(300, 260), (300, 60)]
-    for seg in (path, branch):
-        bd.line(seg, fill=CYAN + (255,), width=8)
-    img.alpha_composite(beams.filter(ImageFilter.GaussianBlur(7)))
-    for seg in (path, branch):
-        d.line(seg, fill=(255, 255, 255, 255), width=2)
-    sprite = lambda top, angle, pos: img.alpha_composite(
-        Image.alpha_composite(base_plate(CYAN), top.rotate(-angle)).resize((64, 64)), (pos[0] - 32, pos[1] - 32))
-    sprite(top_emitter(), 90, (100, 260))
-    sprite(top_splitter(), 135, (300, 260))
-    sprite(top_mirror(), 292.5, (420, 260 - 120))
-    sprite(top_receiver(), 0, (580, 140))
-    sprite(top_receiver(), 0, (300, 60))
-    d.text((24, 24), "BEAMWIRE", fill=(235, 245, 255, 255))
-    d.text((24, 40), "wireless laser power", fill=CYAN + (255,))
+    for sgm in segs:
+        bd.line(sgm, fill=rgba(st["beam"]), width=8)
+    img.alpha_composite(beams.filter(ImageFilter.GaussianBlur(6)))
+    for sgm in segs:
+        d.line(sgm, fill=(255, 255, 255, 235), width=2)
+
+    def place(kind, c, deg):
+        b = base(st, kind)
+        b.alpha_composite(top(st, kind).rotate(-deg, resample=Image.BICUBIC))
+        b = b.resize((t, t), Image.LANCZOS)
+        x, y = cell(*c)
+        img.alpha_composite(b, (x - t // 2, y - t // 2))
+    place("Emitter", (0, 3), 90)
+    place("Splitter", (2, 3), 315)
+    place("Receiver", (2, 0), 0)
+    place("Mirror", (4, 3), 315)
+    place("Relay", (4, 1), 45)
+    return img
+
+
+def preview():
+    w, h = 640, 360
+    img = Image.new("RGBA", (w, h), (24, 22, 20, 255))
+    t = 34
+    for i, st in enumerate(STYLES.values()):
+        sc = mini_scene(st, 6 * t, 4 * t, t)
+        img.alpha_composite(sc, (14 + i * (6 * t + 4), 90))
+    d = ImageDraw.Draw(img)
+    d.text((16, 24), "BEAMWIRE", fill=(240, 240, 235, 255))
+    d.text((16, 42), "wireless laser power  -  3 art styles", fill=(255, 214, 120, 255))
+    for i, name in enumerate(["Rim Standard", "Hazard Industrial", "Glitterworld Spacer"]):
+        d.text((16 + i * (6 * t + 4), 90 + 4 * t + 10), name, fill=(200, 200, 195, 255))
     return img.convert("RGB")
 
 
@@ -210,42 +357,26 @@ def hum(path, seconds=2.0, rate=22050):
         wf.setframerate(rate)
         frames = bytearray()
         for i in range(n):
-            t = i / rate
-            wobble = 1 + 0.15 * math.sin(2 * math.pi * 1.5 * t)
-            v = sum(a * math.sin(2 * math.pi * f * t) for f, a in partials) * wobble
+            tt = i / rate
+            wobble = 1 + 0.15 * math.sin(2 * math.pi * 1.5 * tt)
+            v = sum(a * math.sin(2 * math.pi * f * tt) for f, a in partials) * wobble
             frames += struct.pack("<h", int(max(-1, min(1, v * 0.6)) * 32767))
         wf.writeframes(bytes(frames))
 
 
 def main():
-    accents = {
-        "Emitter": (255, 170, 60),
-        "Receiver": (120, 220, 120),
-        "Mirror": (200, 200, 210),
-        "Splitter": CYAN,
-        "Relay": (200, 140, 255),
-    }
-    tops = {
-        "Emitter": top_emitter,
-        "Receiver": top_receiver,
-        "Mirror": top_mirror,
-        "Splitter": top_splitter,
-        "Relay": top_relay,
-    }
-    for name, accent in accents.items():
-        save(base_plate(accent), "Things", f"{name}_Base.png")
-        save(tops[name](), "Things", f"{name}_Top.png")
-        # Combined icon for the architect menu and the minified item.
-        icon = base_plate(accent)
-        icon.alpha_composite(tops[name]())
-        save(icon, "Things", f"{name}_Icon.png")
+    for folder, st in STYLES.items():
+        for k in NODES:
+            save(down(base(st, k)), "Styles", folder, "Things", f"{k}_Base.png")
+            save(down(top(st, k)), "Styles", folder, "Things", f"{k}_Top.png")
+            save(down(icon(st, k)), "Styles", folder, "Things", f"{k}_Icon.png")
     save(beam_core(), "Effects", "BeamCore.png")
     save(beam_glow(), "Effects", "BeamGlow.png")
     save(icon_show_beams(), "UI", "ShowBeams.png")
     save(icon_throughput(), "UI", "Throughput.png")
     preview().save(os.path.join(ROOT, "About", "Preview.png"))
     hum(os.path.join(ROOT, "Common", "Sounds", "Beamwire", "EmitterHum.wav"))
-    print("Art and sound generated.")
+    print("Art and sound generated for styles:", ", ".join(STYLES))
 
 
 if __name__ == "__main__":

@@ -4,10 +4,10 @@ namespace Beamwire.Core
 {
     /// <summary>How each node kind redirects a beam. Pure functions, easy to unit-test.</summary>
     /// <remarks>
-    /// Angles are in 22.5° units ("sixteenths"): 0 = North, clockwise. Beams only travel in the 8 even
-    /// sixteenths (multiples of 45°). A mirror's orientation is the normal of its reflective face. Reflecting
-    /// direction d off normal n gives 2n - d + 8, which is always even, so every reflection lands on one of the
-    /// 8 beam directions.
+    /// Everything points in one of 8 directions (45° steps). A mirror's facing is the normal of its reflective
+    /// face. Reflection is done in 22.5° units ("sixteenths") so the maths stays in integers: reflecting
+    /// direction d off normal n gives 2n - d + 8. With 8-way mirrors the result is always a 90° turn or a
+    /// straight bounce back.
     /// </remarks>
     public static class BeamOptics
     {
@@ -34,10 +34,10 @@ namespace Beamwire.Core
             switch (node.Kind)
             {
                 case NodeKind.Mirror:
-                    switch (ContactOf(node.Orientation, travel))
+                    switch (ContactOf(node.Facing.To16(), travel))
                     {
                         case Contact.Front:
-                            result.Add(Reflect(node.Orientation, travel));
+                            result.Add(Reflect(node.Facing.To16(), travel));
                             break;
                         case Contact.Grazing:
                             result.Add(travel); // the beam slips past the mirror's edge
@@ -48,14 +48,15 @@ namespace Beamwire.Core
                 case NodeKind.Splitter:
                 {
                     result.Add(travel); // the transmitted part
-                    Contact c = ContactOf(node.Orientation, travel);
+                    int normal = node.Facing.To16();
+                    Contact c = ContactOf(normal, travel);
                     if (c == Contact.Front)
                     {
-                        AddDistinct(result, Reflect(node.Orientation, travel));
+                        AddDistinct(result, Reflect(normal, travel));
                     }
                     else if (c == Contact.Back)
                     {
-                        AddDistinct(result, Reflect(node.Orientation + 8, travel));
+                        AddDistinct(result, Reflect(normal + 8, travel));
                     }
                     break;
                 }
