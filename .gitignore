@@ -1,0 +1,12 @@
+# Build intermediates
+Source/**/bin/
+Source/**/obj/
+*.user
+.vs/
+.idea/
+*.swp
+
+# Compiled assemblies are produced by `dotnet build`; CI builds release zips.
+/1.4/Assemblies/
+/1.5/Assemblies/
+/1.6/Assemblies/

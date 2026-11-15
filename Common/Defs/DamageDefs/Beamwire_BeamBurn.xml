@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <DamageDef>
+    <defName>Beamwire_BeamBurn</defName>
+    <label>laser burn</label>
+    <workerClass>DamageWorker_AddInjury</workerClass>
+    <externalViolence>true</externalViolence>
+    <deathMessage>{0} was cut down by a power beam.</deathMessage>
+    <hediff>Burn</hediff>
+    <armorCategory>Heat</armorCategory>
+    <minDamageToFragment>15</minDamageToFragment>
+    <defaultDamage>5</defaultDamage>
+    <defaultArmorPenetration>0.15</defaultArmorPenetration>
+    <makesBlood>false</makesBlood>
+  </DamageDef>
+</Defs>

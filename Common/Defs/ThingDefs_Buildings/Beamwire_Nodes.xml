@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!-- Shared base for every beam node. -->
+  <ThingDef Name="Beamwire_NodeBase" ParentName="BuildingBase" Abstract="True">
+    <thingClass>Beamwire.Building_BeamNode</thingClass>
+    <category>Building</category>
+    <graphicData>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(1,1)</drawSize>
+      <shadowData>
+        <volume>(0.6, 0.3, 0.6)</volume>
+      </shadowData>
+      <damageData>
+        <rect>(0.15,0.15,0.7,0.7)</rect>
+      </damageData>
+    </graphicData>
+    <drawerType>RealtimeOnly</drawerType>
+    <altitudeLayer>Building</altitudeLayer>
+    <passability>PassThroughOnly</passability>
+    <pathCost>42</pathCost>
+    <fillPercent>0.35</fillPercent>
+    <rotatable>true</rotatable>
+    <tickerType>Normal</tickerType>
+    <size>(1,1)</size>
+    <minifiedDef>MinifiedThing</minifiedDef>
+    <thingCategories>
+      <li>BuildingsPower</li>
+    </thingCategories>
+    <designationCategory>Power</designationCategory>
+    <constructionSkillPrerequisite>5</constructionSkillPrerequisite>
+    <statBases>
+      <MaxHitPoints>120</MaxHitPoints>
+      <WorkToBuild>1600</WorkToBuild>
+      <Flammability>0.3</Flammability>
+      <Mass>8</Mass>
+      <Beauty>-2</Beauty>
+    </statBases>
+    <building>
+      <ai_chillDestination>false</ai_chillDestination>
+    </building>
+    <placeWorkers>
+      <li>Beamwire.PlaceWorker_BeamPreview</li>
+    </placeWorkers>
+  </ThingDef>
+
+  <!-- ===================== Emitter ===================== -->
+  <ThingDef ParentName="Beamwire_NodeBase">
+    <defName>Beamwire_Emitter</defName>
+    <label>beam emitter</label>
+    <description>Draws power from the grid it is connected to and fires it as a thin laser beam in the direction it faces. It only draws what the receivers downstream need, up to its throughput limit. It can be aimed in 45° steps.\n\nAnything standing in a powered beam gets burned.</description>
+    <graphicData>
+      <texPath>Beamwire/Things/Emitter_Base</texPath>
+    </graphicData>
+    <uiIconPath>Beamwire/Things/Emitter_Icon</uiIconPath>
+    <costList>
+      <Steel>60</Steel>
+      <Silver>25</Silver>
+      <ComponentIndustrial>3</ComponentIndustrial>
+    </costList>
+    <researchPrerequisites>
+      <li>Beamwire_Optics</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="CompProperties_Power">
+        <compClass>Beamwire.CompPowerTrader_BeamEmitter</compClass>
+        <basePowerConsumption>20</basePowerConsumption>
+        <shortCircuitInRain>false</shortCircuitInRain>
+      </li>
+      <li Class="CompProperties_Flickable"/>
+      <li Class="CompProperties_Breakdownable"/>
+      <li Class="CompProperties_Glower">
+        <glowRadius>2</glowRadius>
+        <glowColor>(90,215,255,0)</glowColor>
+      </li>
+      <li Class="Beamwire.CompProperties_BeamNode">
+        <kind>Emitter</kind>
+        <throughputSteps>
+          <li>250</li>
+          <li>500</li>
+          <li>1000</li>
+          <li>2000</li>
+          <li>4000</li>
+        </throughputSteps>
+        <defaultThroughputIndex>2</defaultThroughputIndex>
+      </li>
+      <li Class="Beamwire.CompProperties_OpticalDust"/>
+    </comps>
+    <modExtensions>
+      <li Class="Beamwire.BeamNodeGraphicExtension">
+        <topTexPath>Beamwire/Things/Emitter_Top</topTexPath>
+      </li>
+    </modExtensions>
+  </ThingDef>
+
+  <!-- ===================== Receiver ===================== -->
+  <ThingDef ParentName="Beamwire_NodeBase">
+    <defName>Beamwire_Receiver</defName>
+    <label>beam receiver</label>
+    <description>Catches laser beams from any direction and feeds the power into the grid it is connected to. It asks for exactly what that grid is short of, or for its full intake while any battery on the grid can still charge.</description>
+    <graphicData>
+      <texPath>Beamwire/Things/Receiver_Base</texPath>
+    </graphicData>
+    <uiIconPath>Beamwire/Things/Receiver_Icon</uiIconPath>
+    <costList>
+      <Steel>60</Steel>
+      <Silver>25</Silver>
+      <ComponentIndustrial>3</ComponentIndustrial>
+    </costList>
+    <researchPrerequisites>
+      <li>Beamwire_Optics</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="CompProperties_Power">
+        <compClass>Beamwire.CompBeamReceiver</compClass>
+        <basePowerConsumption>0</basePowerConsumption>
+        <shortCircuitInRain>false</shortCircuitInRain>
+      </li>
+      <li Class="CompProperties_Flickable"/>
+      <li Class="CompProperties_Breakdownable"/>
+      <li Class="Beamwire.CompProperties_BeamNode">
+        <kind>Receiver</kind>
+        <maxIntake>4000</maxIntake>
+        <rotatable>false</rotatable>
+      </li>
+      <li Class="Beamwire.CompProperties_OpticalDust"/>
+    </comps>
+    <modExtensions>
+      <li Class="Beamwire.BeamNodeGraphicExtension">
+        <topTexPath>Beamwire/Things/Receiver_Top</topTexPath>
+      </li>
+    </modExtensions>
+  </ThingDef>
+
+  <!-- ===================== Mirror ===================== -->
+  <ThingDef ParentName="Beamwire_NodeBase">
+    <defName>Beamwire_Mirror</defName>
+    <label>beam mirror</label>
+    <description>A one-sided mirror. It turns in 22.5° steps and bounces beams like a real mirror, by 45°, 90°, 135° or straight back, depending on the angle. Beams that hit the armoured back are absorbed. Every bounce loses a little power.\n\nExplosions can knock it out of alignment.</description>
+    <graphicData>
+      <texPath>Beamwire/Things/Mirror_Base</texPath>
+    </graphicData>
+    <uiIconPath>Beamwire/Things/Mirror_Icon</uiIconPath>
+    <costList>
+      <Steel>30</Steel>
+      <Silver>15</Silver>
+    </costList>
+    <statBases>
+      <WorkToBuild>900</WorkToBuild>
+    </statBases>
+    <researchPrerequisites>
+      <li>Beamwire_Optics</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="Beamwire.CompProperties_BeamNode">
+        <kind>Mirror</kind>
+      </li>
+      <li Class="Beamwire.CompProperties_OpticalDust"/>
+    </comps>
+    <modExtensions>
+      <li Class="Beamwire.BeamNodeGraphicExtension">
+        <topTexPath>Beamwire/Things/Mirror_Top</topTexPath>
+      </li>
+    </modExtensions>
+  </ThingDef>
+
+  <!-- ===================== Splitter ===================== -->
+  <ThingDef ParentName="Beamwire_NodeBase">
+    <defName>Beamwire_Splitter</defName>
+    <label>beam splitter</label>
+    <description>A half-silvered pane. Every beam that hits it passes straight through and also reflects, so one beam becomes two. Power is shared between the branches according to how much the receivers on each side need. It turns in 22.5° steps.</description>
+    <graphicData>
+      <texPath>Beamwire/Things/Splitter_Base</texPath>
+    </graphicData>
+    <uiIconPath>Beamwire/Things/Splitter_Icon</uiIconPath>
+    <costList>
+      <Steel>30</Steel>
+      <Silver>30</Silver>
+      <ComponentIndustrial>1</ComponentIndustrial>
+    </costList>
+    <statBases>
+      <WorkToBuild>1200</WorkToBuild>
+    </statBases>
+    <researchPrerequisites>
+      <li>Beamwire_Splitting</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="Beamwire.CompProperties_BeamNode">
+        <kind>Splitter</kind>
+      </li>
+      <li Class="Beamwire.CompProperties_OpticalDust"/>
+    </comps>
+    <modExtensions>
+      <li Class="Beamwire.BeamNodeGraphicExtension">
+        <topTexPath>Beamwire/Things/Splitter_Top</topTexPath>
+      </li>
+    </modExtensions>
+  </ThingDef>
+
+  <!-- ===================== Relay ===================== -->
+  <ThingDef ParentName="Beamwire_NodeBase">
+    <defName>Beamwire_Relay</defName>
+    <label>beam relay</label>
+    <description>Collects beams from any direction and re-fires them as one coherent beam in the direction it faces (45° steps), with the beam's range fully restored. It runs off the beam itself and consumes a little of the power passing through, so it needs no conduit.</description>
+    <graphicData>
+      <texPath>Beamwire/Things/Relay_Base</texPath>
+    </graphicData>
+    <uiIconPath>Beamwire/Things/Relay_Icon</uiIconPath>
+    <costList>
+      <Steel>50</Steel>
+      <Silver>25</Silver>
+      <Plasteel>10</Plasteel>
+      <ComponentIndustrial>2</ComponentIndustrial>
+    </costList>
+    <researchPrerequisites>
+      <li>Beamwire_CoherentRelays</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="Beamwire.CompProperties_BeamNode">
+        <kind>Relay</kind>
+        <upkeep>30</upkeep>
+      </li>
+      <li Class="Beamwire.CompProperties_OpticalDust"/>
+    </comps>
+    <modExtensions>
+      <li Class="Beamwire.BeamNodeGraphicExtension">
+        <topTexPath>Beamwire/Things/Relay_Top</topTexPath>
+      </li>
+    </modExtensions>
+  </ThingDef>
+
+</Defs>

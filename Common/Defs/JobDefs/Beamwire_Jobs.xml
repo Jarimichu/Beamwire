@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <JobDef>
+    <defName>Beamwire_CleanOptics</defName>
+    <driverClass>Beamwire.JobDriver_CleanOptics</driverClass>
+    <reportString>cleaning the optics of TargetA.</reportString>
+    <casualInterruptible>true</casualInterruptible>
+  </JobDef>
+</Defs>

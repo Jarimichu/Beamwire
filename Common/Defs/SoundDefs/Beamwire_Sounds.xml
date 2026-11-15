@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <SoundDef>
+    <defName>Beamwire_EmitterHum</defName>
+    <context>MapOnly</context>
+    <sustain>true</sustain>
+    <maxSimultaneous>3</maxSimultaneous>
+    <priorityMode>PrioritizeNearest</priorityMode>
+    <subSounds>
+      <li>
+        <grains>
+          <li Class="AudioGrain_Clip">
+            <clipPath>Beamwire/EmitterHum</clipPath>
+          </li>
+        </grains>
+        <volumeRange>10~10</volumeRange>
+        <distRange>4~22</distRange>
+        <sustainAttack>0.6</sustainAttack>
+        <sustainRelease>0.6</sustainRelease>
+      </li>
+    </subSounds>
+  </SoundDef>
+</Defs>

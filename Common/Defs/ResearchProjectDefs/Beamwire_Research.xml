@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <ResearchTabDef>
+    <defName>Beamwire</defName>
+    <label>Beamwire</label>
+  </ResearchTabDef>
+
+  <ResearchProjectDef>
+    <defName>Beamwire_Optics</defName>
+    <label>beam optics</label>
+    <description>Turn electricity into a coherent beam and back again. Unlocks the beam emitter, the beam receiver and the beam mirror.</description>
+    <baseCost>800</baseCost>
+    <techLevel>Industrial</techLevel>
+    <tab>Beamwire</tab>
+    <prerequisites>
+      <li>Electricity</li>
+    </prerequisites>
+    <researchViewX>0</researchViewX>
+    <researchViewY>0</researchViewY>
+  </ResearchProjectDef>
+
+  <ResearchProjectDef>
+    <defName>Beamwire_Splitting</defName>
+    <label>beam splitting</label>
+    <description>Half-silvered optics that split one beam into two and share the power between them. Unlocks the beam splitter.</description>
+    <baseCost>1200</baseCost>
+    <techLevel>Industrial</techLevel>
+    <tab>Beamwire</tab>
+    <prerequisites>
+      <li>Beamwire_Optics</li>
+      <li>MicroelectronicsBasics</li>
+    </prerequisites>
+    <researchViewX>1</researchViewX>
+    <researchViewY>0</researchViewY>
+  </ResearchProjectDef>
+
+  <ResearchProjectDef>
+    <defName>Beamwire_CoherentRelays</defName>
+    <label>coherent relays</label>
+    <description>Gather scattered beams, re-collimate them and fire them onward at full range. Unlocks the beam relay.</description>
+    <baseCost>1600</baseCost>
+    <techLevel>Industrial</techLevel>
+    <tab>Beamwire</tab>
+    <prerequisites>
+      <li>Beamwire_Splitting</li>
+    </prerequisites>
+    <researchViewX>2</researchViewX>
+    <researchViewY>0</researchViewY>
+  </ResearchProjectDef>
+
+</Defs>
