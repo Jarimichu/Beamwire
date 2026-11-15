@@ -282,7 +282,7 @@ Place it just past an emitter or mirror, on the stretch of beam you want to guar
       <WorkToBuild>1200</WorkToBuild>
     </statBases>
     <researchPrerequisites>
-      <li>Beamwire_Optics</li>
+      <li>Beamwire_Safety</li>
     </researchPrerequisites>
     <comps>
       <li Class="Beamwire.CompProperties_BeamNode">

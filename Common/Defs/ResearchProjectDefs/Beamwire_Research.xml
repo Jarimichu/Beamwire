@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
 
+  <!--
+    Beamwire research. Every project also requires the vanilla research its tech builds on:
+      Beam optics      <- Electricity, Solar panels
+      Beam safety      <- Beam optics, Autodoors
+      Beam splitting   <- Beam optics, Microelectronics          (hi-tech research bench)
+      Coherent relays  <- Beam splitting, Fabrication            (hi-tech research bench)
+      Beam capacitors  <- Coherent relays, Batteries             (hi-tech research bench)
+  -->
+
   <ResearchTabDef>
     <defName>Beamwire</defName>
     <label>Beamwire</label>
@@ -9,21 +18,37 @@
   <ResearchProjectDef>
     <defName>Beamwire_Optics</defName>
     <label>beam optics</label>
-    <description>Turn electricity into a coherent beam and back again. Unlocks the beam emitter, receiver, mirror, safety shutter and beam window.</description>
+    <description>Turn electricity into a coherent beam and back again, using the same photovoltaic know-how as solar panels. Unlocks the beam emitter, beam receiver, beam mirror and beam window.</description>
     <baseCost>800</baseCost>
     <techLevel>Industrial</techLevel>
     <tab>Beamwire</tab>
     <prerequisites>
       <li>Electricity</li>
+      <li>SolarPanels</li>
     </prerequisites>
     <researchViewX>0</researchViewX>
     <researchViewY>0</researchViewY>
   </ResearchProjectDef>
 
   <ResearchProjectDef>
+    <defName>Beamwire_Safety</defName>
+    <label>beam safety</label>
+    <description>Motion-sensing gates, built on autodoor technology, that cut a beam the moment someone steps into it. Unlocks the beam safety shutter.</description>
+    <baseCost>500</baseCost>
+    <techLevel>Industrial</techLevel>
+    <tab>Beamwire</tab>
+    <prerequisites>
+      <li>Beamwire_Optics</li>
+      <li>Autodoors</li>
+    </prerequisites>
+    <researchViewX>1</researchViewX>
+    <researchViewY>1</researchViewY>
+  </ResearchProjectDef>
+
+  <ResearchProjectDef>
     <defName>Beamwire_Splitting</defName>
     <label>beam splitting</label>
-    <description>Half-silvered optics and crystal prisms that split one beam into several and share the power between them. Unlocks the beam splitter and the beam prism.</description>
+    <description>Half-silvered optics and crystal prisms that split one beam into several and share the power between them, steered by microelectronic controllers. Unlocks the beam splitter and the beam prism.</description>
     <baseCost>1200</baseCost>
     <techLevel>Industrial</techLevel>
     <tab>Beamwire</tab>
@@ -31,6 +56,7 @@
       <li>Beamwire_Optics</li>
       <li>MicroelectronicsBasics</li>
     </prerequisites>
+    <requiredResearchBuilding>HiTechResearchBench</requiredResearchBuilding>
     <researchViewX>1</researchViewX>
     <researchViewY>0</researchViewY>
   </ResearchProjectDef>
@@ -38,13 +64,15 @@
   <ResearchProjectDef>
     <defName>Beamwire_CoherentRelays</defName>
     <label>coherent relays</label>
-    <description>Gather scattered beams, re-collimate them and fire them onward at full range. Unlocks the beam relay.</description>
+    <description>Gather scattered beams, re-collimate them and fire them onward at full range. Needs precision parts from fabrication. Unlocks the beam relay.</description>
     <baseCost>1600</baseCost>
     <techLevel>Industrial</techLevel>
     <tab>Beamwire</tab>
     <prerequisites>
       <li>Beamwire_Splitting</li>
+      <li>Fabrication</li>
     </prerequisites>
+    <requiredResearchBuilding>HiTechResearchBench</requiredResearchBuilding>
     <researchViewX>2</researchViewX>
     <researchViewY>0</researchViewY>
   </ResearchProjectDef>
@@ -52,7 +80,7 @@
   <ResearchProjectDef>
     <defName>Beamwire_Capacitors</defName>
     <label>beam capacitors</label>
-    <description>Bank beam power in the network itself, so it keeps flowing when emitters can't keep up. Unlocks the beam capacitor.</description>
+    <description>Bank beam power in the network itself, using battery chemistry, so it keeps flowing when emitters can't keep up. Unlocks the beam capacitor.</description>
     <baseCost>1800</baseCost>
     <techLevel>Industrial</techLevel>
     <tab>Beamwire</tab>
@@ -60,6 +88,7 @@
       <li>Beamwire_CoherentRelays</li>
       <li>Batteries</li>
     </prerequisites>
+    <requiredResearchBuilding>HiTechResearchBench</requiredResearchBuilding>
     <researchViewX>3</researchViewX>
     <researchViewY>0</researchViewY>
   </ResearchProjectDef>

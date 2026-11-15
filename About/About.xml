@@ -34,6 +34,6 @@ Features
 - Optics gather dust and need cleaning. Explosions can knock mirrors out of alignment.
 - Thin, glowing laser visuals and an emitter hum
 - 3 art styles to choose from in the mod settings: Rim Standard, Hazard Industrial and Glitterworld Spacer
-- Its own research tab: Beam optics, Beam splitting and Coherent relays
+- Its own research tab, tied into vanilla progression: Beam optics (needs Solar panels), Beam safety (Autodoors), Beam splitting (Microelectronics), Coherent relays (Fabrication) and Beam capacitors (Batteries). Later projects need a hi-tech research bench.
 - Compatible with Vanilla Expanded power mods (Beamwire uses the vanilla power net) and Combat Extended</description>
 </ModMetaData>

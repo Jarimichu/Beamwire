@@ -25,7 +25,15 @@ Put a **beam emitter** on one power grid and a **beam receiver** on another, and
 - Walls, rock and other impassable buildings block beams. Roofs can block them too if you turn that setting on.
 - Powered beams **burn** anyone standing in them. You can turn this off or scale it in the settings.
 - Optics gather **dust** (faster outdoors), and colonists clean them under the Cleaning work type. Explosions can knock nodes **out of alignment**, and emitters and receivers can **break down**.
-- Research has its own tab: *Beam optics* → *Beam splitting* → *Coherent relays* → *Beam capacitors*.
+- Research has its own tab. Each project also needs the vanilla research its tech builds on:
+
+  | Project | Unlocks | Requires | Bench |
+  |---|---|---|---|
+  | Beam optics | Emitter, receiver, mirror, beam window | Electricity, Solar panels | any |
+  | Beam safety | Safety shutter | Beam optics, Autodoors | any |
+  | Beam splitting | Splitter, prism | Beam optics, Microelectronics | hi-tech |
+  | Coherent relays | Relay | Beam splitting, Fabrication | hi-tech |
+  | Beam capacitors | Capacitor | Coherent relays, Batteries | hi-tech |
 
 ## Art styles
 
