@@ -40,6 +40,7 @@ namespace Beamwire
         private IntVec3 target = IntVec3.Invalid;
         private Dir8 targetDir;
         private float delivered;
+        private CompPowerTrader_MiningLaser power;
         private bool cutting;
         private Sustainer sound;
         private readonly List<IntVec3> lineCells = new List<IntVec3>();
@@ -50,7 +51,14 @@ namespace Beamwire
 
         public float WantedWatts => HasWork ? Props.maxIntake : 0f;
 
+        /// <summary>Watts arriving by beam.</summary>
         public float Delivered => delivered;
+
+        /// <summary>Watts arriving from the laser's own power grid, topping up what beams don't cover.</summary>
+        public float GridWatts => power != null ? power.GridSupply : 0f;
+
+        /// <summary>All the power it is cutting with: beams first, then the grid.</summary>
+        public float TotalWatts => delivered + GridWatts;
 
         /// <summary>True while it is actually cutting: it has a target, power, and no closed shutter in the way.</summary>
         public bool Cutting => cutting;
@@ -64,7 +72,17 @@ namespace Beamwire
 
         private MapComponent_BeamNetwork Network => parent.Map?.GetComponent<MapComponent_BeamNetwork>();
 
-        public void SetDelivered(float watts) => delivered = watts;
+        public void SetDelivered(float watts)
+        {
+            delivered = watts;
+            UpdateGridDraw();
+        }
+
+        /// <summary>Asks the grid for whatever the beams don't cover, while there is rock to cut.</summary>
+        private void UpdateGridDraw()
+        {
+            power?.SetGridDraw(HasWork ? Mathf.Max(0f, Props.maxIntake - delivered) : 0f);
+        }
 
         public bool InVacuum
         {
@@ -81,6 +99,7 @@ namespace Beamwire
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
             base.PostSpawnSetup(respawningAfterLoad);
+            power = parent.GetComp<CompPowerTrader_MiningLaser>();
             if (!respawningAfterLoad || !StillValid(target)) FindTarget();
             else BuildLine();
         }
@@ -103,7 +122,7 @@ namespace Beamwire
                 FindTarget();
             }
 
-            cutting = target.IsValid && delivered > 1f && LineOpen();
+            cutting = target.IsValid && TotalWatts > 1f && LineOpen();
             if (cutting)
             {
                 if (sound == null || sound.Ended)
@@ -112,9 +131,13 @@ namespace Beamwire
                     sound = def?.TrySpawnSustainer(SoundInfo.InMap(parent, MaintenanceType.PerTick));
                 }
                 sound?.Maintain();
+                if (parent.IsHashIntervalTick(20))
+                {
+                    FleckMaker.ThrowMicroSparks(target.ToVector3Shifted(), parent.Map);
+                }
                 if (parent.IsHashIntervalTick(CutInterval))
                 {
-                    float hp = delivered * Props.hpPerWattSecond * (InVacuum ? Props.vacuumBonus : 1f);
+                    float hp = TotalWatts * Props.hpPerWattSecond * (InVacuum ? Props.vacuumBonus : 1f);
                     Cut(Mathf.Max(1, Mathf.RoundToInt(hp)));
                 }
             }
@@ -160,6 +183,7 @@ namespace Beamwire
             BuildLine();
             if (hadWork != HasWork)
             {
+                UpdateGridDraw();
                 Network?.MarkPlanDirty();
             }
         }
@@ -279,7 +303,7 @@ namespace Beamwire
             Building rock = target.GetEdifice(parent.Map);
             string what = rock != null ? rock.LabelShort : "?";
             string line = cutting
-                ? "Beamwire_LaserCutting".Translate(what, target.x, target.z, delivered.ToString("0"))
+                ? "Beamwire_LaserCutting".Translate(what, target.x, target.z, delivered.ToString("0"), GridWatts.ToString("0"))
                 : LineOpen() ? "Beamwire_LaserNeedsPower".Translate(what, target.x, target.z)
                 : "Beamwire_LaserShuttered".Translate(what);
             if (InVacuum)

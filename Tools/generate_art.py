@@ -253,18 +253,27 @@ def top(st, kind):
         d.rectangle([108, 22, 148, 56], fill=rgba(st["metal_dark"]), outline=o, width=ow)
         img.alpha_composite(lens(st, [114, 10, 142, 38]))
     elif kind == "MiningLaser":
-        # A heavy cutting head: finned heat sink body, a long barrel and a hot lens, pointing North.
+        # A trigun turret head: three short parallel barrels with hot red lenses, on a finned heat-sink block,
+        # pointing North.
         r = 8 if sharp else 22
-        for i, y in enumerate(range(118, 210, 18)):
-            d.rounded_rectangle([60 - i % 2 * 4, y, 196 + i % 2 * 4, y + 10], radius=4, fill=rgba(st["metal_dark"]), outline=o, width=2)
-        d.rounded_rectangle([78, 96, 178, 214], radius=r, fill=rgba(st["metal"]), outline=o, width=ow)
-        d.rectangle([110, 22, 146, 104], fill=rgba(st["metal_dark"]), outline=o, width=ow)
-        d.rectangle([104, 40, 152, 52], fill=rgba(st["metal"]), outline=o, width=3)
-        heat = blank(); ImageDraw.Draw(heat).ellipse([112, 6, 144, 38], fill=(255, 150, 70, 255))
-        img.alpha_composite(glow_layer(heat, 8))
-        d.ellipse([120, 14, 136, 30], fill=(255, 245, 220, 255))
+        for i, y in enumerate(range(150, 214, 14)):
+            d.rounded_rectangle([54, y, 202, y + 8], radius=3, fill=rgba(st["metal_dark"]), outline=o, width=2)
+        d.rounded_rectangle([66, 112, 190, 220], radius=r, fill=rgba(st["metal"]), outline=o, width=ow)
+        d.rounded_rectangle([58, 92, 198, 128], radius=min(r, 10), fill=rgba(st["metal_dark"]), outline=o, width=ow)
+        for bx in (84, 128, 172):
+            d.rectangle([bx - 11, 26, bx + 11, 100], fill=rgba(st["metal"]), outline=o, width=max(3, ow - 3))
+            d.rectangle([bx - 14, 54, bx + 14, 64], fill=rgba(st["metal_dark"]), outline=o, width=2)
+            heat = blank(); ImageDraw.Draw(heat).ellipse([bx - 12, 10, bx + 12, 34], fill=(255, 70, 50, 255))
+            img.alpha_composite(glow_layer(heat, 6))
+            d.ellipse([bx - 6, 16, bx + 6, 28], fill=(255, 220, 210, 255))
         if st["deco"] == "hazard":
-            d.rectangle([78, 150, 178, 164], fill=rgba(st["accents"]["MiningLaser"]), outline=o, width=3)
+            d.rectangle([66, 170, 190, 184], fill=rgba(st["accents"]["MiningLaser"]), outline=o, width=3)
+        elif st["deco"] == "strips":
+            strip = blank(); ImageDraw.Draw(strip).rounded_rectangle([96, 176, 160, 184], radius=3, fill=rgba(st["glass"]))
+            img.alpha_composite(glow_layer(strip, 5))
+        elif st["deco"] == "bolts":
+            for x in (80, 176):
+                d.ellipse([x - 6, 196, x + 6, 208], fill=rgba(st["metal"]), outline=o, width=2)
     return img
 
 

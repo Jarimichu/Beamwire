@@ -363,9 +363,9 @@ namespace Beamwire
             foreach (CompBeamNode n in nodes)
             {
                 CompMiningLaser laser = n.Laser;
-                if (laser == null || !laser.Cutting || laser.Delivered < DamageMinWatts) continue;
-                float amount = Mathf.Clamp(laser.Delivered / 250f * mult, 1f, 40f);
-                float pen = def.defaultArmorPenetration * (1f + laser.Delivered / 2000f);
+                if (laser == null || !laser.Cutting || laser.TotalWatts < DamageMinWatts) continue;
+                float amount = Mathf.Clamp(laser.TotalWatts / 250f * mult, 1f, 40f);
+                float pen = def.defaultArmorPenetration * (1f + laser.TotalWatts / 2000f);
                 foreach (IntVec3 c in laser.LineCells)
                 {
                     BurnPawnsAt(c, def, amount, pen);
@@ -437,7 +437,7 @@ namespace Beamwire
                     CompMiningLaser laser = n.Laser;
                     if (laser != null && laser.Cutting)
                     {
-                        BeamRenderer.DrawCut(n.parent.Position, laser.Target, laser.Delivered, n.parent.thingIDNumber);
+                        BeamRenderer.DrawCut(n.parent.Position, laser.Target, laser.TotalWatts, n.parent.thingIDNumber);
                     }
                 }
             }
