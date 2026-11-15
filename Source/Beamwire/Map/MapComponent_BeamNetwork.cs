@@ -113,6 +113,16 @@ namespace Beamwire
                     tmpGuarded.Add(c);
                 }
             }
+            // A mining laser's cutting beam that passes through this shutter: guard the stretch beyond it.
+            foreach (CompBeamNode n in nodes)
+            {
+                CompMiningLaser laser = n.Laser;
+                if (laser == null || !laser.HasWork) continue;
+                int at = laser.LineCells.IndexOf(shutter.parent.Position);
+                if (at < 0) continue;
+                for (int i = at + 1; i < laser.LineCells.Count; i++) tmpGuarded.Add(laser.LineCells[i]);
+            }
+
             if (tmpGuarded.Count == 0) return false;
 
             foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
@@ -198,7 +208,8 @@ namespace Beamwire
                 {
                     // Plan with what the player controls: switched on and not broken down. Emitters that
                     // have merely lost power stay in the plan, so a brownout doesn't re-aim everything.
-                    Operational = c.PlannableNow,
+                    // Mining lasers only want a route while they have rock to cut.
+                    Operational = c.PlannableNow && (c.Laser == null || c.Laser.HasWork),
                     AutoAim = c.AutoAimActive,
                 });
             }
@@ -258,7 +269,7 @@ namespace Beamwire
                 };
                 if (c.Kind == NodeKind.Receiver)
                 {
-                    n.Demand = ReceiverDemand(c);
+                    n.Demand = c.Laser != null ? c.Laser.WantedWatts : ReceiverDemand(c);
                     c.LastDemand = n.Demand;
                 }
                 snapshot.Add(n);
@@ -348,6 +359,19 @@ namespace Beamwire
             float mult = BeamwireMod.Settings.damageMultiplier;
             DamageDef def = BeamwireDefOf.Beamwire_BeamBurn;
 
+            // Mining lasers' cutting beams burn too.
+            foreach (CompBeamNode n in nodes)
+            {
+                CompMiningLaser laser = n.Laser;
+                if (laser == null || !laser.Cutting || laser.Delivered < DamageMinWatts) continue;
+                float amount = Mathf.Clamp(laser.Delivered / 250f * mult, 1f, 40f);
+                float pen = def.defaultArmorPenetration * (1f + laser.Delivered / 2000f);
+                foreach (IntVec3 c in laser.LineCells)
+                {
+                    BurnPawnsAt(c, def, amount, pen);
+                }
+            }
+
             foreach (BeamSegment s in graph.Segments)
             {
                 if (s.Watts < DamageMinWatts) continue;
@@ -357,23 +381,27 @@ namespace Beamwire
 
                 foreach (GridPos p in s.Cells)
                 {
-                    IntVec3 c = MapBeamGrid.ToCell(p);
-                    tmpPawns.Clear();
-                    foreach (Thing t in c.GetThingList(map))
-                    {
-                        if (t is Pawn pawn && !pawn.Dead)
-                        {
-                            tmpPawns.Add(pawn);
-                        }
-                    }
-                    foreach (Pawn pawn in tmpPawns)
-                    {
-                        pawn.TakeDamage(new DamageInfo(def, amount, pen, -1f, null));
-                        FleckMaker.ThrowMicroSparks(pawn.DrawPos, map);
-                    }
+                    BurnPawnsAt(MapBeamGrid.ToCell(p), def, amount, pen);
                 }
             }
             tmpPawns.Clear();
+        }
+
+        private void BurnPawnsAt(IntVec3 c, DamageDef def, float amount, float pen)
+        {
+            tmpPawns.Clear();
+            foreach (Thing t in c.GetThingList(map))
+            {
+                if (t is Pawn pawn && !pawn.Dead)
+                {
+                    tmpPawns.Add(pawn);
+                }
+            }
+            foreach (Pawn pawn in tmpPawns)
+            {
+                pawn.TakeDamage(new DamageInfo(def, amount, pen, -1f, null));
+                FleckMaker.ThrowMicroSparks(pawn.DrawPos, map);
+            }
         }
 
         /// <summary>Sparks where powered beams land: on receivers, and on walls that block beams carrying power.</summary>
@@ -404,6 +432,14 @@ namespace Beamwire
             if (BeamwireMod.Settings.showBeams || AnyNodeSelected())
             {
                 BeamRenderer.Draw(graph);
+                foreach (CompBeamNode n in nodes)
+                {
+                    CompMiningLaser laser = n.Laser;
+                    if (laser != null && laser.Cutting)
+                    {
+                        BeamRenderer.DrawCut(n.parent.Position, laser.Target, laser.Delivered, n.parent.thingIDNumber);
+                    }
+                }
             }
         }
 

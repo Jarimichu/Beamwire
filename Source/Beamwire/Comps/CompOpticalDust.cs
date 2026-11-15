@@ -25,6 +25,13 @@ namespace Beamwire
             {
                 return;
             }
+#if RW16
+            // In vacuum there is nothing to settle on the optics (Odyssey).
+            if (ModsConfig.OdysseyActive && parent.Spawned && VacuumUtility.GetVacuum(parent.Position, parent.Map) >= 0.5f)
+            {
+                return;
+            }
+#endif
             float rate = Props.dustPerDay * Interval / 60000f;
             if (parent.Map != null && parent.Position.Roofed(parent.Map))
             {

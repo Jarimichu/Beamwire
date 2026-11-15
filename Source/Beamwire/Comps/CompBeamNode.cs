@@ -38,6 +38,7 @@ namespace Beamwire
         private CompFlickable flickable;
         private CompBreakdownable breakdownable;
         private CompOpticalDust dust;
+        private CompMiningLaser laser;
         private Sustainer hum;
 
         // Latest solver results, for the inspect pane and the hum sound.
@@ -84,6 +85,9 @@ namespace Beamwire
 
         public CompBeamReceiver Receiver => receiverPower;
 
+        /// <summary>Set when this node is a mining laser (Odyssey).</summary>
+        public CompMiningLaser Laser => laser;
+
         public float MaxThroughput
         {
             get
@@ -101,6 +105,7 @@ namespace Beamwire
                 if (flickable != null && !flickable.SwitchIsOn) return false;
                 if (breakdownable != null && breakdownable.BrokenDown) return false;
                 if (Kind == NodeKind.Emitter) return emitterPower != null && emitterPower.PowerOn;
+                if (laser != null) return laser.HasWork;
                 if (Kind == NodeKind.Receiver) return receiverPower != null && receiverPower.PowerNet != null;
                 return true;
             }
@@ -127,6 +132,7 @@ namespace Beamwire
             flickable = parent.GetComp<CompFlickable>();
             breakdownable = parent.GetComp<CompBreakdownable>();
             dust = parent.GetComp<CompOpticalDust>();
+            laser = parent.GetComp<CompMiningLaser>();
             if (throughputIndex < 0)
             {
                 throughputIndex = Props.defaultThroughputIndex;
@@ -190,6 +196,7 @@ namespace Beamwire
                 case NodeKind.Receiver:
                     LastWatts = solved.DeliveredWatts;
                     receiverPower?.SetDelivered(solved.DeliveredWatts);
+                    laser?.SetDelivered(solved.DeliveredWatts);
                     break;
                 case NodeKind.Capacitor:
                     LastWatts = solved.InputWatts;

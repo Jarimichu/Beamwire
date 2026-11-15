@@ -337,3 +337,37 @@ namespace Beamwire.Tests
         }
     }
 }
+
+namespace Beamwire.Tests
+{
+    public class IdleSinkTests
+    {
+        [Fact]
+        public void IdleMiningLaser_IsIgnoredByPlanner_AndDrawsNothing()
+        {
+            // A mining laser with nothing to cut is passed in as a non-operational receiver with no demand.
+            var s = new BeamSettings { NodeLoss = 0f, LossPerTile = 0f, MaxRange = 60f };
+            var e = new BeamNode(1, NodeKind.Emitter, new GridPos(0, 5), Dir8.North) { AutoAim = true, MaxThroughput = 2000f };
+            var laser = new BeamNode(2, NodeKind.Receiver, new GridPos(6, 5), Dir8.North) { Operational = false, Demand = 0f };
+            AimPlan plan = AutoAimPlanner.Plan(new TestGrid(), new[] { e, laser }, s);
+            Assert.Equal(Dir8.North, plan.Facings[1]); // left alone: nothing to serve
+            Assert.Empty(plan.ReachedReceivers);
+            Assert.Empty(plan.UnreachedReceivers);
+
+            var aimed = new BeamNode(1, NodeKind.Emitter, new GridPos(0, 5), Dir8.East) { MaxThroughput = 2000f };
+            BeamGraph g = BeamTracer.Trace(new TestGrid(), new[] { aimed, laser }, s);
+            PowerSolver.Solve(g, s);
+            Assert.Equal(0f, aimed.DrawWatts);
+        }
+
+        [Fact]
+        public void BusyMiningLaser_GetsItsFullIntake()
+        {
+            var s = new BeamSettings { NodeLoss = 0f, LossPerTile = 0f, MaxRange = 60f };
+            var e = new BeamNode(1, NodeKind.Emitter, new GridPos(0, 5), Dir8.North) { AutoAim = true, MaxThroughput = 4000f };
+            var laser = new BeamNode(2, NodeKind.Receiver, new GridPos(6, 5), Dir8.North) { Demand = 2000f };
+            AimPlan plan = AutoAimPlanner.Plan(new TestGrid(), new[] { e, laser }, s);
+            Assert.Equal(Dir8.East, plan.Facings[1]);
+        }
+    }
+}

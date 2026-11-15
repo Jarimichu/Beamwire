@@ -32,6 +32,7 @@ Features
 - Walls and rock block beams. Fog, rain and smoke dim them, and roofs optionally block them.
 - Powered beams burn anyone in their path. You can turn this off, or route beams through your killbox.
 - Optics gather dust and need cleaning. Explosions can knock mirrors out of alignment.
+- With the Odyssey expansion: a beam mining laser that cuts rock and ore marked for mining, best of all in the vacuum of space, where optics never gather dust. Odyssey content loads automatically; without Odyssey the rest of the mod works as normal.
 - Thin, glowing laser visuals and an emitter hum
 - 3 art styles to choose from in the mod settings: Rim Standard, Hazard Industrial and Glitterworld Spacer
 - Its own research tab, tied into vanilla progression: Beam optics (needs Solar panels), Beam safety (Autodoors), Beam splitting (Microelectronics), Coherent relays (Fabrication) and Beam capacitors (Batteries). Later projects need a hi-tech research bench.

@@ -20,7 +20,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEX = os.path.join(ROOT, "Common", "Textures", "Beamwire")
 S = 256          # working resolution
 FINAL = 128      # saved resolution
-NODES = ["Emitter", "Receiver", "Mirror", "Splitter", "Relay", "Prism", "Shutter", "Capacitor"]
+NODES = ["Emitter", "Receiver", "Mirror", "Splitter", "Relay", "Prism", "Shutter", "Capacitor", "MiningLaser"]
 
 # Folder name -> style. The folder names must match BeamwireStyles.All in Source/Beamwire/BeamwireStyles.cs.
 STYLES = {
@@ -28,7 +28,7 @@ STYLES = {
     beam=(255, 214, 120), outline=(28, 26, 24), ow=10, radius=18,
     plate=(118, 112, 104), plate_hi=(146, 140, 131), plate_lo=(92, 87, 81),
     metal=(160, 156, 148), metal_dark=(84, 80, 75), glass=(255, 214, 120), mirror=(214, 222, 228),
-    accents={"Emitter": (196, 120, 52), "Receiver": (110, 150, 92), "Mirror": (150, 150, 150), "Splitter": (190, 170, 90), "Relay": (130, 110, 150), "Prism": (110, 160, 190), "Shutter": (196, 72, 60), "Capacitor": (96, 160, 110)},
+    accents={"Emitter": (196, 120, 52), "Receiver": (110, 150, 92), "Mirror": (150, 150, 150), "Splitter": (190, 170, 90), "Relay": (130, 110, 150), "Prism": (110, 160, 190), "Shutter": (196, 72, 60), "Capacitor": (96, 160, 110), "MiningLaser": (214, 120, 40)},
     deco="bolts", ground="dirt"),
   "Industrial": dict(
     beam=(255, 150, 40), outline=(22, 20, 18), ow=8, radius=6,
@@ -252,6 +252,19 @@ def top(st, kind):
             img.alpha_composite(glow_layer(cell, 4))
         d.rectangle([108, 22, 148, 56], fill=rgba(st["metal_dark"]), outline=o, width=ow)
         img.alpha_composite(lens(st, [114, 10, 142, 38]))
+    elif kind == "MiningLaser":
+        # A heavy cutting head: finned heat sink body, a long barrel and a hot lens, pointing North.
+        r = 8 if sharp else 22
+        for i, y in enumerate(range(118, 210, 18)):
+            d.rounded_rectangle([60 - i % 2 * 4, y, 196 + i % 2 * 4, y + 10], radius=4, fill=rgba(st["metal_dark"]), outline=o, width=2)
+        d.rounded_rectangle([78, 96, 178, 214], radius=r, fill=rgba(st["metal"]), outline=o, width=ow)
+        d.rectangle([110, 22, 146, 104], fill=rgba(st["metal_dark"]), outline=o, width=ow)
+        d.rectangle([104, 40, 152, 52], fill=rgba(st["metal"]), outline=o, width=3)
+        heat = blank(); ImageDraw.Draw(heat).ellipse([112, 6, 144, 38], fill=(255, 150, 70, 255))
+        img.alpha_composite(glow_layer(heat, 8))
+        d.ellipse([120, 14, 136, 30], fill=(255, 245, 220, 255))
+        if st["deco"] == "hazard":
+            d.rectangle([78, 150, 178, 164], fill=rgba(st["accents"]["MiningLaser"]), outline=o, width=3)
     return img
 
 

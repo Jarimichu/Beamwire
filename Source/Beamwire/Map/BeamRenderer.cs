@@ -66,6 +66,35 @@ namespace Beamwire
             }
         }
 
+        /// <summary>
+        /// A mining laser's cutting beam: a hotter, slightly thicker core than a power beam, ending in the rock face.
+        /// </summary>
+        public static void DrawCut(IntVec3 from, IntVec3 to, float watts, int seed)
+        {
+            Color beam = BeamwireStyles.Current.BeamColor;
+            Vector3 a = from.ToVector3Shifted();
+            Vector3 b = to.ToVector3Shifted();
+            Vector3 dir = (b - a).normalized;
+            a += dir * NodeLensInset;
+            b -= dir * 0.45f;
+            a.y = b.y = AltitudeLayer.Projectile.AltitudeFor();
+            float length = (b - a).magnitude;
+            if (length < 0.05f) return;
+
+            float frac = Mathf.Clamp01(watts / FullBrightnessWatts);
+            float flicker = 1f + 0.12f * Mathf.Sin(Time.realtimeSinceStartup * 37f + seed);
+            float core = Mathf.Lerp(0.08f, 0.14f, frac) * flicker;
+            Vector3 mid = (a + b) * 0.5f;
+            Quaternion rot = Quaternion.LookRotation(dir);
+
+            Block.SetColor(ColorId, new Color(beam.r, beam.g * 0.7f, beam.b * 0.5f, Mathf.Lerp(0.45f, 0.8f, frac)));
+            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid, rot, new Vector3(core * 4.5f, 1f, length + core)),
+                BeamwireTex.BeamGlow, 0, null, 0, Block);
+            Block.SetColor(ColorId, new Color(1f, 0.96f, 0.85f, 1f));
+            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid + new Vector3(0f, 0.001f, 0f), rot, new Vector3(core, 1f, length)),
+                BeamwireTex.BeamCore, 0, null, 0, Block);
+        }
+
         public static Vector3 StartPoint(BeamSegment s)
         {
             return MapBeamGrid.ToCell(s.From.Pos).ToVector3Shifted() + DirVector(s.Dir) * NodeLensInset;

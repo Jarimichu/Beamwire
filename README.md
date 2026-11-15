@@ -35,6 +35,15 @@ Put a **beam emitter** on one power grid and a **beam receiver** on another, and
   | Coherent relays | Relay | Beam splitting, Fabrication | hi-tech |
   | Beam capacitors | Capacitor | Coherent relays, Batteries | hi-tech |
 
+## Odyssey content
+
+When the Odyssey expansion is active (RimWorld 1.6), the `Odyssey/` folder loads automatically through `LoadFolders.xml`:
+
+- **Beam mining laser** (research *Beam mining laser*: Beam optics + Deep drilling). A beam-powered cutting laser that mines the nearest rock or ore marked for mining on one of its 8 lines, within 30 tiles, for full yield. It cuts about 60 HP per second per kW, ×1.5 in vacuum. It only asks for power while it has work, so auto-aim routes beams to it as needed. Its cutting beam burns like other beams, and a safety shutter on the line pauses it.
+- **Vacuum optics:** nodes standing in vacuum never gather dust.
+
+Without Odyssey these don't appear, and nothing else changes.
+
 ## Art styles
 
 Players pick one in the mod settings, and it switches live: node art, architect icons, build ghosts and beam colour.
