@@ -38,7 +38,7 @@ namespace Beamwire
         private const int CutInterval = 60;
 
         private IntVec3 target = IntVec3.Invalid;
-        private Dir8 targetDir;
+        private float headAngle;
         private float delivered;
         private CompPowerTrader_MiningLaser power;
         private bool cutting;
@@ -65,10 +65,11 @@ namespace Beamwire
 
         public IntVec3 Target => target;
 
-        /// <summary>Cells between the laser and its target (not including either).</summary>
+        /// <summary>Cells on the straight line between the laser and its target (not including either).</summary>
         public List<IntVec3> LineCells => lineCells;
 
-        public float HeadAngle => (int)targetDir * 45f;
+        /// <summary>Degrees clockwise from North toward the target, at any angle.</summary>
+        public float HeadAngle => headAngle;
 
         private MapComponent_BeamNetwork Network => parent.Map?.GetComponent<MapComponent_BeamNetwork>();
 
@@ -108,7 +109,7 @@ namespace Beamwire
         {
             base.PostExposeData();
             Scribe_Values.Look(ref target, "beamwireLaserTarget", IntVec3.Invalid);
-            Scribe_Values.Look(ref targetDir, "beamwireLaserDir", Dir8.North);
+            Scribe_Values.Look(ref headAngle, "beamwireLaserAngle", 0f);
             Scribe_Values.Look(ref delivered, "beamwireLaserWatts", 0f);
         }
 
@@ -148,38 +149,35 @@ namespace Beamwire
             }
         }
 
-        /// <summary>Picks the nearest marked rock on one of the 8 lines with nothing solid in between.</summary>
+        /// <summary>
+        /// Picks the nearest marked rock (by true distance, within range) that the laser can see along a straight
+        /// grid line, at any angle.
+        /// </summary>
         private void FindTarget()
         {
             bool hadWork = HasWork;
             Map map = parent.Map;
-            IntVec3 best = IntVec3.Invalid;
-            Dir8 bestDir = targetDir;
-            float bestDist = float.MaxValue;
+            IntVec3 from = parent.Position;
+            float rangeSq = Props.range * Props.range;
 
-            for (int d = 0; d < 8; d++)
+            var candidates = new List<IntVec3>();
+            AddMarked(map, DesignationDefOf.Mine, from, rangeSq, candidates);
+#if RW16
+            AddMarked(map, DesignationDefOf.MineVein, from, rangeSq, candidates);
+#endif
+            candidates.Sort((a, b) => (a - from).LengthHorizontalSquared.CompareTo((b - from).LengthHorizontalSquared));
+
+            IntVec3 best = IntVec3.Invalid;
+            foreach (IntVec3 c in candidates)
             {
-                var dir = (Dir8)d;
-                GridPos off = dir.Offset();
-                float step = dir.StepLength();
-                IntVec3 c = parent.Position;
-                for (float dist = step; dist <= Props.range && dist < bestDist; dist += step)
+                if (IsMarkedRock(c, map) && LineClear(from, c, map))
                 {
-                    c = new IntVec3(c.x + off.X, 0, c.z + off.Z);
-                    if (!c.InBounds(map)) break;
-                    if (IsMarkedRock(c, map))
-                    {
-                        best = c;
-                        bestDir = dir;
-                        bestDist = dist;
-                        break;
-                    }
-                    if (BlocksCut(c, map)) break;
+                    best = c;
+                    break;
                 }
             }
 
             target = best;
-            targetDir = bestDir;
             BuildLine();
             if (hadWork != HasWork)
             {
@@ -188,17 +186,63 @@ namespace Beamwire
             }
         }
 
+        private static void AddMarked(Map map, DesignationDef def, IntVec3 from, float rangeSq, List<IntVec3> into)
+        {
+            foreach (Designation d in map.designationManager.SpawnedDesignationsOfDef(def))
+            {
+                IntVec3 c = d.target.Cell;
+                if (c != from && (c - from).LengthHorizontalSquared <= rangeSq && !into.Contains(c)) into.Add(c);
+            }
+        }
+
         private void BuildLine()
         {
             lineCells.Clear();
             if (!target.IsValid) return;
-            GridPos off = targetDir.Offset();
-            IntVec3 c = parent.Position;
-            for (int i = 0; i < 200; i++)
+            CellsBetween(parent.Position, target, lineCells);
+            IntVec3 d = target - parent.Position;
+            headAngle = Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg;
+        }
+
+        private static readonly List<IntVec3> tmpLine = new List<IntVec3>();
+
+        /// <summary>
+        /// True when nothing solid sits between the two cells. A diagonal step can't squeeze between two
+        /// corner-touching blockers, the same rule as power beams.
+        /// </summary>
+        private static bool LineClear(IntVec3 a, IntVec3 b, Map map)
+        {
+            CellsBetween(a, b, tmpLine);
+            IntVec3 prev = a;
+            tmpLine.Add(b);
+            foreach (IntVec3 c in tmpLine)
             {
-                c = new IntVec3(c.x + off.X, 0, c.z + off.Z);
-                if (c == target) break;
-                lineCells.Add(c);
+                if (c.x != prev.x && c.z != prev.z &&
+                    BlocksCut(new IntVec3(c.x, 0, prev.z), map) && BlocksCut(new IntVec3(prev.x, 0, c.z), map))
+                {
+                    return false;
+                }
+                if (c != b && BlocksCut(c, map)) return false;
+                prev = c;
+            }
+            return true;
+        }
+
+        /// <summary>Bresenham line: the cells strictly between <paramref name="a"/> and <paramref name="b"/>.</summary>
+        public static void CellsBetween(IntVec3 a, IntVec3 b, List<IntVec3> into)
+        {
+            into.Clear();
+            int x = a.x, z = a.z;
+            int dx = Mathf.Abs(b.x - a.x), dz = Mathf.Abs(b.z - a.z);
+            int sx = a.x < b.x ? 1 : -1, sz = a.z < b.z ? 1 : -1;
+            int err = dx - dz;
+            while (true)
+            {
+                int e2 = 2 * err;
+                if (e2 > -dz) { err -= dz; x += sx; }
+                if (e2 < dx) { err += dx; z += sz; }
+                if (x == b.x && z == b.z) break;
+                into.Add(new IntVec3(x, 0, z));
             }
         }
 

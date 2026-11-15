@@ -34,7 +34,7 @@
   <Beamwire_ShutterMode_Closed>Shutter: always closed</Beamwire_ShutterMode_Closed>
   <Beamwire_ShutterModeDesc>Cycle the shutter mode. Auto closes while a colonist, colony animal, prisoner or guest is in the beam beyond the shutter, and reopens when they're clear; hostiles don't trigger it. Always open and always closed ignore everyone.</Beamwire_ShutterModeDesc>
 
-  <Beamwire_LaserIdle>No rock marked for mining on its lines within {0} tiles.</Beamwire_LaserIdle>
+  <Beamwire_LaserIdle>No rock marked for mining in sight within {0} tiles.</Beamwire_LaserIdle>
   <Beamwire_LaserCutting>Cutting {0} at ({1}, {2}): {3} W from beams + {4} W from grid.</Beamwire_LaserCutting>
   <Beamwire_LaserNeedsPower>Waiting for power to cut {0} at ({1}, {2}): no beam reaches it and its grid has nothing to spare.</Beamwire_LaserNeedsPower>
   <Beamwire_LaserShuttered>Paused: a safety shutter on the line to {0} is closed.</Beamwire_LaserShuttered>
