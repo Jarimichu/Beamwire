@@ -15,6 +15,8 @@ namespace Beamwire
     {
         private int throughputIndex = -1;
         private int orientation = -1;
+        private bool autoAim = true;
+        private int realignAtTick = -1;
 
         private CompPowerTrader_BeamEmitter emitterPower;
         private CompBeamReceiver receiverPower;
@@ -33,6 +35,19 @@ namespace Beamwire
 
         /// <summary>Which of the 8 directions the node points (45° steps, 0 = North, clockwise).</summary>
         public Dir8 Facing => (Dir8)(orientation < 0 ? parent.Rotation.AsInt * 2 : orientation);
+
+        /// <summary>Whether the network may aim this node (the player's Auto/Manual choice).</summary>
+        public bool AutoAim => autoAim && Props.rotatable;
+
+        /// <summary>
+        /// Auto-aim is in charge right now: the node is set to Auto, auto-aim is on in the settings, and the node
+        /// isn't still shaken from an explosion.
+        /// </summary>
+        public bool AutoAimActive =>
+            AutoAim && BeamwireMod.Settings.autoAim && (realignAtTick < 0 || Find.TickManager.TicksGame >= realignAtTick);
+
+        /// <summary>Receiver only: the last plan found no route to it.</summary>
+        public bool NoRoute;
 
         /// <summary>The angle the top sprite is drawn at.</summary>
         public float AngleDegrees => (int)Facing * 45f;
@@ -59,6 +74,17 @@ namespace Beamwire
                 if (breakdownable != null && breakdownable.BrokenDown) return false;
                 if (Kind == NodeKind.Emitter) return emitterPower != null && emitterPower.PowerOn;
                 if (Kind == NodeKind.Receiver) return receiverPower != null && receiverPower.PowerNet != null;
+                return true;
+            }
+        }
+
+        /// <summary>Switched on and not broken down. Unlike <see cref="Operational"/>, ignores whether an emitter has power.</summary>
+        public bool PlannableNow
+        {
+            get
+            {
+                if (flickable != null && !flickable.SwitchIsOn) return false;
+                if (breakdownable != null && breakdownable.BrokenDown) return false;
                 return true;
             }
         }
@@ -110,13 +136,15 @@ namespace Beamwire
             base.PostExposeData();
             Scribe_Values.Look(ref throughputIndex, "beamwireThroughputIndex", -1);
             Scribe_Values.Look(ref orientation, "beamwireOrientation", -1);
+            Scribe_Values.Look(ref autoAim, "beamwireAutoAim", true);
+            Scribe_Values.Look(ref realignAtTick, "beamwireRealignAt", -1);
         }
 
         public override void ReceiveCompSignal(string signal)
         {
             base.ReceiveCompSignal(signal);
-            // Switching on or off, breaking down and being repaired all change the beam paths.
-            Network?.MarkDirty();
+            // Switching on or off, breaking down and being repaired all change the beam paths and the plan.
+            Network?.MarkPlanDirty();
         }
 
         /// <summary>Called by the network after each solve.</summary>
@@ -141,6 +169,12 @@ namespace Beamwire
         public override void CompTick()
         {
             base.CompTick();
+            if (realignAtTick >= 0 && Find.TickManager.TicksGame >= realignAtTick)
+            {
+                // The shaken node has settled; let auto-aim straighten it out.
+                realignAtTick = -1;
+                Network?.MarkPlanDirty();
+            }
             if (Kind != NodeKind.Emitter)
             {
                 return;
@@ -172,7 +206,22 @@ namespace Beamwire
         public void Rotate(int steps)
         {
             orientation = (int)Facing.Rotate(steps);
-            Network?.MarkDirty();
+            Network?.MarkPlanDirty();
+        }
+
+        /// <summary>The player turns the node by hand, which locks it to manual aim.</summary>
+        private void RotateByHand(int steps)
+        {
+            autoAim = false;
+            Rotate(steps);
+        }
+
+        /// <summary>Auto-aim turns the node. Returns true if it moved.</summary>
+        public bool ApplyPlannedFacing(Dir8 facing)
+        {
+            if (facing == Facing) return false;
+            orientation = (int)facing;
+            return true;
         }
 
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
@@ -189,14 +238,30 @@ namespace Beamwire
                     defaultLabel = "Beamwire_RotateLeft".Translate(),
                     defaultDesc = "Beamwire_RotateDesc".Translate(),
                     icon = TexUI.RotLeftTex,
-                    action = () => Rotate(-1),
+                    action = () => RotateByHand(-1),
                 };
                 yield return new Command_Action
                 {
                     defaultLabel = "Beamwire_RotateRight".Translate(),
                     defaultDesc = "Beamwire_RotateDesc".Translate(),
                     icon = TexUI.RotRightTex,
-                    action = () => Rotate(1),
+                    action = () => RotateByHand(1),
+                };
+            }
+
+            if (Props.rotatable && parent.Faction == Faction.OfPlayer)
+            {
+                yield return new Command_Toggle
+                {
+                    defaultLabel = "Beamwire_AutoAim".Translate(),
+                    defaultDesc = "Beamwire_AutoAimDesc".Translate(),
+                    icon = BeamwireTex.AutoAim,
+                    isActive = () => autoAim,
+                    toggleAction = () =>
+                    {
+                        autoAim = !autoAim;
+                        Network?.MarkPlanDirty();
+                    },
                 };
             }
 
@@ -227,6 +292,24 @@ namespace Beamwire
 
         public override string CompInspectStringExtra()
         {
+            string main = MainInspectLine();
+            if (Props.rotatable)
+            {
+                string aim = !AutoAim ? "Beamwire_InspectAimManual".Translate()
+                    : realignAtTick >= 0 && Find.TickManager.TicksGame < realignAtTick ? "Beamwire_InspectAimShaken".Translate()
+                    : BeamwireMod.Settings.autoAim ? "Beamwire_InspectAimAuto".Translate()
+                    : "Beamwire_InspectAimAutoOff".Translate();
+                main += "\n" + aim;
+            }
+            if (Kind == NodeKind.Receiver && NoRoute && BeamwireMod.Settings.autoAim)
+            {
+                main += "\n" + "Beamwire_InspectNoRoute".Translate();
+            }
+            return main;
+        }
+
+        private string MainInspectLine()
+        {
             switch (Kind)
             {
                 case NodeKind.Emitter:
@@ -250,6 +333,8 @@ namespace Beamwire
             if (Rand.Chance(Props.misalignChance))
             {
                 Rotate(Rand.Bool ? 1 : -1);
+                // Auto-aim leaves it knocked askew for about an hour before re-aiming it.
+                realignAtTick = Find.TickManager.TicksGame + GenDate.TicksPerHour;
                 if (parent.Faction == Faction.OfPlayer)
                 {
                     Messages.Message("Beamwire_Misaligned".Translate(parent.LabelShort), parent, MessageTypeDefOf.NegativeEvent);

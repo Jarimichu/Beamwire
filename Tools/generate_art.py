@@ -286,6 +286,20 @@ def icon_throughput():
     return glow_layer(img, 3)
 
 
+def icon_auto_aim():
+    """Crosshair with a small spark: 'aims itself'."""
+    img = blank(128)
+    ring = blank(128)
+    rd = ImageDraw.Draw(ring)
+    rd.ellipse([24, 24, 104, 104], outline=rgba(UI_BLUE), width=8)
+    for a, b in [((64, 8), (64, 40)), ((64, 88), (64, 120)), ((8, 64), (40, 64)), ((88, 64), (120, 64))]:
+        rd.line([a, b], fill=rgba(UI_BLUE), width=8)
+    img.alpha_composite(glow_layer(ring, 4))
+    d = ImageDraw.Draw(img)
+    d.ellipse([54, 54, 74, 74], fill=(255, 255, 255, 255))
+    return img
+
+
 # ---------------------------------------------------------------- Workshop preview: the three styles side by side
 def mini_scene(st, w, h, t):
     import random
@@ -374,6 +388,7 @@ def main():
     save(beam_glow(), "Effects", "BeamGlow.png")
     save(icon_show_beams(), "UI", "ShowBeams.png")
     save(icon_throughput(), "UI", "Throughput.png")
+    save(icon_auto_aim(), "UI", "AutoAim.png")
     preview().save(os.path.join(ROOT, "About", "Preview.png"))
     hum(os.path.join(ROOT, "Common", "Sounds", "Beamwire", "EmitterHum.wav"))
     print("Art and sound generated for styles:", ", ".join(STYLES))

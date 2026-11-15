@@ -23,6 +23,9 @@ namespace Beamwire
             var l = new Listing_Standard();
             l.Begin(inRect);
 
+            l.CheckboxLabeled("Beamwire_Setting_AutoAim".Translate(), ref Settings.autoAim, "Beamwire_Setting_AutoAim_Desc".Translate());
+            l.GapLine();
+
             l.CheckboxLabeled("Beamwire_Setting_Damage".Translate(), ref Settings.beamDamage, "Beamwire_Setting_Damage_Desc".Translate());
             if (Settings.beamDamage)
             {
@@ -75,6 +78,7 @@ namespace Beamwire
     public class BeamwireSettings : ModSettings
     {
         public string artStyle = "Standard";
+        public bool autoAim = true;
         public bool beamDamage = true;
         public float damageMultiplier = 1f;
         public bool showBeams = true;
@@ -88,6 +92,7 @@ namespace Beamwire
         public void Reset()
         {
             artStyle = "Standard";
+            autoAim = true;
             beamDamage = true;
             damageMultiplier = 1f;
             showBeams = true;
@@ -110,6 +115,7 @@ namespace Beamwire
         {
             base.ExposeData();
             Scribe_Values.Look(ref artStyle, "artStyle", "Standard");
+            Scribe_Values.Look(ref autoAim, "autoAim", true);
             Scribe_Values.Look(ref beamDamage, "beamDamage", true);
             Scribe_Values.Look(ref damageMultiplier, "damageMultiplier", 1f);
             Scribe_Values.Look(ref showBeams, "showBeams", true);
@@ -142,5 +148,6 @@ namespace Beamwire
         public static readonly Material BeamGlow = MaterialPool.MatFrom("Beamwire/Effects/BeamGlow", ShaderDatabase.MoteGlow);
         public static readonly Texture2D ShowBeams = ContentFinder<Texture2D>.Get("Beamwire/UI/ShowBeams");
         public static readonly Texture2D Throughput = ContentFinder<Texture2D>.Get("Beamwire/UI/Throughput");
+        public static readonly Texture2D AutoAim = ContentFinder<Texture2D>.Get("Beamwire/UI/AutoAim");
     }
 }

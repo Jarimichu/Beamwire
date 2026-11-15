@@ -25,6 +25,7 @@
 Build a beam emitter on one grid and a beam receiver on another, and the power flows between them through the air with no conduit in between. Aim and bend beams in 8 directions, diagonals included, with mirrors that turn them 90°. Split them with half-silvered splitters that share power according to demand, and carry them across the map with relays.
 
 Features
+- Auto-aim: the network aims its own emitters, mirrors, splitters and relays so beams reach every receiver it can, re-aiming as you build. Rotate any node by hand to take manual control.
 - 5 nodes: emitter, receiver, mirror, splitter and relay
 - Beams and nodes point in 8 directions (45° steps); mirrors turn beams 90° or bounce them back
 - Emitters only draw what the receivers need. A little power is lost at each bounce and over distance.

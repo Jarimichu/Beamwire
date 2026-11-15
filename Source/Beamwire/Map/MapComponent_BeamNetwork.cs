@@ -23,8 +23,11 @@ namespace Beamwire
         private readonly HashSet<IntVec3> watchedCells = new HashSet<IntVec3>();
         private readonly List<Pawn> tmpPawns = new List<Pawn>();
 
+        private readonly HashSet<IntVec3> planCells = new HashSet<IntVec3>();
+
         private BeamGraph graph;
         private bool dirty = true;
+        private bool planDirty = true;
 
         public MapComponent_BeamNetwork(Map map) : base(map)
         {
@@ -37,11 +40,18 @@ namespace Beamwire
             if (Current.Game?.Maps == null) return;
             foreach (Map m in Current.Game.Maps)
             {
-                m.GetComponent<MapComponent_BeamNetwork>()?.MarkDirty();
+                m.GetComponent<MapComponent_BeamNetwork>()?.MarkPlanDirty();
             }
         }
 
         public void MarkDirty() => dirty = true;
+
+        /// <summary>Something changed that may call for different aims: re-plan, then re-trace.</summary>
+        public void MarkPlanDirty()
+        {
+            planDirty = true;
+            dirty = true;
+        }
 
         public void Register(CompBeamNode node)
         {
@@ -50,14 +60,14 @@ namespace Beamwire
                 nodes.Add(node);
                 byId[node.parent.thingIDNumber] = node;
             }
-            dirty = true;
+            MarkPlanDirty();
         }
 
         public void Deregister(CompBeamNode node)
         {
             nodes.Remove(node);
             byId.Remove(node.parent.thingIDNumber);
-            dirty = true;
+            MarkPlanDirty();
         }
 
         /// <summary>Called by the Harmony patches when a building appears or disappears.</summary>
@@ -66,6 +76,10 @@ namespace Beamwire
             if (watchedCells.Contains(cell))
             {
                 dirty = true;
+            }
+            if (planCells.Contains(cell))
+            {
+                MarkPlanDirty();
             }
         }
 
@@ -98,6 +112,10 @@ namespace Beamwire
             base.MapComponentTick();
             int ticks = Find.TickManager.TicksGame;
 
+            if (planDirty)
+            {
+                Replan();
+            }
             if (dirty || ticks % SolveInterval == 0)
             {
                 Recompute();
@@ -114,6 +132,54 @@ namespace Beamwire
             {
                 ThrowImpactSparks();
             }
+        }
+
+        /// <summary>
+        /// Aims every auto-aim node so beams reach as many receivers as possible. This only runs when the
+        /// network's layout changes: nodes built or removed, walls in possible beam paths, switches,
+        /// breakdowns, or a player turning a node or switching it between Auto and Manual.
+        /// </summary>
+        public void Replan()
+        {
+            planDirty = false;
+            planCells.Clear();
+            if (!BeamwireMod.Settings.autoAim)
+            {
+                foreach (CompBeamNode c in nodes) c.NoRoute = false;
+                return;
+            }
+
+            var snapshot = new List<BeamNode>(nodes.Count);
+            foreach (CompBeamNode c in nodes)
+            {
+                if (c.parent.Destroyed || !c.parent.Spawned) continue;
+                snapshot.Add(new BeamNode(c.parent.thingIDNumber, c.Kind, MapBeamGrid.ToGrid(c.parent.Position), c.Facing)
+                {
+                    // Plan with what the player controls: switched on and not broken down. Emitters that
+                    // have merely lost power stay in the plan, so a brownout doesn't re-aim everything.
+                    Operational = c.PlannableNow,
+                    AutoAim = c.AutoAimActive,
+                });
+            }
+
+            AimPlan plan = AutoAimPlanner.Plan(new MapBeamGrid(map, BeamwireMod.Settings), snapshot, BeamwireMod.Settings.ToBeamSettings());
+
+            foreach (var kv in plan.Facings)
+            {
+                if (byId.TryGetValue(kv.Key, out CompBeamNode c))
+                {
+                    c.ApplyPlannedFacing(kv.Value);
+                }
+            }
+            foreach (CompBeamNode c in nodes)
+            {
+                c.NoRoute = c.Kind == NodeKind.Receiver && plan.UnreachedReceivers.Contains(c.parent.thingIDNumber);
+            }
+            foreach (GridPos p in plan.WatchedCells)
+            {
+                planCells.Add(MapBeamGrid.ToCell(p));
+            }
+            dirty = true;
         }
 
         public void Recompute()

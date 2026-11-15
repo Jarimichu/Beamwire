@@ -14,6 +14,7 @@ Put a **beam emitter** on one power grid and a **beam receiver** on another, and
 | Splitter | 45° | Glass beam-splitter cube: every beam both passes through and turns 90°. Power is shared between the branches by downstream demand. |
 | Relay | 45° | Re-fires every incoming beam as one, with full range. Uses 30 W of the beam's power. |
 
+- **Auto-aim:** every node except the receiver has an Auto/Manual toggle. Auto nodes are aimed by the network so beams reach as many receivers as possible, using the fewest bounces and then the shortest paths. They re-aim whenever the layout changes: nodes built or removed, walls in a possible beam path, switches or breakdowns. Rotating a node by hand locks it to Manual, and auto-aim routes around it. A receiver that no emitter can reach says so in its inspect pane. Auto-aim can be turned off for the whole game in the mod settings.
 - Beams and nodes point in **8 directions** (45° steps). Diagonal steps count as √2 tiles, and a diagonal beam can't squeeze between two walls that touch at their corners.
 - **Losses:** 5% per mirror, splitter or relay, and 1% per 10 tiles. Fog, rain and smoke dim outdoor beams. Range is 60 tiles from an emitter or relay. All of this can be changed in the mod settings.
 - Walls, rock and other impassable buildings block beams. Roofs can block them too if you turn that setting on.

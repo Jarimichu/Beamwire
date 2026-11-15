@@ -49,6 +49,12 @@ namespace Beamwire.Core
         /// </summary>
         public Dir8 Facing { get; }
 
+        /// <summary>
+        /// When true, <see cref="AutoAimPlanner"/> may choose this node's facing. Manual nodes keep the
+        /// facing the player gave them, and routes are planned around them.
+        /// </summary>
+        public bool AutoAim { get; set; }
+
         /// <summary>When false, the node absorbs incoming beams and emits nothing (broken, unpowered, switched off).</summary>
         public bool Operational { get; set; } = true;
 

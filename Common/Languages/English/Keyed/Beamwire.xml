@@ -3,7 +3,9 @@
   <!-- Gizmos -->
   <Beamwire_RotateLeft>Rotate left</Beamwire_RotateLeft>
   <Beamwire_RotateRight>Rotate right</Beamwire_RotateRight>
-  <Beamwire_RotateDesc>Turn this node 45° to re-aim its beam. Takes effect immediately.</Beamwire_RotateDesc>
+  <Beamwire_RotateDesc>Turn this node 45°. Turning it by hand switches it to Manual, so auto-aim leaves it alone.</Beamwire_RotateDesc>
+  <Beamwire_AutoAim>Auto-aim</Beamwire_AutoAim>
+  <Beamwire_AutoAimDesc>When on, the network aims this node for you so beams reach as many receivers as possible. It re-aims whenever nodes or walls change. Turn it off, or rotate the node by hand, to aim it yourself.</Beamwire_AutoAimDesc>
   <Beamwire_Throughput>Limit: {0} W</Beamwire_Throughput>
   <Beamwire_ThroughputDesc>Cycle the most power this emitter will put into its beam.</Beamwire_ThroughputDesc>
   <Beamwire_ShowBeams>Show beams</Beamwire_ShowBeams>
@@ -14,16 +16,23 @@
   <Beamwire_InspectReceiver>Beam input: {0} W (requesting {1} W)</Beamwire_InspectReceiver>
   <Beamwire_InspectRelay>Beam throughput: {0} W (upkeep {1} W)</Beamwire_InspectRelay>
   <Beamwire_InspectPassive>Beam throughput: {0} W</Beamwire_InspectPassive>
+  <Beamwire_InspectAimAuto>Aim: auto</Beamwire_InspectAimAuto>
+  <Beamwire_InspectAimAutoOff>Aim: auto (auto-aim is off in the mod settings)</Beamwire_InspectAimAutoOff>
+  <Beamwire_InspectAimManual>Aim: manual</Beamwire_InspectAimManual>
+  <Beamwire_InspectAimShaken>Aim: knocked out of alignment, will re-aim soon</Beamwire_InspectAimShaken>
+  <Beamwire_InspectNoRoute>No beam route: no emitter can reach this receiver. Add mirrors, splitters or relays, or clear the way.</Beamwire_InspectNoRoute>
   <Beamwire_InspectDust>Optics dust: {0} (efficiency {1})</Beamwire_InspectDust>
 
   <!-- Messages -->
-  <Beamwire_Misaligned>The blast knocked the {0} out of alignment.</Beamwire_Misaligned>
+  <Beamwire_Misaligned>The blast knocked the {0} out of alignment. If it is on auto-aim, it will re-aim itself in about an hour.</Beamwire_Misaligned>
 
   <!-- Settings -->
   <Beamwire_Setting_ArtStyle>Art style</Beamwire_Setting_ArtStyle>
   <Beamwire_Style_Standard>Rim Standard (vanilla look, warm beams)</Beamwire_Style_Standard>
   <Beamwire_Style_Industrial>Hazard Industrial (hazard stripes, orange beams)</Beamwire_Style_Industrial>
   <Beamwire_Style_Spacer>Glitterworld Spacer (white ceramic, teal beams)</Beamwire_Style_Spacer>
+  <Beamwire_Setting_AutoAim>Auto-aim</Beamwire_Setting_AutoAim>
+  <Beamwire_Setting_AutoAim_Desc>Nodes set to Auto aim themselves so beams reach as many receivers as possible, re-aiming whenever the network changes. Rotating a node by hand switches it to Manual.</Beamwire_Setting_AutoAim_Desc>
   <Beamwire_Setting_Damage>Beams burn creatures</Beamwire_Setting_Damage>
   <Beamwire_Setting_Damage_Desc>Anyone standing in a powered beam takes burn damage that grows with the power it carries.</Beamwire_Setting_Damage_Desc>
   <Beamwire_Setting_DamageMult>Beam damage: {0}</Beamwire_Setting_DamageMult>
