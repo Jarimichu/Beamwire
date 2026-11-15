@@ -83,12 +83,12 @@ namespace Beamwire
 
             float frac = Mathf.Clamp01(watts / FullBrightnessWatts);
             float flicker = 1f + 0.12f * Mathf.Sin(Time.realtimeSinceStartup * 37f + seed);
-            float core = Mathf.Lerp(0.08f, 0.14f, frac) * flicker;
+            float core = Mathf.Lerp(0.06f, 0.10f, frac) * flicker;
             Vector3 mid = (a + b) * 0.5f;
             Quaternion rot = Quaternion.LookRotation(dir);
 
-            Block.SetColor(ColorId, new Color(beam.r, beam.g * 0.7f, beam.b * 0.5f, Mathf.Lerp(0.45f, 0.8f, frac)));
-            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid, rot, new Vector3(core * 4.5f, 1f, length + core)),
+            Block.SetColor(ColorId, new Color(beam.r, beam.g * 0.7f, beam.b * 0.5f, Mathf.Lerp(0.3f, 0.6f, frac)));
+            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid, rot, new Vector3(core * 3f, 1f, length + core)),
                 BeamwireTex.BeamGlow, 0, null, 0, Block);
             Block.SetColor(ColorId, new Color(1f, 0.96f, 0.85f, 1f));
             Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid + new Vector3(0f, 0.001f, 0f), rot, new Vector3(core, 1f, length)),
