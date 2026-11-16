@@ -4,7 +4,7 @@
   <ThingDef ParentName="BuildingBase">
     <defName>JML_MiningLaser</defName>
     <label>mining laser</label>
-    <description>A three-barrelled cutting laser. It slices through the nearest rock or ore marked for mining that it can see in a straight line, at any angle, within 30 tiles, and leaves the same yield a colonist would. The more power it gets, the faster it cuts: about one block every half minute at 1,000 W. In vacuum it cuts half again as fast.\n\nIt runs on its power grid, drawing up to 2,000 W only while it has something to cut. With Jarimichus Beamwire installed, power beams can feed it too: it uses beam power first and the grid makes up the rest.\n\nIts cutting beam burns anyone who walks through it.</description>
+    <description>A three-barrelled cutting laser. It slices through the nearest rock or ore marked for mining that it can see in a straight line, at any angle, within 30 tiles, and leaves the same yield a colonist would. At full power it cuts about as fast as a good miner: a granite block in about 18 seconds, a steel ore block in about 30. The less power it gets, the slower it cuts, and in vacuum it cuts half again as fast.\n\nIt runs on its power grid, drawing up to 1,500 W only while it has something to cut (20 W idle). With Jarimichus Beamwire installed, power beams can feed it too: it uses beam power first and the grid makes up the rest.\n\nIts cutting beam burns anyone who walks through it.</description>
     <thingClass>JarimichusMiningLaser.Building_MiningLaser</thingClass>
     <category>Building</category>
     <graphicData>
@@ -31,13 +31,13 @@
     <designationCategory>Production</designationCategory>
     <constructionSkillPrerequisite>6</constructionSkillPrerequisite>
     <costList>
-      <Steel>120</Steel>
+      <Steel>200</Steel>
       <Plasteel>25</Plasteel>
-      <ComponentIndustrial>4</ComponentIndustrial>
+      <ComponentIndustrial>5</ComponentIndustrial>
     </costList>
     <statBases>
-      <MaxHitPoints>180</MaxHitPoints>
-      <WorkToBuild>3000</WorkToBuild>
+      <MaxHitPoints>250</MaxHitPoints>
+      <WorkToBuild>8000</WorkToBuild>
       <Flammability>0.3</Flammability>
       <Mass>30</Mass>
       <Beauty>-4</Beauty>
@@ -57,9 +57,9 @@
       <li Class="CompProperties_Flickable"/>
       <li Class="CompProperties_Breakdownable"/>
       <li Class="JarimichusMiningLaser.CompProperties_MiningLaser">
-        <maxIntake>2000</maxIntake>
+        <maxIntake>1500</maxIntake>
         <range>30</range>
-        <hpPerWattSecond>0.06</hpPerWattSecond>
+        <hpPerWattSecond>0.0333</hpPerWattSecond>
         <vacuumBonus>1.5</vacuumBonus>
       </li>
     </comps>

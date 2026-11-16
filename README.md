@@ -5,7 +5,8 @@
 A three-barrelled mining laser for RimWorld 1.4, 1.5 and 1.6.
 
 - It cuts the nearest rock or ore **marked for mining** that it can see in a straight line, at any angle, within 30 tiles, for the same yield a colonist would get. Walls block its line; Beamwire's beam windows don't.
-- It cuts about 60 HP per second per kW, and draws up to **2,000 W** from its power grid only while it has work (20 W idle).
+- It cuts about **50 HP per second at its full 1,500 W**, roughly a good miner: granite in ~18 s, steel ore in ~30 s, plasteel in ~2.7 min. Less power means slower cutting. It draws power from its grid only while it has work (20 W idle).
+- **Balance:** it costs 200 steel, 25 plasteel, 5 components and 8,000 work, and has 250 HP. That's about a deep drill's cost, paid for working unattended, at range, for full yield.
 - Three thin orange industrial-laser beams pulse independently. The head turns smoothly onto its target and back to rest (the direction it was placed facing) when idle.
 - Its cutting beam burns anyone on the line (mod setting).
 - Research **Mining laser** (Electricity + Deep drilling) on the vanilla Main tab. Its position is worked out at load time, one column right of Deep drilling.

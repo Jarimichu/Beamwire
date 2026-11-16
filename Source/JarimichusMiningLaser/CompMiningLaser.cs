@@ -11,13 +11,13 @@ namespace JarimichusMiningLaser
     public class CompProperties_MiningLaser : CompProperties
     {
         /// <summary>Watts it uses while it has rock to cut (beams first, then its grid).</summary>
-        public float maxIntake = 2000f;
+        public float maxIntake = 1500f;
 
         /// <summary>How far it reaches, in tiles.</summary>
         public float range = 30f;
 
-        /// <summary>Rock hit points cut per second for each watt (1 kW ≈ 60 HP/s).</summary>
-        public float hpPerWattSecond = 0.06f;
+        /// <summary>Rock hit points cut per second for each watt (1.5 kW ≈ 50 HP/s, about a good miner).</summary>
+        public float hpPerWattSecond = 0.0333f;
 
         /// <summary>Cutting speed multiplier while the laser stands in vacuum (Odyssey).</summary>
         public float vacuumBonus = 1.5f;
@@ -238,7 +238,7 @@ namespace JarimichusMiningLaser
             if (!MiningLaserMod.Settings.burn || TotalWatts < 25f) return;
             DamageDef def = MiningLaserDefOf.JML_LaserBurn;
             float amount = Mathf.Clamp(TotalWatts / 250f * MiningLaserMod.Settings.burnMultiplier, 1f, 40f);
-            float pen = def.defaultArmorPenetration * (1f + TotalWatts / 2000f);
+            float pen = def.defaultArmorPenetration * (1f + TotalWatts / Mathf.Max(1f, Props.maxIntake));
             foreach (IntVec3 c in lineCells)
             {
                 tmpPawns.Clear();
