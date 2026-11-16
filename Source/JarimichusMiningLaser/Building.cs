@@ -3,7 +3,7 @@ using Verse;
 
 namespace JarimichusMiningLaser
 {
-    /// <summary>Draws the base plate, the turning trigun head and, while cutting, the three red beams.</summary>
+    /// <summary>Draws the base plate, the turning trigun head and, while cutting, the three orange beams.</summary>
     public class Building_MiningLaser : Building
     {
         private CompMiningLaser laser;

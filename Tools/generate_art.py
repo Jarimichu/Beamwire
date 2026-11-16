@@ -151,7 +151,7 @@ def beam_glow():
 
 
 def top(st):
-    """Trigun turret head: three short barrels with red-hot lenses on a finned heat-sink block, pointing North."""
+    """Trigun turret head: three short barrels with orange-hot lenses on a finned heat-sink block, pointing North."""
     img = blank(); d = ImageDraw.Draw(img); o = rgba(st["outline"]); ow = max(3, st["ow"] - 2)
     sharp = st["deco"] in ("vents", "engrave", "hazard")
     r = 8 if sharp else 22
@@ -162,9 +162,9 @@ def top(st):
     for bx in (84, 128, 172):
         d.rectangle([bx - 11, 26, bx + 11, 100], fill=rgba(st["metal"]), outline=o, width=max(3, ow - 3))
         d.rectangle([bx - 14, 54, bx + 14, 64], fill=rgba(st["metal_dark"]), outline=o, width=2)
-        heat = blank(); ImageDraw.Draw(heat).ellipse([bx - 12, 10, bx + 12, 34], fill=(255, 70, 50, 255))
+        heat = blank(); ImageDraw.Draw(heat).ellipse([bx - 12, 10, bx + 12, 34], fill=(255, 130, 30, 255))
         img.alpha_composite(glow_layer(heat, 6))
-        d.ellipse([bx - 6, 16, bx + 6, 28], fill=(255, 220, 210, 255))
+        d.ellipse([bx - 6, 16, bx + 6, 28], fill=(255, 232, 200, 255))
     if st["deco"] == "hazard":
         d.rectangle([66, 170, 190, 184], fill=rgba(st["accents"][NODE]), outline=o, width=3)
     elif st["deco"] == "strips":
@@ -185,10 +185,10 @@ def preview():
         img.alpha_composite(t.resize((150, 150), Image.LANCZOS), (40 + i * 200, 120))
     beams = Image.new("RGBA", (w, h), (0, 0, 0, 0)); bd = ImageDraw.Draw(beams)
     for k, dx in enumerate((-8, 0, 8)):
-        bd.line([(150 + dx, 150), (300 + dx * 2, 40)], fill=(255, 60, 40, 255), width=4)
+        bd.line([(150 + dx, 150), (300 + dx * 2, 40)], fill=(255, 130, 30, 255), width=4)
     img.alpha_composite(beams.filter(ImageFilter.GaussianBlur(4)))
     d.text((20, 20), "JARIMICHUS MINING LASER", fill=(240, 240, 235, 255))
-    d.text((20, 38), "cuts marked rock at any angle - grid or beam powered", fill=(255, 120, 100, 255))
+    d.text((20, 38), "cuts marked rock at any angle - grid or beam powered", fill=(255, 170, 90, 255))
     return img.convert("RGB")
 
 

@@ -5,8 +5,8 @@ using Verse;
 namespace JarimichusMiningLaser
 {
     /// <summary>
-    /// Draws the trigun's three thin red beams from its three barrels, converging on a point. Each pulses on its own
-    /// rhythm but never fades out. Red in every art style.
+    /// Draws the trigun's three thin orange beams from its three barrels, converging on a point. Each pulses on its own
+    /// rhythm but never fades out. Orange (an industrial laser) in every art style.
     /// </summary>
     [StaticConstructorOnStartup]
     public static class TrigunRenderer
@@ -15,8 +15,8 @@ namespace JarimichusMiningLaser
         private static readonly Material Glow = MaterialPool.MatFrom("JarimichusMiningLaser/Effects/BeamGlow", ShaderDatabase.MoteGlow);
         private static readonly MaterialPropertyBlock Block = new MaterialPropertyBlock();
         private static readonly int ColorId = Shader.PropertyToID("_Color");
-        private static readonly Color CoreColor = new Color(1f, 0.55f, 0.48f);
-        private static readonly Color GlowColor = new Color(1f, 0.16f, 0.10f);
+        private static readonly Color CoreColor = new Color(1f, 0.82f, 0.66f);
+        private static readonly Color GlowColor = new Color(1f, 0.48f, 0.08f);
         private static readonly float[] BarrelOffsets = { -0.17f, 0f, 0.17f };
         private static readonly float[] EndOffsets = { -0.06f, 0f, 0.06f };
 
