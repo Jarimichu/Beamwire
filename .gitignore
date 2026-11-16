@@ -10,3 +10,6 @@ Source/**/obj/
 /1.4/Assemblies/
 /1.5/Assemblies/
 /1.6/Assemblies/
+
+# Art generator previews (inputs to Tools/make_preview.py are the textures themselves)
+Tools/previews/

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Checks Beamwire's research wiring. Run from the repo root:  python3 Tools/check_research.py
+"""Checks the mod's research wiring (Beamwire and the lasers). Run from the repo root:  python3 Tools/check_research.py
 
 - Every XML file under Common/ and About/ parses.
-- Every Beamwire building's researchPrerequisites names a Beamwire research project.
-- Every Beamwire project's prerequisites are Beamwire projects or known vanilla projects.
+- Every building's researchPrerequisites names one of the mod's projects or a known vanilla project.
+- Every project's prerequisites are the mod's own projects or known vanilla projects.
 - requiredResearchBuilding (if set) is a known vanilla bench.
 - The prerequisite graph has no cycles.
 Exits non-zero on any problem.
@@ -15,9 +15,10 @@ import xml.etree.ElementTree as ET
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Vanilla Core defNames Beamwire depends on. MicroelectronicsBasics is referenced by the game's own
+# Vanilla Core research defNames the mod depends on. MicroelectronicsBasics is referenced by the game's own
 # ResearchProjectDefOf; the rest are used as research prerequisites by many published mods for 1.4-1.6.
-VANILLA_RESEARCH = {"Electricity", "SolarPanels", "Autodoors", "MicroelectronicsBasics", "Fabrication", "Batteries"}
+VANILLA_RESEARCH = {"Electricity", "SolarPanels", "Autodoors", "MicroelectronicsBasics", "Fabrication", "Batteries",
+                    "DeepDrilling", "GunTurrets"}
 VANILLA_BENCHES = {"HiTechResearchBench", "SimpleResearchBench"}
 
 problems = []
@@ -44,12 +45,12 @@ for path in sorted(glob.glob(os.path.join(ROOT, "Common", "**", "*.xml"), recurs
 
 for b, reqs in buildings.items():
     for r in reqs:
-        if r not in projects:
+        if r not in projects and r not in VANILLA_RESEARCH:
             problems.append(f"building {b} needs unknown research project {r}")
 for p, reqs in projects.items():
     for r in reqs:
         if r not in projects and r not in VANILLA_RESEARCH:
-            problems.append(f"project {p} needs {r}, which is neither a Beamwire project nor a known vanilla project")
+            problems.append(f"project {p} needs {r}, which is neither one of the mod's projects nor a known vanilla project")
     bench = benches[p]
     if bench and bench not in VANILLA_BENCHES:
         problems.append(f"project {p} needs unknown research bench {bench}")

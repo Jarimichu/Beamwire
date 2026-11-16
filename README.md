@@ -1,12 +1,21 @@
-# Jarimichus Beamwire
+# Jarimichus Lasers
 
-*Part of the Jarimichus mod series, with [Jarimichus Mining Laser](https://github.com/jarimichu/mining-laser) and [Jarimichus Laser Cannon](https://github.com/jarimichu/laser-cannon).*
+Lasers for RimWorld 1.4, 1.5 and 1.6: wireless power over laser beams, a mining laser, a laser cannon, and a control console to crew them. Every part can be switched off in the mod settings.
 
-Wireless power over laser beams for RimWorld 1.4, 1.5 and 1.6.
+| Part | What it is |
+|---|---|
+| **Beamwire** | Wireless power. Emitters fire power across the map to receivers, bent by mirrors and split by splitters and prisms. |
+| **Mining laser** | A three-barrelled turret that cuts rock marked for mining, for full yield. |
+| **Laser cannon** | A twin-barrelled defence turret that burns hostiles. |
+| **Laser control console** | A military fire-control station that lets one colonist man up to three lasers, e.g. from inside a gravship. |
+
+Beamwire beams can power the lasers: beams first, and the grid tops up.
+
+## Beamwire
 
 Put a **beam emitter** on one power grid and a **beam receiver** on another, and power flows between them through the air with no conduit in between. **Mirrors** bend beams, **splitters** divide them by demand, and **relays** carry them across the map.
 
-## How beams work
+### How beams work
 
 | Node | Turns in | What it does |
 |---|---|---|
@@ -37,19 +46,69 @@ Put a **beam emitter** on one power grid and a **beam receiver** on another, and
   | Coherent relays | Relay | Beam splitting, Fabrication | hi-tech |
   | Beam capacitors | Capacitor | Coherent relays, Batteries | hi-tech |
 
-## Odyssey
+## Mining laser
 
-With Odyssey active (RimWorld 1.6), Beamwire nodes standing in vacuum never gather dust. Nothing else needs Odyssey.
+- It cuts the nearest rock or ore **marked for mining** that it can see in a straight line, at any angle, within 30 tiles, for the same yield a colonist would get. Walls block its line; beam windows don't.
+- It cuts about **50 HP per second at its full 1,500 W**, roughly a good miner: granite in ~18 s, steel ore in ~30 s, plasteel in ~2.7 min. Less power means slower cutting. It draws power only while it has work (20 W idle).
+- **Balance:** 200 steel, 25 plasteel, 5 components and 8,000 work; 250 HP. About a deep drill's cost, paid for working unattended, at range, for full yield.
+- Three thin orange industrial-laser beams pulse independently. The head turns onto its target and back to rest (the direction it was placed facing) when idle.
+- Its cutting beam burns anyone on the line (setting). A closed Beamwire safety shutter on its line pauses it.
+- Research **Mining laser** (Electricity + Deep drilling) on the vanilla Main tab, placed at load time one column right of Deep drilling.
 
-## Beam-powered devices API
+## Laser cannon
 
-Other mods can let Beamwire beams power their buildings, with no compile-time reference either way. The Jarimichus Mining Laser and Laser Cannon use this.
+- **Targeting:** the nearest hostile pawn it can see within 28 tiles (34 manned), along the same straight-line rules as the mining laser. Hostile animals too, unless you turn that off.
+- **Burning:** two continuous red beams pulse independently. Each pulse (every 30 ticks) deals 9 damage per kW, with armour penetration growing with power and a 6% chance to set the target alight.
+- **Friendly fire:** it **holds fire** while any non-hostile pawn (colonist, ally, guest, prisoner, tame animal) is on the line of fire, or a Beamwire safety shutter on the line is closed.
+- **Manning:** right-click with a colonist to **man** it from the tile in front, for +6 range and ×1.5 damage. Violent work must be enabled. It also fires on its own.
+- **Controls:** force target, clear target and hold fire. Selecting it shows its range ring.
+- **Power:** up to **1,000 W** only while it has a target (50 W idle). Damage scales with the power it gets.
+- **Balance:** 18 DPS unmanned (27 manned) with perfect accuracy, between the vanilla mini-turret and autocannon turret. 200 steel, 40 plasteel, 5 components and 8,000 work; 300 HP.
+- **Research:** **Laser cannon** (Gun turrets + Microelectronics, hi-tech bench) on the vanilla Main tab, placed at load time beside its prerequisites.
+
+## Laser control console
+
+A 1x1 fire-control station built like an arcade cabinet: armoured hood, radar scope, guarded fire button, arming switches and a flight-stick on the right (Security tab; research Microelectronics basics; 80 steel, 3 components; 100 W).
+
+- Use **Link laser** to connect up to **3** laser cannons or mining lasers within **20 tiles**. Selecting it shows its reach and its links.
+- While a colonist mans it, every linked laser counts as manned: cannons get +6 range and ×1.5 damage; mining lasers cut ×1.5 faster, and their **Choose rock** button picks which marked rock they cut next.
+- Without power, the linked lasers aren't manned.
+
+## Odyssey (optional)
+
+- Beamwire optics standing in vacuum never gather dust.
+- Built on a gravship's substructure, the lasers and the console switch to a flush hull-mounted look that blends into the deck (same stats).
+- In vacuum the mining laser cuts ×1.5 faster, the laser cannon does ×1.5 damage (when it or its target is in vacuum), and both reach ×1.25 further.
+
+## Mod settings
+
+- **Parts:** switch Beamwire, the mining laser or the laser cannon off. Their buildings and research are removed while the game loads (`Common/Patches/PartToggles.xml`), so this needs a restart, and their buildings disappear from existing saves. The console stays while either laser is on. Patches that join two parts (beam power for the lasers) only run when both are on.
+- **Art style**, one for every building: Rim Standard, Hazard Industrial or Glitterworld Spacer. It switches live.
+- **Beamwire:** auto-aim, beam burns, losses, range, weather, roofs, dust, beam visibility.
+- **Mining laser:** burns on the cutting line, and their strength.
+- **Laser cannon:** damage multiplier, and whether it attacks hostile animals.
+
+## Art styles
+
+| Style | Look | Power beams |
+|---|---|---|
+| Rim Standard (default) | Close to vanilla: muted flat colours, thick outlines | Warm yellow |
+| Hazard Industrial | Hazard stripes, rivets, amber lamps | Orange |
+| Glitterworld Spacer | White ceramic, teal light strips | Teal |
+
+The mining laser's beams are always orange and the cannon's always red. Each building also has one gravship look.
+
+`Tools/art_beamwire.py`, `Tools/art_mining_laser.py` and `Tools/art_laser_cannon.py` regenerate the art (the last also makes the console art and the cannon's buzz). Beamwire's textures are under `Common/Textures/Beamwire/`, the lasers' under `Common/Textures/JarimichusLasers/`. Previews land in `Tools/previews/`.
+
+## Beam-powered devices API (for other modders)
+
+Other mods can let Beamwire beams power their buildings, with no compile-time reference either way. The mod's own mining laser and laser cannon use it (see `Common/Patches/LaserBeamPower.xml`).
 
 1. Give one of your building's comps these public members (found by name):
    - `float BeamWantedWatts { get; }`: watts wanted from beams right now (0 = nothing to do).
    - `void SetBeamWatts(float watts)`: called after every solve with the watts beams deliver.
    - optional `IEnumerable<IntVec3> BeamGuardLine { get; }`: cells of a dangerous line your device fires along; safety shutters on it guard the stretch beyond them.
-2. Ship a patch that loads only when Beamwire is active (`LoadFolders.xml`: `<li IfModActive="jarimichu.beamwire">Mods/Beamwire</li>`) and adds two comps to your building:
+2. Ship a patch that loads only when Jarimichus Lasers is active (`LoadFolders.xml`: `<li IfModActive="jarimichu.lasers">Mods/JarimichusLasers</li>`) and adds two comps to your building:
 
 ```xml
 <Operation Class="PatchOperationAdd">
@@ -68,29 +127,20 @@ Auto-aim then routes beams to your building whenever it wants power. To respect 
 - a closed safety shutter has a comp whose `bool BlocksLasers` is true;
 - beam windows' defs carry the mod extension `Beamwire.BeamTransparentExtension`.
 
-## Art styles
-
-Players pick one in the mod settings, and it switches live: node art, architect icons, build ghosts and beam colour.
-
-| Style | Look | Beam |
-|---|---|---|
-| Rim Standard (default) | Close to vanilla: muted flat colours, thick outlines | Warm yellow |
-| Hazard Industrial | Hazard stripes, rivets, amber lamps | Orange |
-| Glitterworld Spacer | White ceramic, teal light strips | Teal |
-
-`python3 Tools/generate_art.py` regenerates every style. Each style is a folder under `Common/Textures/Beamwire/Styles/`. To add one, add it to `STYLES` in the script and to `BeamwireStyles.All` in `Source/Beamwire/BeamwireStyles.cs`.
-
 ## Repository layout
 
 ```
-About/            mod metadata + preview
-Common/           Defs, Patches, Languages, Textures, Sounds (shared by all versions)
-1.4/ 1.5/ 1.6/    Assemblies (build output; not committed)
+About/                     mod metadata + preview
+Common/                    Defs (one folder per part), Patches, Languages, Textures, Sounds
+1.4/ 1.5/ 1.6/             Assemblies (build output; not committed)
 Source/
-  Beamwire.Core/  pure beam tracing + power solver, no RimWorld dependency
-  Beamwire.Tests/ xUnit tests for the core
-  Beamwire/       RimWorld assembly (comps, map component, rendering, Harmony patches)
-Tools/generate_art.py   regenerates the placeholder art and hum sound
+  JarimichusLasers.Core/   pure logic, no RimWorld dependency: Beamwire tracing, solver and auto-aim; laser maths
+  JarimichusLasers.Tests/  xUnit tests for the core
+  JarimichusLasers/        the RimWorld assembly
+    Beamwire/              power network (namespace Beamwire)
+    Lasers/                mining laser, laser cannon, console and their shared code (namespace JarimichusLasers)
+    LasersMod.cs           settings window, part toggles
+Tools/                     art generators and def checks
 ```
 
 ## Building
@@ -98,18 +148,20 @@ Tools/generate_art.py   regenerates the placeholder art and hum sound
 You need the .NET 8 SDK. No RimWorld install is needed to compile, because the build uses the `Krafs.Rimworld.Ref` reference assemblies.
 
 ```bash
-dotnet test Source/Beamwire.Tests
-dotnet build Source/Beamwire/Beamwire.csproj -c Release -p:RimWorldVersion=1.6
-dotnet build Source/Beamwire/Beamwire.csproj -c Release -p:RimWorldVersion=1.5
-dotnet build Source/Beamwire/Beamwire.csproj -c Release -p:RimWorldVersion=1.4
+dotnet test Source/JarimichusLasers.Tests
+dotnet build Source/JarimichusLasers/JarimichusLasers.csproj -c Release -p:RimWorldVersion=1.6
+dotnet build Source/JarimichusLasers/JarimichusLasers.csproj -c Release -p:RimWorldVersion=1.5
+dotnet build Source/JarimichusLasers/JarimichusLasers.csproj -c Release -p:RimWorldVersion=1.4
+python3 Tools/check_research.py
+python3 Tools/check_lasers.py
 ```
 
-Each build writes `Beamwire.dll` to `<version>/Assemblies/`. To test in game, copy or symlink the repo folder into `RimWorld/Mods/`. Harmony must be installed as a mod.
+Each build writes `JarimichusLasers.dll` to `<version>/Assemblies/`. To test in game, copy or symlink the repo folder into `RimWorld/Mods/`. Harmony must be installed as a mod.
 
 ## Compatibility
 
-- **Vanilla Expanded power mods:** emitters and receivers are ordinary vanilla power-net comps, so VE batteries, generators and conduits work with them unchanged. No patch is needed.
-- **Combat Extended:** a patch adds `Bulk` to the nodes. Beam burns are Heat damage. This still needs testing in game under CE.
+- **Vanilla Expanded power mods:** emitters and receivers are ordinary vanilla power-net comps, so VE batteries, generators and conduits work with them unchanged.
+- **Combat Extended:** a patch adds `Bulk` to the Beamwire nodes. Beam burns are Heat damage. This still needs testing in game under CE.
 
 ## Credits
 

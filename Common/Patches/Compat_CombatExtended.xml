@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Patch>
-  <!-- Combat Extended: give the nodes a Bulk value for carrying when minified. Beam burns are Heat damage,
+  <!-- Combat Extended: give every beam node (they share Beamwire_NodeBase) a Bulk value for carrying when minified. Beam burns are Heat damage,
        which CE resolves against heat armour. Needs an in-game check under CE. -->
-  <Operation Class="PatchOperationFindMod">
-    <mods>
-      <li>Combat Extended</li>
-    </mods>
-    <match Class="PatchOperationAdd">
-      <xpath>Defs/ThingDef[defName="Beamwire_Emitter" or defName="Beamwire_Receiver" or defName="Beamwire_Mirror" or defName="Beamwire_Splitter" or defName="Beamwire_Relay"]/statBases</xpath>
-      <value>
-        <Bulk>10</Bulk>
-      </value>
-    </match>
+  <Operation Class="JarimichusLasers.PatchOperationIfParts">
+    <enabled><li>Beamwire</li></enabled>
+    <operation Class="PatchOperationFindMod">
+      <mods>
+        <li>Combat Extended</li>
+      </mods>
+      <match Class="PatchOperationAdd">
+        <xpath>Defs/ThingDef[@Name="Beamwire_NodeBase"]/statBases</xpath>
+        <value>
+          <Bulk>10</Bulk>
+        </value>
+      </match>
+    </operation>
   </Operation>
 </Patch>

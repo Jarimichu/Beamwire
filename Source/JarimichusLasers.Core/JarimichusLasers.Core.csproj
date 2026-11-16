@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Pure logic (Beamwire beams and laser maths) with no RimWorld dependency. This project exists so the logic can be unit-tested;
+       the mod assembly compiles these same source files directly, so only one DLL ships. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <RootNamespace>JarimichusLasers.Core</RootNamespace>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+</Project>

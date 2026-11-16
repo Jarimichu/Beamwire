@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Parts of the mod that players switched off in the settings are removed from the game while it loads
+     (their buildings and research). See JarimichusLasers.PatchOperationIfParts. Needs a restart to change. -->
+<Patch>
+
+  <Operation Class="JarimichusLasers.PatchOperationIfParts">
+    <disabled><li>Beamwire</li></disabled>
+    <operation Class="PatchOperationSequence">
+      <operations>
+        <li Class="PatchOperationRemove">
+          <xpath>Defs/ThingDef[starts-with(defName, "Beamwire_")]</xpath>
+        </li>
+        <li Class="PatchOperationRemove">
+          <xpath>Defs/ResearchProjectDef[starts-with(defName, "Beamwire_")]</xpath>
+        </li>
+        <li Class="PatchOperationRemove">
+          <xpath>Defs/WorkGiverDef[starts-with(defName, "Beamwire_")]</xpath>
+        </li>
+        <li Class="PatchOperationRemove">
+          <xpath>Defs/ResearchTabDef[defName="Beamwire"]</xpath>
+        </li>
+      </operations>
+    </operation>
+  </Operation>
+
+  <Operation Class="JarimichusLasers.PatchOperationIfParts">
+    <disabled><li>MiningLaser</li></disabled>
+    <operation Class="PatchOperationRemove">
+      <xpath>Defs/*[self::ThingDef or self::ResearchProjectDef][defName="JML_MiningLaser"]</xpath>
+    </operation>
+  </Operation>
+
+  <Operation Class="JarimichusLasers.PatchOperationIfParts">
+    <disabled><li>LaserCannon</li></disabled>
+    <operation Class="PatchOperationRemove">
+      <xpath>Defs/*[self::ThingDef or self::ResearchProjectDef][defName="JLC_LaserCannon"]</xpath>
+    </operation>
+  </Operation>
+
+  <!-- The laser control console goes when there is no laser left for it to run. -->
+  <Operation Class="JarimichusLasers.PatchOperationIfParts">
+    <disabled><li>MiningLaser</li><li>LaserCannon</li></disabled>
+    <operation Class="PatchOperationRemove">
+      <xpath>Defs/ThingDef[defName="JLX_LaserConsole"]</xpath>
+    </operation>
+  </Operation>
+
+</Patch>

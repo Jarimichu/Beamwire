@@ -17,24 +17,27 @@ jobs:
       - name: Check research wiring
         run: python3 Tools/check_research.py
 
-      - name: Unit tests (beam tracing and power solver)
-        run: dotnet test Source/Beamwire.Tests -c Release
+      - name: Check defs, patches and textures
+        run: python3 Tools/check_defs.py
+
+      - name: Unit tests (beam tracing, power solver, laser maths)
+        run: dotnet test Source/JarimichusLasers.Tests -c Release
 
       - name: Build for RimWorld 1.4
-        run: dotnet build Source/Beamwire/Beamwire.csproj -c Release -p:RimWorldVersion=1.4
+        run: dotnet build Source/JarimichusLasers/JarimichusLasers.csproj -c Release -p:RimWorldVersion=1.4
 
       - name: Build for RimWorld 1.5
-        run: dotnet build Source/Beamwire/Beamwire.csproj -c Release -p:RimWorldVersion=1.5
+        run: dotnet build Source/JarimichusLasers/JarimichusLasers.csproj -c Release -p:RimWorldVersion=1.5
 
       - name: Build for RimWorld 1.6
-        run: dotnet build Source/Beamwire/Beamwire.csproj -c Release -p:RimWorldVersion=1.6
+        run: dotnet build Source/JarimichusLasers/JarimichusLasers.csproj -c Release -p:RimWorldVersion=1.6
 
       - name: Package mod
         run: |
-          mkdir -p dist/Beamwire
-          cp -r About Common LoadFolders.xml LICENSE 1.4 1.5 1.6 dist/Beamwire/
+          mkdir -p dist/JarimichusLasers
+          cp -r About Common LoadFolders.xml LICENSE 1.4 1.5 1.6 dist/JarimichusLasers/
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Beamwire
+          name: JarimichusLasers
           path: dist/

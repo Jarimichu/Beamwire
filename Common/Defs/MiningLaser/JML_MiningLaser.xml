@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <ThingDef ParentName="BuildingBase">
+    <defName>JML_MiningLaser</defName>
+    <label>mining laser</label>
+    <description>A three-barrelled cutting laser. It slices through the nearest rock or ore marked for mining that it can see in a straight line, at any angle, within 30 tiles, and leaves the same yield a colonist would. At full power it cuts about as fast as a good miner: a granite block in about 18 seconds, a steel ore block in about 30. The less power it gets, the slower it cuts, and in vacuum it cuts half again as fast and reaches 37.5 tiles.\n\nIt runs on its power grid, drawing up to 1,500 W only while it has something to cut (20 W idle). Beamwire power beams can feed it too: it uses beam power first and the grid makes up the rest.\n\nIts cutting beam burns anyone who walks through it.</description>
+    <thingClass>JarimichusLasers.Building_MiningLaser</thingClass>
+    <category>Building</category>
+    <graphicData>
+      <texPath>JarimichusLasers/Styles/Standard/Things/MiningLaser_Base</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(1,1)</drawSize>
+      <shadowData>
+        <volume>(0.6, 0.3, 0.6)</volume>
+      </shadowData>
+    </graphicData>
+    <uiIconPath>JarimichusLasers/Styles/Standard/Things/MiningLaser_Icon</uiIconPath>
+    <drawerType>RealtimeOnly</drawerType>
+    <altitudeLayer>Building</altitudeLayer>
+    <passability>PassThroughOnly</passability>
+    <pathCost>42</pathCost>
+    <fillPercent>0.4</fillPercent>
+    <rotatable>true</rotatable>
+    <tickerType>Normal</tickerType>
+    <size>(1,1)</size>
+    <minifiedDef>MinifiedThing</minifiedDef>
+    <thingCategories>
+      <li>BuildingsProduction</li>
+    </thingCategories>
+    <designationCategory>Production</designationCategory>
+    <constructionSkillPrerequisite>6</constructionSkillPrerequisite>
+    <costList>
+      <Steel>200</Steel>
+      <Plasteel>25</Plasteel>
+      <ComponentIndustrial>5</ComponentIndustrial>
+    </costList>
+    <statBases>
+      <MaxHitPoints>250</MaxHitPoints>
+      <WorkToBuild>8000</WorkToBuild>
+      <Flammability>0.3</Flammability>
+      <Mass>30</Mass>
+      <Beauty>-4</Beauty>
+    </statBases>
+    <building>
+      <ai_chillDestination>false</ai_chillDestination>
+    </building>
+    <researchPrerequisites>
+      <li>JML_MiningLaser</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="CompProperties_Power">
+        <compClass>JarimichusLasers.CompPowerTrader_Laser</compClass>
+        <basePowerConsumption>20</basePowerConsumption>
+        <shortCircuitInRain>false</shortCircuitInRain>
+      </li>
+      <li Class="CompProperties_Flickable"/>
+      <li Class="CompProperties_Breakdownable"/>
+      <li Class="JarimichusLasers.CompProperties_MiningLaser">
+        <maxIntake>1500</maxIntake>
+        <range>30</range>
+        <hpPerWattSecond>0.0333</hpPerWattSecond>
+        <vacuumBonus>1.5</vacuumBonus>
+        <vacuumRangeMultiplier>1.25</vacuumRangeMultiplier>
+      </li>
+    </comps>
+  </ThingDef>
+
+  <ResearchProjectDef>
+    <defName>JML_MiningLaser</defName>
+    <label>mining laser</label>
+    <description>Focus electrical power into a three-barrelled cutting laser that mines rock and ore from a distance, building on deep-drilling know-how. Especially effective in the vacuum of space. Unlocks the mining laser.</description>
+    <baseCost>1400</baseCost>
+    <techLevel>Industrial</techLevel>
+    <prerequisites>
+      <li>Electricity</li>
+      <li>DeepDrilling</li>
+    </prerequisites>
+    <!-- Placed at load time one column right of Deep drilling (see ResearchPlacer); these are only a fallback. -->
+    <researchViewX>14</researchViewX>
+    <researchViewY>2</researchViewY>
+  </ResearchProjectDef>
+
+  <DamageDef>
+    <defName>JML_LaserBurn</defName>
+    <label>laser burn</label>
+    <workerClass>DamageWorker_AddInjury</workerClass>
+    <externalViolence>true</externalViolence>
+    <deathMessage>{0} was cut down by a mining laser.</deathMessage>
+    <hediff>Burn</hediff>
+    <armorCategory>Heat</armorCategory>
+    <minDamageToFragment>15</minDamageToFragment>
+    <defaultDamage>5</defaultDamage>
+    <defaultArmorPenetration>0.15</defaultArmorPenetration>
+    <makesBlood>false</makesBlood>
+  </DamageDef>
+
+</Defs>

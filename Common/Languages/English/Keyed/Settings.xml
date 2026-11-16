@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <JLS_Header_Parts>Parts</JLS_Header_Parts>
+  <JLS_Parts_Desc>Switch off any part you don't want. Its buildings and research are removed from the game.</JLS_Parts_Desc>
+  <JLS_Part_Beamwire>Beamwire (wireless power by laser)</JLS_Part_Beamwire>
+  <JLS_Part_Beamwire_Desc>Emitters, receivers, mirrors, splitters, prisms, relays, safety shutters, capacitors and beam windows. Without it, the lasers run on their power grid alone.</JLS_Part_Beamwire_Desc>
+  <JLS_Part_MiningLaser>Mining laser</JLS_Part_MiningLaser>
+  <JLS_Part_MiningLaser_Desc>A three-barrelled turret that cuts rock marked for mining, for full yield.</JLS_Part_MiningLaser_Desc>
+  <JLS_Part_LaserCannon>Laser cannon</JLS_Part_LaserCannon>
+  <JLS_Part_LaserCannon_Desc>A twin-barrelled defence turret that burns hostiles. The laser control console stays while either laser is on.</JLS_Part_LaserCannon_Desc>
+  <JLS_Parts_Restart>Restart RimWorld for this to take effect. Buildings of a part you switch off disappear from existing saves.</JLS_Parts_Restart>
+  <JLS_Header_Appearance>Appearance</JLS_Header_Appearance>
+  <JLS_ArtStyle>Art style for every building in the mod</JLS_ArtStyle>
+  <JLS_Header_Beamwire>Beamwire</JLS_Header_Beamwire>
+  <JLS_Header_MiningLaser>Mining laser</JLS_Header_MiningLaser>
+  <JLS_Header_LaserCannon>Laser cannon</JLS_Header_LaserCannon>
+  <JLS_Reset>Reset tuning to defaults</JLS_Reset>
+</LanguageData>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lets Beamwire beams power the lasers (beams first, the grid tops up), using Beamwire's beam-powered
+     devices API: CompMiningLaser and CompLaserCannon provide BeamWantedWatts, SetBeamWatts and BeamGuardLine.
+     Only when both Beamwire and that laser are switched on. -->
+<Patch>
+
+  <Operation Class="JarimichusLasers.PatchOperationIfParts">
+    <enabled><li>Beamwire</li><li>MiningLaser</li></enabled>
+    <operation Class="PatchOperationAdd">
+      <xpath>Defs/ThingDef[defName="JML_MiningLaser"]/comps</xpath>
+      <value>
+        <li Class="Beamwire.CompProperties_BeamNode">
+          <kind>Receiver</kind>
+          <rotatable>false</rotatable>
+        </li>
+        <li Class="Beamwire.CompProperties_BeamPowered" />
+      </value>
+    </operation>
+  </Operation>
+
+  <Operation Class="JarimichusLasers.PatchOperationIfParts">
+    <enabled><li>Beamwire</li><li>LaserCannon</li></enabled>
+    <operation Class="PatchOperationAdd">
+      <xpath>Defs/ThingDef[defName="JLC_LaserCannon"]/comps</xpath>
+      <value>
+        <li Class="Beamwire.CompProperties_BeamNode">
+          <kind>Receiver</kind>
+          <rotatable>false</rotatable>
+        </li>
+        <li Class="Beamwire.CompProperties_BeamPowered" />
+      </value>
+    </operation>
+  </Operation>
+
+</Patch>
