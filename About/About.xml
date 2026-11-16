@@ -18,7 +18,7 @@ Part of the Jarimichus series. Works on its own on grid power. With Jarimichus B
 
 - Automatic, or manned by a colonist for +6 range and ×1.5 damage
 - Force target, clear target and hold fire controls
-- Draws up to 2,000 W only while it has a target; the head swings back to rest when idle
+- 18 damage per second (27 manned) with perfect accuracy; draws up to 1,000 W only while it has a target (50 W idle); the head swings back to rest when idle
 - Three art styles: Rim Standard, Hazard Industrial and Glitterworld Spacer, or follow Beamwire's choice
 - Research: Laser cannon (after Gun turrets and Microelectronics, hi-tech bench)</description>
 </ModMetaData>

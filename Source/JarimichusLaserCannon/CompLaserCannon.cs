@@ -10,7 +10,7 @@ namespace JarimichusLaserCannon
 {
     public class CompProperties_LaserCannon : CompProperties
     {
-        public float maxIntake = 2000f;
+        public float maxIntake = 1000f;
         public float range = 26f;
         public float mannedRangeBonus = 6f;
 
@@ -249,7 +249,7 @@ namespace JarimichusLaserCannon
             if (MannedNow) amount *= Props.mannedDamageMultiplier;
             if (InVacuum) amount *= Props.vacuumBonus;
             if (amount < 0.5f) return;
-            float pen = def.defaultArmorPenetration * (1f + TotalWatts / 2000f);
+            float pen = def.defaultArmorPenetration * (1f + TotalWatts / Mathf.Max(1f, Props.maxIntake));
             target.TakeDamage(new DamageInfo(def, amount, pen, targetAngle, parent, null, parent.def));
             FleckMaker.ThrowMicroSparks(target.DrawPos, parent.Map);
             if (target != null && !target.Destroyed && Rand.Chance(Props.igniteChance))

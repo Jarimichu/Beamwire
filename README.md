@@ -9,7 +9,8 @@ A twin-barrelled defensive laser turret for RimWorld 1.4, 1.5 and 1.6.
 - **Friendly fire:** it **holds fire** while any non-hostile pawn (colonist, ally, guest, prisoner, tame animal) is on the line of fire.
 - **Manning:** right-click with a colonist to **man** it, for +6 range and ×1.5 damage. Violent work must be enabled. It also fires on its own.
 - **Controls:** force target, clear target and hold fire. Selecting it shows its range ring.
-- **Power:** it draws up to **2,000 W** from its grid only while it has a target (50 W idle).
+- **Power:** it draws up to **1,000 W** from its grid only while it has a target (50 W idle). Damage scales with the power it gets.
+- **Balance:** 18 DPS unmanned (27 manned) with perfect accuracy. That sits between the vanilla mini-turret and autocannon turret. It costs 200 steel, 40 plasteel, 5 components and 8,000 work, and has 300 HP.
 - **Research:** **Laser cannon** (Gun turrets + Microelectronics, hi-tech bench) on the vanilla Main tab, placed at load time beside its prerequisites.
 
 ## With other mods

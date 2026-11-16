@@ -4,7 +4,7 @@
   <ThingDef ParentName="BuildingBase">
     <defName>JLC_LaserCannon</defName>
     <label>laser cannon</label>
-    <description>A twin-barrelled defensive laser turret. It locks two continuous red beams onto the nearest hostile it can see within 26 tiles and burns it, with a chance of setting it alight. It holds fire while a colonist, ally, guest, prisoner or tame animal is on the line of fire.\n\nIt works on its own, and a colonist manning it adds 6 tiles of range and half again as much damage. It draws up to 2,000 W from its power grid only while it has a target. With Jarimichus Beamwire installed, power beams can feed it too. In vacuum its beams do half again as much damage.</description>
+    <description>A twin-barrelled defensive laser turret. It locks two continuous red beams onto the nearest hostile it can see within 26 tiles and burns it, with a chance of setting it alight. It holds fire while a colonist, ally, guest, prisoner or tame animal is on the line of fire.\n\nIt works on its own, and a colonist manning it adds 6 tiles of range and half again as much damage. It draws up to 1,000 W from its power grid only while it has a target, and does less damage on less power. With Jarimichus Beamwire installed, power beams can feed it too. In vacuum its beams do half again as much damage.</description>
     <thingClass>JarimichusLaserCannon.Building_LaserCannon</thingClass>
     <category>Building</category>
     <graphicData>
@@ -33,13 +33,13 @@
     <designationCategory>Security</designationCategory>
     <constructionSkillPrerequisite>6</constructionSkillPrerequisite>
     <costList>
-      <Steel>150</Steel>
+      <Steel>200</Steel>
       <Plasteel>40</Plasteel>
-      <ComponentIndustrial>6</ComponentIndustrial>
+      <ComponentIndustrial>5</ComponentIndustrial>
     </costList>
     <statBases>
-      <MaxHitPoints>250</MaxHitPoints>
-      <WorkToBuild>4000</WorkToBuild>
+      <MaxHitPoints>300</MaxHitPoints>
+      <WorkToBuild>8000</WorkToBuild>
       <Flammability>0.4</Flammability>
       <Mass>40</Mass>
       <Beauty>-10</Beauty>
@@ -60,7 +60,7 @@
       <li Class="CompProperties_Flickable"/>
       <li Class="CompProperties_Breakdownable"/>
       <li Class="JarimichusLaserCannon.CompProperties_LaserCannon">
-        <maxIntake>2000</maxIntake>
+        <maxIntake>1000</maxIntake>
         <range>26</range>
         <mannedRangeBonus>6</mannedRangeBonus>
         <damagePerKw>9</damagePerKw>

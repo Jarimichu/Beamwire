@@ -31,7 +31,7 @@ namespace JarimichusLaserCannon
             Vector3 dir = flat.normalized;
             Vector3 side = new Vector3(dir.z, 0f, -dir.x);
             float altitude = AltitudeLayer.Projectile.AltitudeFor();
-            float frac = Mathf.Clamp01(watts / 2000f);
+            float frac = Mathf.Clamp01(watts / 1000f);
             double time = Time.realtimeSinceStartup;
 
             for (int i = 0; i < BarrelOffsets.Length; i++)
