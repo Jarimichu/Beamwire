@@ -308,7 +308,7 @@ def console_art(st):
     for x, y in ((38, 176), (S - 38, 176), (38, 214), (S - 38, 214)):
         d.ellipse([x - 3, y - 3, x + 3, y + 3], fill=hi, outline=o, width=1)
     # flight-stick grip: boot, shaft, black grip with a red thumb button and a trigger
-    jx, jy = 80, 196
+    jx, jy = S - 78, 196  # on the right-hand side
     d.ellipse([jx - 18, jy - 11, jx + 18, jy + 11], fill=(30, 30, 32, 255), outline=o, width=3)
     d.line([(jx, jy), (jx + 2, jy - 18)], fill=(55, 55, 58, 255), width=8)
     d.rounded_rectangle([jx - 10, jy - 40, jx + 12, jy - 12], radius=7, fill=(36, 38, 36, 255), outline=o, width=3)
@@ -317,7 +317,7 @@ def console_art(st):
     img.alpha_composite(glow_layer(thumb, 3))
     d = ImageDraw.Draw(img)
     # guarded fire button: red, under a flip-up cover in yellow/black
-    fx, fy = 182, 194
+    fx, fy = 76, 194
     d.rectangle([fx - 20, fy - 18, fx + 20, fy + 18], fill=(230, 180, 30, 255), outline=o, width=3)
     for i in range(-20, 21, 10):
         d.line([(fx + i - 6, fy + 18), (fx + i + 6, fy - 18)], fill=(30, 30, 30, 255), width=3)
@@ -326,7 +326,7 @@ def console_art(st):
     img.alpha_composite(glow_layer(btn, 3))
     d = ImageDraw.Draw(img)
     # arming toggle switches
-    for x in (122, 140):
+    for x in (118, 136):
         d.rectangle([x - 5, 182, x + 5, 208], fill=(30, 30, 34, 255), outline=o, width=2)
         d.rectangle([x - 2, 184, x + 2, 196], fill=(200, 200, 205, 255))
     # stencilled unit plate on the front instead of coin slots
