@@ -38,9 +38,6 @@
   <Beamwire_Misaligned>The blast knocked the {0} out of alignment. If it is on auto-aim, it will re-aim itself in about an hour.</Beamwire_Misaligned>
 
   <!-- Settings -->
-  <Beamwire_Style_Standard>Rim Standard (vanilla look, warm power beams)</Beamwire_Style_Standard>
-  <Beamwire_Style_Industrial>Hazard Industrial (hazard stripes, orange power beams)</Beamwire_Style_Industrial>
-  <Beamwire_Style_Spacer>Glitterworld Spacer (white ceramic, teal power beams)</Beamwire_Style_Spacer>
   <Beamwire_Setting_AutoAim>Auto-aim</Beamwire_Setting_AutoAim>
   <Beamwire_Setting_AutoAim_Desc>Nodes set to Auto aim themselves so beams reach as many receivers as possible, re-aiming whenever the network changes. Rotating a node by hand switches it to Manual.</Beamwire_Setting_AutoAim_Desc>
   <Beamwire_Setting_Damage>Beams burn creatures</Beamwire_Setting_Damage>

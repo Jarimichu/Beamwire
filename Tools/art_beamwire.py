@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""Generates Beamwire's art in every selectable style, plus the beam textures, gizmo icons,
+"""Generates Beamwire's art (the high-tech look: white ceramic, teal light strips), plus the beam textures, gizmo icons,
 a Beamwire preview (Tools/previews/) and the emitter hum.
 
 Run from the repo root:  python3 Tools/art_beamwire.py
 Needs Pillow (pip install pillow). Overwrites the files it writes under Common/ and Tools/previews/.
 
-Styles are chosen in the mod settings. Each style lives in Common/Textures/Beamwire/Styles/<Folder>/Things/
-as <Node>_Base.png (fixed plate), <Node>_Top.png (rotating part, drawn pointing North) and <Node>_Icon.png.
-To add a style: add an entry to STYLES here and to BeamwireStyles.All in the C# source.
+Node art lives in Common/Textures/Beamwire/Things/ as <Node>_Base.png (fixed plate), <Node>_Top.png
+(rotating part, drawn pointing North) and <Node>_Icon.png.
 """
 import math
 import os
@@ -22,20 +21,9 @@ S = 256          # working resolution
 FINAL = 128      # saved resolution
 NODES = ["Emitter", "Receiver", "Mirror", "Splitter", "Relay", "Prism", "Shutter", "Capacitor"]
 
-# Folder name -> style. The folder names must match BeamwireStyles.All in Source/Beamwire/BeamwireStyles.cs.
+# The mod's one look: high tech (white ceramic, teal light strips). The drawing code still has branches for
+# other decorations ("vents" is the gravship look; the rest are unused).
 STYLES = {
-  "Standard": dict(
-    beam=(255, 214, 120), outline=(28, 26, 24), ow=10, radius=18,
-    plate=(118, 112, 104), plate_hi=(146, 140, 131), plate_lo=(92, 87, 81),
-    metal=(160, 156, 148), metal_dark=(84, 80, 75), glass=(255, 214, 120), mirror=(214, 222, 228),
-    accents={"Emitter": (196, 120, 52), "Receiver": (110, 150, 92), "Mirror": (150, 150, 150), "Splitter": (190, 170, 90), "Relay": (130, 110, 150), "Prism": (110, 160, 190), "Shutter": (196, 72, 60), "Capacitor": (96, 160, 110)},
-    deco="bolts", ground="dirt"),
-  "Industrial": dict(
-    beam=(255, 150, 40), outline=(22, 20, 18), ow=8, radius=6,
-    plate=(84, 86, 84), plate_hi=(112, 114, 110), plate_lo=(60, 61, 60),
-    metal=(140, 138, 128), metal_dark=(70, 68, 62), glass=(255, 160, 50), mirror=(200, 206, 210),
-    accents={k: (236, 186, 30) for k in NODES},
-    deco="hazard", ground="concrete"),
   "Spacer": dict(
     beam=(90, 240, 220), outline=(70, 86, 96), ow=5, radius=40,
     plate=(222, 228, 232), plate_hi=(246, 249, 250), plate_lo=(184, 193, 200),
@@ -43,6 +31,8 @@ STYLES = {
     accents={k: (90, 240, 220) for k in NODES},
     deco="strips", ground="tile"),
 }
+
+STYLE = STYLES["Spacer"]
 
 
 def save(img, *parts):
@@ -424,15 +414,12 @@ def mini_scene(st, w, h, t):
 def preview():
     w, h = 640, 360
     img = Image.new("RGBA", (w, h), (24, 22, 20, 255))
-    t = 34
-    for i, st in enumerate(STYLES.values()):
-        sc = mini_scene(st, 6 * t, 4 * t, t)
-        img.alpha_composite(sc, (14 + i * (6 * t + 4), 90))
+    t = 64
+    sc = mini_scene(STYLE, 6 * t, 4 * t, t)
+    img.alpha_composite(sc, ((w - 6 * t) // 2, 90))
     d = ImageDraw.Draw(img)
     d.text((16, 24), "BEAMWIRE", fill=(240, 240, 235, 255))
-    d.text((16, 42), "wireless laser power  -  3 art styles", fill=(255, 214, 120, 255))
-    for i, name in enumerate(["Rim Standard", "Hazard Industrial", "Glitterworld Spacer"]):
-        d.text((16 + i * (6 * t + 4), 90 + 4 * t + 10), name, fill=(200, 200, 195, 255))
+    d.text((16, 42), "wireless laser power", fill=(90, 240, 220, 255))
     return img.convert("RGB")
 
 
@@ -458,17 +445,16 @@ def hum(path, seconds=2.0, rate=22050):
 def main():
     for folder, st in STYLES.items():
         for k in NODES:
-            save(down(base(st, k)), "Styles", folder, "Things", f"{k}_Base.png")
-            save(down(top(st, k)), "Styles", folder, "Things", f"{k}_Top.png")
-            save(down(icon(st, k)), "Styles", folder, "Things", f"{k}_Icon.png")
+            save(down(base(st, k)), "Things", f"{k}_Base.png")
+            save(down(top(st, k)), "Things", f"{k}_Top.png")
+            save(down(icon(st, k)), "Things", f"{k}_Icon.png")
         closed_icon = base(st, "Shutter")
         closed_icon.alpha_composite(top_closed(st, "Shutter"))
-        save(down(top_closed(st, "Shutter")), "Styles", folder, "Things", "Shutter_TopClosed.png")
-        save(down(window(st)), "Styles", folder, "Things", "Window_Base.png")
-        save(down(window(st)), "Styles", folder, "Things", "Window_Icon.png")
-        if folder == "Standard":
-            save(down(icon(st, "Shutter")), "UI", "ShutterOpen.png")
-            save(down(closed_icon), "UI", "ShutterClosed.png")
+        save(down(top_closed(st, "Shutter")), "Things", "Shutter_TopClosed.png")
+        save(down(window(st)), "Things", "Window_Base.png")
+        save(down(window(st)), "Things", "Window_Icon.png")
+        save(down(icon(st, "Shutter")), "UI", "ShutterOpen.png")
+        save(down(closed_icon), "UI", "ShutterClosed.png")
     save(beam_core(), "Effects", "BeamCore.png")
     save(beam_glow(), "Effects", "BeamGlow.png")
     save(icon_show_beams(), "UI", "ShowBeams.png")
@@ -477,7 +463,7 @@ def main():
     os.makedirs(os.path.join(ROOT, "Tools", "previews"), exist_ok=True)
     preview().save(os.path.join(ROOT, "Tools", "previews", "Beamwire.png"))
     hum(os.path.join(ROOT, "Common", "Sounds", "Beamwire", "EmitterHum.wav"))
-    print("Art and sound generated for styles:", ", ".join(STYLES))
+    print("Beamwire art and sound generated.")
 
 
 if __name__ == "__main__":

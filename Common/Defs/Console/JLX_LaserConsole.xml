@@ -9,11 +9,11 @@
     <thingClass>JarimichusLasers.Building_LaserConsole</thingClass>
     <category>Building</category>
     <graphicData>
-      <texPath>JarimichusLasers/Styles/Standard/Things/LaserConsole_Base</texPath>
+      <texPath>JarimichusLasers/Things/LaserConsole_Base</texPath>
       <graphicClass>Graphic_Single</graphicClass>
       <drawSize>(1,1)</drawSize>
     </graphicData>
-    <uiIconPath>JarimichusLasers/Styles/Standard/Things/LaserConsole_Icon</uiIconPath>
+    <uiIconPath>JarimichusLasers/Things/LaserConsole_Icon</uiIconPath>
     <drawerType>RealtimeOnly</drawerType>
     <altitudeLayer>Building</altitudeLayer>
     <passability>PassThroughOnly</passability>

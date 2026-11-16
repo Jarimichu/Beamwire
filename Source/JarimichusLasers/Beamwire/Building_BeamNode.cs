@@ -4,7 +4,7 @@ using Verse;
 namespace Beamwire
 {
     /// <summary>
-    /// A beam node building. It draws its base plate in the chosen art style, then the moving part
+    /// A beam node building. It draws its base plate, then the moving part
     /// (lens, mirror pane, splitter cube) at the node's 45° facing, which RimWorld's 4-way
     /// rotation can't show.
     /// </summary>
@@ -32,14 +32,14 @@ namespace Beamwire
 
             // Fixed base plate, then the rotating top at the node's 45° facing.
             Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(drawLoc, Quaternion.identity, scale),
-                BeamwireStyles.Mat(Ext.node, "Base"), 0);
+                BeamwireArt.Mat(Ext.node, "Base"), 0);
 
             Vector3 topPos = drawLoc;
             topPos.y += Altitudes.AltInc;
             string topPart = Node.ShutterClosed ? "TopClosed" : "Top";
             Graphics.DrawMesh(MeshPool.plane10,
                 Matrix4x4.TRS(topPos, Quaternion.AngleAxis(Node.AngleDegrees, Vector3.up), scale),
-                BeamwireStyles.Mat(Ext.node, topPart), 0);
+                BeamwireArt.Mat(Ext.node, topPart), 0);
 
             if (Node.Kind == Core.NodeKind.Capacitor)
             {
@@ -61,13 +61,12 @@ namespace Beamwire
     }
 
     /// <summary>
-    /// A beam window: a wall that beams pass through. It looks up its graphic from the chosen art style, so
-    /// switching style re-skins windows that are already built.
+    /// A beam window: a wall that beams pass through, drawn with Beamwire's window art.
     /// </summary>
     public class Building_BeamWindow : Building
     {
         public override Graphic Graphic =>
-            GraphicDatabase.Get<Graphic_Single>(BeamwireStyles.TexPath("Window", "Base"), ShaderDatabase.Cutout, def.graphicData.drawSize, Color.white);
+            GraphicDatabase.Get<Graphic_Single>(BeamwireArt.TexPath("Window", "Base"), ShaderDatabase.Cutout, def.graphicData.drawSize, Color.white);
     }
 
     /// <summary>XML: marks a building that beams pass straight through, even though it is impassable.</summary>

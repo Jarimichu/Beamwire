@@ -18,12 +18,12 @@ namespace JarimichusLasers
         {
             Vector3 scale = new Vector3(def.graphicData.drawSize.x, 1f, def.graphicData.drawSize.y);
             // On a gravship's deck it uses the flush hull-mount look instead of the free-standing one.
-            bool ship = LaserStyles.OnGravship(this);
-            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(drawLoc, Quaternion.identity, scale), ship ? LaserStyles.ShipMatFor("MiningLaser", "Base") : LaserStyles.StyleMat("MiningLaser", "Base"), 0);
+            bool ship = LaserArt.OnGravship(this);
+            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(drawLoc, Quaternion.identity, scale), ship ? LaserArt.ShipMat("MiningLaser", "Base") : LaserArt.Mat("MiningLaser", "Base"), 0);
             Vector3 top = drawLoc;
             top.y += Altitudes.AltInc;
             float angle = Laser != null ? Laser.HeadAngle : Rotation.AsAngle;
-            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(top, Quaternion.AngleAxis(angle, Vector3.up), scale), ship ? LaserStyles.ShipMatFor("MiningLaser", "Top") : LaserStyles.StyleMat("MiningLaser", "Top"), 0);
+            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(top, Quaternion.AngleAxis(angle, Vector3.up), scale), ship ? LaserArt.ShipMat("MiningLaser", "Top") : LaserArt.Mat("MiningLaser", "Top"), 0);
 
             if (Laser != null && Laser.Cutting)
             {

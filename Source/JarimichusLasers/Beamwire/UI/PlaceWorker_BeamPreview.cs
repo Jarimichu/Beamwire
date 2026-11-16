@@ -33,7 +33,7 @@ namespace Beamwire
                 if (travelled > range || !grid.InBounds(p) || grid.IsBlocked(p)) break;
                 Cells.Add(MapBeamGrid.ToCell(p));
             }
-            GenDraw.DrawFieldEdges(Cells, BeamwireStyles.Current.BeamColor);
+            GenDraw.DrawFieldEdges(Cells, BeamwireArt.BeamColor);
         }
     }
 }

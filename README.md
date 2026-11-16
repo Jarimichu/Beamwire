@@ -83,22 +83,15 @@ A 1x1 fire-control station built like an arcade cabinet: armoured hood, radar sc
 ## Mod settings
 
 - **Parts:** switch Beamwire, the mining laser or the laser cannon off. Their buildings and research are removed while the game loads (`Common/Patches/PartToggles.xml`), so this needs a restart, and their buildings disappear from existing saves. The console stays while either laser is on. Patches that join two parts (beam power for the lasers) only run when both are on.
-- **Art style**, one for every building: Rim Standard, Hazard Industrial or Glitterworld Spacer. It switches live.
 - **Beamwire:** auto-aim, beam burns, losses, range, weather, roofs, dust, beam visibility.
 - **Mining laser:** burns on the cutting line, and their strength.
 - **Laser cannon:** damage multiplier, and whether it attacks hostile animals.
 
-## Art styles
+## Look
 
-| Style | Look | Power beams |
-|---|---|---|
-| Rim Standard (default) | Close to vanilla: muted flat colours, thick outlines | Warm yellow |
-| Hazard Industrial | Hazard stripes, rivets, amber lamps | Orange |
-| Glitterworld Spacer | White ceramic, teal light strips | Teal |
+Everything has a high-tech look: white ceramic casings with teal light strips. Power beams are teal, the mining laser's beams orange and the laser cannon's red. On Odyssey gravship substructure the lasers and the console switch to a gunmetal hull-mounted look that blends into the deck.
 
-The mining laser's beams are always orange and the cannon's always red. Each building also has one gravship look.
-
-`Tools/art_beamwire.py`, `Tools/art_mining_laser.py` and `Tools/art_laser_cannon.py` regenerate the art (the last also makes the console art and the cannon's buzz). Beamwire's textures are under `Common/Textures/Beamwire/`, the lasers' under `Common/Textures/JarimichusLasers/`. Previews land in `Tools/previews/`.
+`Tools/art_beamwire.py`, `Tools/art_mining_laser.py` and `Tools/art_laser_cannon.py` regenerate the art (the last also makes the console art and the cannon's buzz), and `Tools/make_preview.py` the Workshop preview. Beamwire's textures are in `Common/Textures/Beamwire/Things/`, the lasers' in `Common/Textures/JarimichusLasers/Things/` (gravship looks in `.../Ship/`).
 
 ## Beam-powered devices API (for other modders)
 

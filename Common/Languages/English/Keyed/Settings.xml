@@ -9,8 +9,6 @@
   <JLS_Part_LaserCannon>Laser cannon</JLS_Part_LaserCannon>
   <JLS_Part_LaserCannon_Desc>A twin-barrelled defence turret that burns hostiles. The laser control console stays while either laser is on.</JLS_Part_LaserCannon_Desc>
   <JLS_Parts_Restart>Restart RimWorld for this to take effect. Buildings of a part you switch off disappear from existing saves.</JLS_Parts_Restart>
-  <JLS_Header_Appearance>Appearance</JLS_Header_Appearance>
-  <JLS_ArtStyle>Art style for every building in the mod</JLS_ArtStyle>
   <JLS_Header_Beamwire>Beamwire</JLS_Header_Beamwire>
   <JLS_Header_MiningLaser>Mining laser</JLS_Header_MiningLaser>
   <JLS_Header_LaserCannon>Laser cannon</JLS_Header_LaserCannon>

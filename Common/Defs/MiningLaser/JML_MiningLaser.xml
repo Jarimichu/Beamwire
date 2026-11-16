@@ -8,14 +8,14 @@
     <thingClass>JarimichusLasers.Building_MiningLaser</thingClass>
     <category>Building</category>
     <graphicData>
-      <texPath>JarimichusLasers/Styles/Standard/Things/MiningLaser_Base</texPath>
+      <texPath>JarimichusLasers/Things/MiningLaser_Base</texPath>
       <graphicClass>Graphic_Single</graphicClass>
       <drawSize>(1,1)</drawSize>
       <shadowData>
         <volume>(0.6, 0.3, 0.6)</volume>
       </shadowData>
     </graphicData>
-    <uiIconPath>JarimichusLasers/Styles/Standard/Things/MiningLaser_Icon</uiIconPath>
+    <uiIconPath>JarimichusLasers/Things/MiningLaser_Icon</uiIconPath>
     <drawerType>RealtimeOnly</drawerType>
     <altitudeLayer>Building</altitudeLayer>
     <passability>PassThroughOnly</passability>

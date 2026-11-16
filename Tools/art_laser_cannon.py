@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates the laser cannon's and the laser control console's art in the three art styles (the same look as Beamwire's), plus the cannon's buzz.
+"""Generates the laser cannon's and the laser control console's art in the mod's high-tech look (the same as Beamwire's), plus the cannon's buzz.
 
 Run from the repo root:  python3 Tools/art_laser_cannon.py   (needs Pillow)
 """
@@ -17,20 +17,9 @@ FINAL = 128      # saved resolution
 NODE = "LaserCannon"
 NODES = [NODE]
 
-# Folder name -> style. The folder names must match BeamwireStyles.All in Source/Beamwire/BeamwireStyles.cs.
+# The mod's one look: high tech (white ceramic, teal light strips). The drawing code still has branches for
+# other decorations ("vents" is the gravship look; the rest are unused).
 STYLES = {
-  "Standard": dict(
-    beam=(255, 214, 120), outline=(28, 26, 24), ow=10, radius=18,
-    plate=(118, 112, 104), plate_hi=(146, 140, 131), plate_lo=(92, 87, 81),
-    metal=(160, 156, 148), metal_dark=(84, 80, 75), glass=(255, 214, 120), mirror=(214, 222, 228),
-    accents={k: (200, 90, 60) for k in NODES},
-    deco="bolts", ground="dirt"),
-  "Industrial": dict(
-    beam=(255, 150, 40), outline=(22, 20, 18), ow=8, radius=6,
-    plate=(84, 86, 84), plate_hi=(112, 114, 110), plate_lo=(60, 61, 60),
-    metal=(140, 138, 128), metal_dark=(70, 68, 62), glass=(255, 160, 50), mirror=(200, 206, 210),
-    accents={k: (236, 186, 30) for k in NODES},
-    deco="hazard", ground="concrete"),
   "Spacer": dict(
     beam=(90, 240, 220), outline=(70, 86, 96), ow=5, radius=40,
     plate=(222, 228, 232), plate_hi=(246, 249, 250), plate_lo=(184, 193, 200),
@@ -38,6 +27,8 @@ STYLES = {
     accents={k: (90, 240, 220) for k in NODES},
     deco="strips", ground="tile"),
 }
+
+STYLE = STYLES["Spacer"]
 
 
 def save(img, *parts):
@@ -216,7 +207,7 @@ def preview():
 
 
 # ---------------------------------------------------------------- gravship hull-mount variant (Odyssey)
-# One look in every art style: gunmetal hull plating like gravship substructure, so the turret blends into the deck.
+# Used instead of the normal look on gravship substructure: gunmetal hull plating like gravship substructure, so the turret blends into the deck.
 SHIP = dict(
     beam=(255, 214, 120), outline=(18, 20, 24), ow=6, radius=4,
     plate=(72, 78, 86), plate_hi=(96, 102, 110), plate_lo=(52, 56, 64),
@@ -345,17 +336,17 @@ def console_art(st):
 def console_files():
     for folder, st in STYLES.items():
         c = console_art(st)
-        save(down(c), "Styles", folder, "Things", "LaserConsole_Base.png")
-        save(down(c), "Styles", folder, "Things", "LaserConsole_Icon.png")
+        save(down(c), "Things", "LaserConsole_Base.png")
+        save(down(c), "Things", "LaserConsole_Icon.png")
     save(down(console_art(SHIP)), "Ship", "LaserConsole_ShipBase.png")
 
 
 def main():
     for folder, st in STYLES.items():
-        save(down(base(st, NODE)), "Styles", folder, "Things", f"{NODE}_Base.png")
-        save(down(top(st)), "Styles", folder, "Things", f"{NODE}_Top.png")
+        save(down(base(st, NODE)), "Things", f"{NODE}_Base.png")
+        save(down(top(st)), "Things", f"{NODE}_Top.png")
         i = base(st, NODE); i.alpha_composite(top(st))
-        save(down(i), "Styles", folder, "Things", f"{NODE}_Icon.png")
+        save(down(i), "Things", f"{NODE}_Icon.png")
     save(beam_core(), "Effects", "BeamCore.png")
     save(beam_glow(), "Effects", "BeamGlow.png")
     ship_art()

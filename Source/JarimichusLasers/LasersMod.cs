@@ -46,18 +46,6 @@ namespace JarimichusLasers
                 GUI.color = Color.white;
             }
 
-            // ---- appearance
-            Header(l, "JLS_Header_Appearance");
-            l.Label("JLS_ArtStyle".Translate());
-            foreach (BeamwireStyle style in BeamwireStyles.All)
-            {
-                if (l.RadioButton(style.Label, s.artStyle == style.Folder, 12f))
-                {
-                    s.artStyle = style.Folder;
-                    ApplyStyles();
-                }
-            }
-
             // ---- Beamwire
             if (s.beamwireEnabled)
             {
@@ -107,7 +95,6 @@ namespace JarimichusLasers
             if (l.ButtonText("JLS_Reset".Translate()))
             {
                 s.ResetTuning();
-                ApplyStyles();
             }
             viewHeight = l.CurHeight + 20f;
             l.End();
@@ -123,16 +110,9 @@ namespace JarimichusLasers
             l.GapLine(6f);
         }
 
-        public static void ApplyStyles()
-        {
-            BeamwireStyles.Apply();
-            LaserStyles.Apply();
-        }
-
         public override void WriteSettings()
         {
             base.WriteSettings();
-            ApplyStyles();
             if (Current.ProgramState == ProgramState.Playing) MapComponent_BeamNetwork.DirtyAllMaps();
         }
     }
@@ -146,9 +126,6 @@ namespace JarimichusLasers
 
         /// <summary>Set when a part toggle changed this session, to show the restart notice.</summary>
         public bool partsChanged;
-
-        /// <summary>One art style for every building in the mod.</summary>
-        public string artStyle = "Standard";
 
         public BeamwireSettings beamwire = new BeamwireSettings();
 
@@ -171,7 +148,7 @@ namespace JarimichusLasers
             }
         }
 
-        /// <summary>Resets every tuning setting to its default. Leaves the parts and the art style alone.</summary>
+        /// <summary>Resets every tuning setting to its default. Leaves the parts alone.</summary>
         public void ResetTuning()
         {
             beamwire.Reset();
@@ -187,7 +164,6 @@ namespace JarimichusLasers
             Scribe_Values.Look(ref beamwireEnabled, "beamwireEnabled", true);
             Scribe_Values.Look(ref miningLaserEnabled, "miningLaserEnabled", true);
             Scribe_Values.Look(ref laserCannonEnabled, "laserCannonEnabled", true);
-            Scribe_Values.Look(ref artStyle, "artStyle", "Standard");
             Scribe_Deep.Look(ref beamwire, "beamwire");
             Scribe_Values.Look(ref miningBurn, "miningBurn", true);
             Scribe_Values.Look(ref miningBurnMultiplier, "miningBurnMultiplier", 1f);

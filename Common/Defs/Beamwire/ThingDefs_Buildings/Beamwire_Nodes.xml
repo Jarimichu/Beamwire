@@ -50,9 +50,9 @@
     <label>beam emitter</label>
     <description>Draws power from the grid it is connected to and fires it as a thin laser beam in the direction it faces. It only draws what the receivers downstream need, up to its throughput limit. It can be aimed in 45° steps.\n\nAnything standing in a powered beam gets burned.</description>
     <graphicData>
-      <texPath>Beamwire/Styles/Standard/Things/Emitter_Base</texPath>
+      <texPath>Beamwire/Things/Emitter_Base</texPath>
     </graphicData>
-    <uiIconPath>Beamwire/Styles/Standard/Things/Emitter_Icon</uiIconPath>
+    <uiIconPath>Beamwire/Things/Emitter_Icon</uiIconPath>
     <costList>
       <Steel>60</Steel>
       <Silver>25</Silver>
@@ -99,9 +99,9 @@
     <label>beam receiver</label>
     <description>Catches laser beams from any direction and feeds the power into the grid it is connected to. It asks for exactly what that grid is short of, or for its full intake while any battery on the grid can still charge.</description>
     <graphicData>
-      <texPath>Beamwire/Styles/Standard/Things/Receiver_Base</texPath>
+      <texPath>Beamwire/Things/Receiver_Base</texPath>
     </graphicData>
-    <uiIconPath>Beamwire/Styles/Standard/Things/Receiver_Icon</uiIconPath>
+    <uiIconPath>Beamwire/Things/Receiver_Icon</uiIconPath>
     <costList>
       <Steel>60</Steel>
       <Silver>25</Silver>
@@ -138,9 +138,9 @@
     <label>beam mirror</label>
     <description>A one-sided mirror that turns in 45° steps. A beam striking its face at an angle turns 90°, and one hitting it head-on bounces straight back. Beams that hit the armoured back are absorbed. Every bounce loses a little power.\n\nExplosions can knock it out of alignment.</description>
     <graphicData>
-      <texPath>Beamwire/Styles/Standard/Things/Mirror_Base</texPath>
+      <texPath>Beamwire/Things/Mirror_Base</texPath>
     </graphicData>
-    <uiIconPath>Beamwire/Styles/Standard/Things/Mirror_Icon</uiIconPath>
+    <uiIconPath>Beamwire/Things/Mirror_Icon</uiIconPath>
     <costList>
       <Steel>30</Steel>
       <Silver>15</Silver>
@@ -170,9 +170,9 @@
     <label>beam splitter</label>
     <description>A glass beam-splitter cube with a half-silvered pane inside. Every beam that hits it passes straight through and also turns 90°, so one beam becomes two. Power is shared between the branches according to how much the receivers on each side need. It turns in 45° steps.</description>
     <graphicData>
-      <texPath>Beamwire/Styles/Standard/Things/Splitter_Base</texPath>
+      <texPath>Beamwire/Things/Splitter_Base</texPath>
     </graphicData>
-    <uiIconPath>Beamwire/Styles/Standard/Things/Splitter_Icon</uiIconPath>
+    <uiIconPath>Beamwire/Things/Splitter_Icon</uiIconPath>
     <costList>
       <Steel>30</Steel>
       <Silver>30</Silver>
@@ -203,9 +203,9 @@
     <label>beam relay</label>
     <description>Collects beams from any direction and re-fires them as one coherent beam in the direction it faces (45° steps), with the beam's range fully restored. It runs off the beam itself and consumes a little of the power passing through, so it needs no conduit.</description>
     <graphicData>
-      <texPath>Beamwire/Styles/Standard/Things/Relay_Base</texPath>
+      <texPath>Beamwire/Things/Relay_Base</texPath>
     </graphicData>
-    <uiIconPath>Beamwire/Styles/Standard/Things/Relay_Icon</uiIconPath>
+    <uiIconPath>Beamwire/Things/Relay_Icon</uiIconPath>
     <costList>
       <Steel>50</Steel>
       <Silver>25</Silver>
@@ -235,9 +235,9 @@
     <label>beam prism</label>
     <description>A three-way crystal. Every beam that enters goes straight on and also turns 90° to both sides, so one beam can feed receivers on either side of it. Power is shared between the three branches according to demand. It works the same from every side, so it never needs aiming.</description>
     <graphicData>
-      <texPath>Beamwire/Styles/Standard/Things/Prism_Base</texPath>
+      <texPath>Beamwire/Things/Prism_Base</texPath>
     </graphicData>
-    <uiIconPath>Beamwire/Styles/Standard/Things/Prism_Icon</uiIconPath>
+    <uiIconPath>Beamwire/Things/Prism_Icon</uiIconPath>
     <costList>
       <Steel>30</Steel>
       <Silver>40</Silver>
@@ -271,9 +271,9 @@
 
 Place it just past an emitter or mirror, on the stretch of beam you want to guard.</description>
     <graphicData>
-      <texPath>Beamwire/Styles/Standard/Things/Shutter_Base</texPath>
+      <texPath>Beamwire/Things/Shutter_Base</texPath>
     </graphicData>
-    <uiIconPath>Beamwire/Styles/Standard/Things/Shutter_Icon</uiIconPath>
+    <uiIconPath>Beamwire/Things/Shutter_Icon</uiIconPath>
     <costList>
       <Steel>40</Steel>
       <ComponentIndustrial>2</ComponentIndustrial>
@@ -304,9 +304,9 @@ Place it just past an emitter or mirror, on the stretch of beam you want to guar
     <label>beam capacitor</label>
     <description>Stores energy in the beam network. Like a relay, it collects beams from any side except its output and fires one beam out of its facing, with the range restored. Spare beam power charges it, up to 600 Wd at 1,000 W. When the incoming beams can't cover demand, it makes up the difference from storage, and it keeps powering receivers when no beam reaches it at all.</description>
     <graphicData>
-      <texPath>Beamwire/Styles/Standard/Things/Capacitor_Base</texPath>
+      <texPath>Beamwire/Things/Capacitor_Base</texPath>
     </graphicData>
-    <uiIconPath>Beamwire/Styles/Standard/Things/Capacitor_Icon</uiIconPath>
+    <uiIconPath>Beamwire/Things/Capacitor_Icon</uiIconPath>
     <costList>
       <Steel>80</Steel>
       <Silver>20</Silver>
@@ -345,11 +345,11 @@ Place it just past an emitter or mirror, on the stretch of beam you want to guar
     <thingClass>Beamwire.Building_BeamWindow</thingClass>
     <category>Building</category>
     <graphicData>
-      <texPath>Beamwire/Styles/Standard/Things/Window_Base</texPath>
+      <texPath>Beamwire/Things/Window_Base</texPath>
       <graphicClass>Graphic_Single</graphicClass>
       <drawSize>(1,1)</drawSize>
     </graphicData>
-    <uiIconPath>Beamwire/Styles/Standard/Things/Window_Icon</uiIconPath>
+    <uiIconPath>Beamwire/Things/Window_Icon</uiIconPath>
     <altitudeLayer>Building</altitudeLayer>
     <passability>Impassable</passability>
     <blockWind>true</blockWind>

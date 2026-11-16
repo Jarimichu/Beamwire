@@ -8,14 +8,14 @@
     <thingClass>JarimichusLasers.Building_LaserCannon</thingClass>
     <category>Building</category>
     <graphicData>
-      <texPath>JarimichusLasers/Styles/Standard/Things/LaserCannon_Base</texPath>
+      <texPath>JarimichusLasers/Things/LaserCannon_Base</texPath>
       <graphicClass>Graphic_Single</graphicClass>
       <drawSize>(1,1)</drawSize>
       <shadowData>
         <volume>(0.7, 0.35, 0.7)</volume>
       </shadowData>
     </graphicData>
-    <uiIconPath>JarimichusLasers/Styles/Standard/Things/LaserCannon_Icon</uiIconPath>
+    <uiIconPath>JarimichusLasers/Things/LaserCannon_Icon</uiIconPath>
     <drawerType>RealtimeOnly</drawerType>
     <altitudeLayer>Building</altitudeLayer>
     <passability>PassThroughOnly</passability>

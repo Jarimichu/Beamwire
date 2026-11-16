@@ -187,7 +187,7 @@ namespace JarimichusLasers
 #endif
         {
             Vector3 scale = new Vector3(def.graphicData.drawSize.x, 1f, def.graphicData.drawSize.y);
-            Material mat = LaserStyles.OnGravship(this) ? LaserStyles.ShipMatFor("LaserConsole", "Base") : LaserStyles.StyleMat("LaserConsole", "Base");
+            Material mat = LaserArt.OnGravship(this) ? LaserArt.ShipMat("LaserConsole", "Base") : LaserArt.Mat("LaserConsole", "Base");
             Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(drawLoc, Rotation.AsQuat, scale), mat, 0);
         }
 

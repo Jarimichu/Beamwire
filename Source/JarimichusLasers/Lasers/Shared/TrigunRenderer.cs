@@ -6,7 +6,7 @@ namespace JarimichusLasers
 {
     /// <summary>
     /// Draws the trigun's three thin orange beams from its three barrels, converging on a point. Each pulses on its own
-    /// rhythm but never fades out. Orange (an industrial laser) in every art style.
+    /// rhythm but never fades out. Always orange (an industrial laser).
     /// </summary>
     [StaticConstructorOnStartup]
     public static class TrigunRenderer

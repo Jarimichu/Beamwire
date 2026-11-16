@@ -24,7 +24,7 @@ namespace Beamwire
         public static void Draw(BeamGraph graph)
         {
             float altitude = AltitudeLayer.Projectile.AltitudeFor();
-            Color beam = BeamwireStyles.Current.BeamColor;
+            Color beam = BeamwireArt.BeamColor;
             // The core is mostly white with a hint of the style's colour; the halo carries the colour.
             Color coreTint = Color.Lerp(Color.white, beam, 0.25f);
             float time = Time.realtimeSinceStartup;

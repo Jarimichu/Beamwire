@@ -27,15 +27,15 @@ def tex(*parts):
 
 def turret(name, angle, size):
     """A laser building: base plate with its head turned by angle (degrees clockwise)."""
-    img = tex("JarimichusLasers", "Styles", "Standard", "Things", f"{name}_Base").resize((size, size), Image.LANCZOS)
-    top = tex("JarimichusLasers", "Styles", "Standard", "Things", f"{name}_Top").resize((size, size), Image.LANCZOS)
+    img = tex("JarimichusLasers", "Things", f"{name}_Base").resize((size, size), Image.LANCZOS)
+    top = tex("JarimichusLasers", "Things", f"{name}_Top").resize((size, size), Image.LANCZOS)
     img.alpha_composite(top.rotate(-angle, resample=Image.BICUBIC))
     return img
 
 
 def node(name, size, angle=0):
-    img = tex("Beamwire", "Styles", "Standard", "Things", f"{name}_Base").resize((size, size), Image.LANCZOS)
-    top = tex("Beamwire", "Styles", "Standard", "Things", f"{name}_Top").resize((size, size), Image.LANCZOS)
+    img = tex("Beamwire", "Things", f"{name}_Base").resize((size, size), Image.LANCZOS)
+    top = tex("Beamwire", "Things", f"{name}_Top").resize((size, size), Image.LANCZOS)
     img.alpha_composite(top.rotate(-angle, resample=Image.BICUBIC))
     return img
 
@@ -67,15 +67,15 @@ def main():
     fx = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     s = 56
     e, m, sp, r1, r2 = (40, 230), (130, 230), (220, 230), (220, 110), (130, 110)
-    yellow = (255, 200, 90)
+    teal = (60, 230, 210)
     for a, b in ((e, m), (m, sp), (sp, r1)):
-        beam(fx, (a[0] + s // 2, a[1] + s // 2), (b[0] + s // 2, b[1] + s // 2), yellow)
+        beam(fx, (a[0] + s // 2, a[1] + s // 2), (b[0] + s // 2, b[1] + s // 2), teal)
     img.alpha_composite(fx)
     img.alpha_composite(node("Emitter", s, 90), e)
     img.alpha_composite(node("Splitter", s, 0), m)
     img.alpha_composite(node("Mirror", s, 315), sp)
     img.alpha_composite(node("Receiver", s), r1)
-    beam(img, (m[0] + s // 2, m[1] + s // 2), (r2[0] + s // 2, r2[1] + s // 2), yellow)
+    beam(img, (m[0] + s // 2, m[1] + s // 2), (r2[0] + s // 2, r2[1] + s // 2), teal)
     img.alpha_composite(node("Receiver", s), r2)
 
     # The three laser buildings
@@ -103,7 +103,7 @@ def main():
             img.alpha_composite(fx)
             sprite = turret(name, angle, size)
         else:
-            sprite = tex("JarimichusLasers", "Styles", "Standard", "Things", "LaserConsole_Base").resize((size, size), Image.LANCZOS)
+            sprite = tex("JarimichusLasers", "Things", "LaserConsole_Base").resize((size, size), Image.LANCZOS)
         img.alpha_composite(sprite, (cx - size // 2, cy - size // 2))
         d = ImageDraw.Draw(img)
         d.text((x0 + 8, 298), title, font=font(11, True), fill=FG)

@@ -6,7 +6,7 @@ namespace JarimichusLasers
 {
     /// <summary>
     /// Draws the cannon's two thin red beams from its two barrels, converging on a point. Each pulses on its own
-    /// rhythm but never fades out. Red in every art style.
+    /// rhythm but never fades out. Always red.
     /// </summary>
     [StaticConstructorOnStartup]
     public static class TwinBeamRenderer

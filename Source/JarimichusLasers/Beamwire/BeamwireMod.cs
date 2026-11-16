@@ -14,8 +14,6 @@ namespace Beamwire
     /// <summary>Beamwire's part of the mod settings. Saved inside <see cref="JarimichusLasers.LasersSettings"/>.</summary>
     public class BeamwireSettings : IExposable
     {
-        /// <summary>The mod-wide art style (shared with the lasers).</summary>
-        public string artStyle => JarimichusLasers.LasersMod.Settings?.artStyle ?? "Standard";
         public bool autoAim = true;
         public bool beamDamage = true;
         public float damageMultiplier = 1f;
