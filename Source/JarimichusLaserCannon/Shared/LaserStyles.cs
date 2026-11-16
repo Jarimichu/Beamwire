@@ -78,6 +78,33 @@ namespace JarimichusLaserCannon
             return mat;
         }
 
+        /// <summary>
+        /// The gravship hull-mount look (Odyssey): one look in every art style, used while the laser stands on
+        /// gravship substructure, so it blends into the deck.
+        /// </summary>
+        public static Material ShipMat(string part)
+        {
+            string path = $"JarimichusLaserCannon/Ship/LaserCannon_Ship{part}";
+            if (!Materials.TryGetValue(path, out Material mat))
+            {
+                mat = MaterialPool.MatFrom(path, ShaderDatabase.Cutout);
+                Materials[path] = mat;
+            }
+            return mat;
+        }
+
+        /// <summary>True when the thing stands on gravship substructure (Odyssey, RimWorld 1.6).</summary>
+        public static bool OnGravship(Thing t)
+        {
+#if RW16
+            if (!ModsConfig.OdysseyActive || !t.Spawned) return false;
+            TerrainDef terrain = t.Position.GetTerrain(t.Map);
+            return terrain != null && terrain.IsSubstructure;
+#else
+            return false;
+#endif
+        }
+
         /// <summary>Points the architect icon and build ghost at the current style.</summary>
         public static void Apply()
         {

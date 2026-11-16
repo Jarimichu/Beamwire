@@ -16,7 +16,7 @@ A twin-barrelled defensive laser turret for RimWorld 1.4, 1.5 and 1.6.
 ## With other mods
 
 - **Jarimichus Beamwire** (optional): power beams feed it first and the grid tops up. A closed safety shutter on its line holds its fire.
-- **Odyssey** (optional): ×1.5 damage when the cannon or its target is in vacuum.
+- **Odyssey** (optional): built on a gravship's substructure it switches to a flush hull-mounted look that blends into the deck (same stats); and ×1.5 damage when the cannon or its target is in vacuum.
 
 ## Building
 

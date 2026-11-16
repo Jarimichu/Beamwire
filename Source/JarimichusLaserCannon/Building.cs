@@ -20,11 +20,13 @@ namespace JarimichusLaserCannon
 #endif
         {
             Vector3 scale = new Vector3(def.graphicData.drawSize.x, 1f, def.graphicData.drawSize.y);
-            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(drawLoc, Quaternion.identity, scale), LaserStyles.Mat("Base"), 0);
+            // On a gravship's deck it uses the flush hull-mount look instead of the free-standing one.
+            bool ship = LaserStyles.OnGravship(this);
+            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(drawLoc, Quaternion.identity, scale), ship ? LaserStyles.ShipMat("Base") : LaserStyles.Mat("Base"), 0);
             Vector3 top = drawLoc;
             top.y += Altitudes.AltInc;
             float angle = Cannon != null ? Cannon.HeadAngle : Rotation.AsAngle;
-            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(top, Quaternion.AngleAxis(angle, Vector3.up), scale), LaserStyles.Mat("Top"), 0);
+            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(top, Quaternion.AngleAxis(angle, Vector3.up), scale), ship ? LaserStyles.ShipMat("Top") : LaserStyles.Mat("Top"), 0);
 
             if (Cannon != null && Cannon.Firing && Cannon.Target != null)
             {
