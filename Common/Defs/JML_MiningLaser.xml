@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <ThingDef ParentName="BuildingBase">
+    <defName>JML_MiningLaser</defName>
+    <label>mining laser</label>
+    <description>A three-barrelled cutting laser. It slices through the nearest rock or ore marked for mining that it can see in a straight line, at any angle, within 30 tiles, and leaves the same yield a colonist would. The more power it gets, the faster it cuts: about one block every half minute at 1,000 W. In vacuum it cuts half again as fast.\n\nIt runs on its power grid, drawing up to 2,000 W only while it has something to cut. With Jarimichus Beamwire installed, power beams can feed it too: it uses beam power first and the grid makes up the rest.\n\nIts cutting beam burns anyone who walks through it.</description>
+    <thingClass>JarimichusMiningLaser.Building_MiningLaser</thingClass>
+    <category>Building</category>
+    <graphicData>
+      <texPath>JarimichusMiningLaser/Styles/Standard/Things/MiningLaser_Base</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(1,1)</drawSize>
+      <shadowData>
+        <volume>(0.6, 0.3, 0.6)</volume>
+      </shadowData>
+    </graphicData>
+    <uiIconPath>JarimichusMiningLaser/Styles/Standard/Things/MiningLaser_Icon</uiIconPath>
+    <drawerType>RealtimeOnly</drawerType>
+    <altitudeLayer>Building</altitudeLayer>
+    <passability>PassThroughOnly</passability>
+    <pathCost>42</pathCost>
+    <fillPercent>0.4</fillPercent>
+    <rotatable>true</rotatable>
+    <tickerType>Normal</tickerType>
+    <size>(1,1)</size>
+    <minifiedDef>MinifiedThing</minifiedDef>
+    <thingCategories>
+      <li>BuildingsProduction</li>
+    </thingCategories>
+    <designationCategory>Production</designationCategory>
+    <constructionSkillPrerequisite>6</constructionSkillPrerequisite>
+    <costList>
+      <Steel>120</Steel>
+      <Plasteel>25</Plasteel>
+      <ComponentIndustrial>4</ComponentIndustrial>
+    </costList>
+    <statBases>
+      <MaxHitPoints>180</MaxHitPoints>
+      <WorkToBuild>3000</WorkToBuild>
+      <Flammability>0.3</Flammability>
+      <Mass>30</Mass>
+      <Beauty>-4</Beauty>
+    </statBases>
+    <building>
+      <ai_chillDestination>false</ai_chillDestination>
+    </building>
+    <researchPrerequisites>
+      <li>JML_MiningLaser</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="CompProperties_Power">
+        <compClass>JarimichusMiningLaser.CompPowerTrader_Laser</compClass>
+        <basePowerConsumption>20</basePowerConsumption>
+        <shortCircuitInRain>false</shortCircuitInRain>
+      </li>
+      <li Class="CompProperties_Flickable"/>
+      <li Class="CompProperties_Breakdownable"/>
+      <li Class="JarimichusMiningLaser.CompProperties_MiningLaser">
+        <maxIntake>2000</maxIntake>
+        <range>30</range>
+        <hpPerWattSecond>0.06</hpPerWattSecond>
+        <vacuumBonus>1.5</vacuumBonus>
+      </li>
+    </comps>
+  </ThingDef>
+
+  <ResearchProjectDef>
+    <defName>JML_MiningLaser</defName>
+    <label>mining laser</label>
+    <description>Focus electrical power into a three-barrelled cutting laser that mines rock and ore from a distance, building on deep-drilling know-how. Especially effective in the vacuum of space. Unlocks the mining laser.</description>
+    <baseCost>1400</baseCost>
+    <techLevel>Industrial</techLevel>
+    <prerequisites>
+      <li>Electricity</li>
+      <li>DeepDrilling</li>
+    </prerequisites>
+    <!-- Placed at load time one column right of Deep drilling (see ResearchPlacer); these are only a fallback. -->
+    <researchViewX>14</researchViewX>
+    <researchViewY>2</researchViewY>
+  </ResearchProjectDef>
+
+  <DamageDef>
+    <defName>JML_LaserBurn</defName>
+    <label>laser burn</label>
+    <workerClass>DamageWorker_AddInjury</workerClass>
+    <externalViolence>true</externalViolence>
+    <deathMessage>{0} was cut down by a mining laser.</deathMessage>
+    <hediff>Burn</hediff>
+    <armorCategory>Heat</armorCategory>
+    <minDamageToFragment>15</minDamageToFragment>
+    <defaultDamage>5</defaultDamage>
+    <defaultArmorPenetration>0.15</defaultArmorPenetration>
+    <makesBlood>false</makesBlood>
+  </DamageDef>
+
+</Defs>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Loaded only when Jarimichus Beamwire is active (see LoadFolders.xml): lets power beams feed the laser.
+     Uses Beamwire's beam-powered devices API; the laser's CompMiningLaser provides BeamWantedWatts,
+     SetBeamWatts and BeamGuardLine. -->
+<Patch>
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="JML_MiningLaser"]/comps</xpath>
+    <value>
+      <li Class="Beamwire.CompProperties_BeamNode">
+        <kind>Receiver</kind>
+        <rotatable>false</rotatable>
+      </li>
+      <li Class="Beamwire.CompProperties_BeamPowered" />
+    </value>
+  </Operation>
+</Patch>

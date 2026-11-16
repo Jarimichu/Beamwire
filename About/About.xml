@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Jarimichus Mining Laser</name>
+  <author>Jarimichu</author>
+  <packageId>jarimichu.mininglaser</packageId>
+  <url>https://github.com/jarimichu/mining-laser</url>
+  <supportedVersions>
+    <li>1.4</li>
+    <li>1.5</li>
+    <li>1.6</li>
+  </supportedVersions>
+  <loadAfter>
+    <li>jarimichu.beamwire</li>
+  </loadAfter>
+  <description>A three-barrelled mining laser that cuts rock and ore you've marked for mining, at any angle, from up to 30 tiles away. It leaves the same yield a colonist would.
+
+Part of the Jarimichus series. Works on its own on grid power. With Jarimichus Beamwire installed, power beams can feed it too, and Beamwire's safety shutters can guard its cutting line. With Odyssey, it cuts half again as fast in the vacuum of space.
+
+- Three thin red cutting beams that pulse independently
+- Draws up to 2,000 W only while it has work; the head swings back to rest when idle
+- Its cutting beam burns anyone who walks through it (can be turned off)
+- Three art styles: Rim Standard, Hazard Industrial and Glitterworld Spacer, or follow Beamwire's choice
+- Research: Mining laser (after Deep drilling)</description>
+</ModMetaData>
