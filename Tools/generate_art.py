@@ -192,6 +192,53 @@ def preview():
     return img.convert("RGB")
 
 
+
+# ---------------------------------------------------------------- gravship hull-mount variant (Odyssey)
+# One look in every art style: gunmetal hull plating like gravship substructure, so the turret blends into the deck.
+SHIP = dict(
+    beam=(255, 214, 120), outline=(18, 20, 24), ow=6, radius=4,
+    plate=(72, 78, 86), plate_hi=(96, 102, 110), plate_lo=(52, 56, 64),
+    metal=(108, 114, 124), metal_dark=(44, 48, 56), glass=(120, 170, 220), mirror=(200, 210, 220),
+    accents={k: (120, 140, 170) for k in NODES}, deco="vents", ground="metal")
+
+
+def ship_base():
+    """A flush deck panel: full-bleed plating with seams and rivets, and a recessed turret well in the middle."""
+    img = Image.new("RGBA", (S, S), rgba(SHIP["plate"]))
+    d = ImageDraw.Draw(img)
+    # panel seams at the tile edge so neighbouring deck tiles read as one surface
+    d.rectangle([0, 0, S - 1, S - 1], outline=rgba(SHIP["plate_lo"]), width=6)
+    d.line([(6, 8), (S - 7, 8)], fill=rgba(SHIP["plate_hi"]), width=3)
+    for x, y in [(18, 18), (S - 18, 18), (18, S - 18), (S - 18, S - 18), (S // 2, 14), (S // 2, S - 14), (14, S // 2), (S - 14, S // 2)]:
+        d.ellipse([x - 5, y - 5, x + 5, y + 5], fill=rgba(SHIP["metal"]), outline=rgba(SHIP["outline"]), width=2)
+    # recessed well
+    c = S // 2
+    d.ellipse([c - 98, c - 98, c + 98, c + 98], fill=rgba(SHIP["plate_lo"]), outline=rgba(SHIP["outline"]), width=4)
+    d.ellipse([c - 86, c - 86, c + 86, c + 86], fill=rgba(SHIP["metal_dark"]))
+    for a in range(0, 360, 30):
+        x1 = c + 90 * math.cos(math.radians(a)); y1 = c + 90 * math.sin(math.radians(a))
+        x2 = c + 97 * math.cos(math.radians(a)); y2 = c + 97 * math.sin(math.radians(a))
+        d.line([(x1, y1), (x2, y2)], fill=rgba(SHIP["plate_hi"]), width=3)
+    return img
+
+
+def ship_top():
+    """The turret head sitting low in its well: a dark armoured collar with the head scaled down inside it."""
+    img = blank(); d = ImageDraw.Draw(img); c = S // 2
+    d.ellipse([c - 84, c - 84, c + 84, c + 84], fill=rgba(SHIP["metal_dark"]), outline=rgba(SHIP["outline"]), width=6)
+    d.ellipse([c - 70, c - 70, c + 70, c + 70], outline=rgba(SHIP["plate_lo"]), width=4)
+    head = top(SHIP)
+    small = head.resize((int(S * 0.86), int(S * 0.86)), Image.LANCZOS)
+    off = (S - small.size[0]) // 2
+    img.alpha_composite(small, (off, off))
+    return img
+
+
+def ship_art():
+    save(down(ship_base()), "Ship", f"{NODE}_ShipBase.png")
+    save(down(ship_top()), "Ship", f"{NODE}_ShipTop.png")
+
+
 def main():
     for folder, st in STYLES.items():
         save(down(base(st, NODE)), "Styles", folder, "Things", f"{NODE}_Base.png")
@@ -200,6 +247,7 @@ def main():
         save(down(i), "Styles", folder, "Things", f"{NODE}_Icon.png")
     save(beam_core(), "Effects", "BeamCore.png")
     save(beam_glow(), "Effects", "BeamGlow.png")
+    ship_art()
     preview().save(os.path.join(ROOT, "About", "Preview.png"))
     print("Art generated.")
 

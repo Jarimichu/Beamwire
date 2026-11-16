@@ -13,7 +13,7 @@ A three-barrelled mining laser for RimWorld 1.4, 1.5 and 1.6.
 ## With other mods
 
 - **Jarimichus Beamwire** (optional): `Mods/Beamwire` loads automatically and makes the laser a beam-powered device. Power beams feed it first and the grid tops up. Auto-aim routes beams to it while it has work, and a closed safety shutter on its line pauses it.
-- **Odyssey** (optional): in vacuum it cuts ×1.5 faster.
+- **Odyssey** (optional): built on a gravship's substructure it switches to a flush hull-mounted look that blends into the deck (same stats); and in vacuum it cuts ×1.5 faster.
 
 ## Building
 

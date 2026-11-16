@@ -19,6 +19,7 @@ Part of the Jarimichus series. Works on its own on grid power. With Jarimichus B
 - Three thin orange industrial-laser cutting beams that pulse independently
 - Draws up to 2,000 W only while it has work; the head swings back to rest when idle
 - Its cutting beam burns anyone who walks through it (can be turned off)
+- On a gravship (Odyssey) it switches to a flush hull-mounted look that blends into the deck
 - Three art styles: Rim Standard, Hazard Industrial and Glitterworld Spacer, or follow Beamwire's choice
 - Research: Mining laser (after Deep drilling)</description>
 </ModMetaData>
