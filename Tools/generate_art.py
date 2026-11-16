@@ -264,60 +264,80 @@ def ship_art():
 
 # ---------------------------------------------------------------- laser control console
 def console_art(st):
-    """An arcade-cabinet fire-control station seen from above and in front: glowing marquee at the back (north),
-    the screen with a targeting reticle, then a control deck toward the operator (south) with a ball-top
-    joystick and three fire buttons, and coin slots on the front."""
+    """A military fire-control station built like an arcade cabinet, seen from above and in front: an armoured
+    hood with warning lamps at the back (north), a green radar scope with red target marks, and an armoured
+    control deck toward the operator (south) with a flight-stick grip, a guarded fire button and toggle switches."""
     img = blank()
     d = ImageDraw.Draw(img); o = rgba(st["outline"]); ow = max(3, st["ow"] - 2)
-    r = 6 if st["deco"] in ("vents", "engrave", "hazard") else 14
-    red = (255, 70, 50, 255)
-    # cabinet body, with side-art stripes down both flanks
-    d.rounded_rectangle([46, 14, S - 46, S - 14], radius=r, fill=rgba(st["metal"]), outline=o, width=ow)
-    for x0 in (52, S - 62):
-        d.rectangle([x0, 70, x0 + 10, 150], fill=rgba(st["accents"][NODE]) if st["deco"] == "hazard" else rgba(st["metal_dark"]))
-        d.line([(x0 + 2, 78), (x0 + 8, 142)], fill=red, width=3)
-    # marquee: a lit sign across the top
-    mq = blank(); md = ImageDraw.Draw(mq)
-    md.rounded_rectangle([58, 22, S - 58, 52], radius=6, fill=(255, 96, 60, 255), outline=o, width=3)
-    for i, x in enumerate(range(72, S - 72, 18)):
-        md.polygon([(x, 46), (x + 8, 28), (x + 12, 28), (x + 4, 46)], fill=(255, 214, 160, 255))
-    img.alpha_composite(glow_layer(mq, 6))
+    r = 4 if st["deco"] in ("vents", "engrave", "hazard") else 10
+    red = (255, 60, 45, 255); phosphor = (110, 255, 140, 255)
+    metal, dark, lo, hi = rgba(st["metal"]), rgba(st["metal_dark"]), rgba(st["plate_lo"]), rgba(st["plate_hi"])
+    # armoured cabinet with chamfered top corners and bolted side plates
+    d.polygon([(58, 14), (S - 58, 14), (S - 44, 28), (S - 44, S - 14), (44, S - 14), (44, 28)], fill=metal, outline=o)
+    d.line([(58, 14), (S - 58, 14), (S - 44, 28), (S - 44, S - 14), (44, S - 14), (44, 28), (58, 14)], fill=o, width=ow, joint="curve")
+    for x0 in (50, S - 60):
+        d.rectangle([x0, 64, x0 + 10, 152], fill=dark, outline=o, width=2)
+        for y in (70, 108, 146):
+            d.ellipse([x0 + 3, y - 2, x0 + 7, y + 2], fill=hi)
+    # hood: an armoured visor over the scope, with amber and red status lamps instead of a lit marquee
+    d.rectangle([58, 22, S - 58, 50], fill=dark, outline=o, width=3)
+    for x in range(66, S - 66, 12):
+        d.line([(x, 26), (x, 46)], fill=lo, width=3)  # vent slots
+    lamps = blank(); ld = ImageDraw.Draw(lamps)
+    for x, col in ((78, (255, 170, 40, 255)), (S - 78, red)):
+        ld.ellipse([x - 7, 29, x + 7, 43], fill=col)
+    img.alpha_composite(glow_layer(lamps, 5))
     d = ImageDraw.Draw(img)
-    # screen in a deep bezel
-    d.rounded_rectangle([62, 60, S - 62, 150], radius=min(r, 10), fill=rgba(st["metal_dark"]), outline=o, width=ow)
-    d.rectangle([72, 68, S - 72, 142], fill=(18, 34, 28, 255))
+    # radar scope: green phosphor, range rings, a sweep and red target marks
+    d.rectangle([62, 58, S - 62, 152], fill=dark, outline=o, width=ow)
+    d.rectangle([72, 66, S - 72, 144], fill=(10, 26, 16, 255))
     scr = blank(); sd = ImageDraw.Draw(scr); c = (S // 2, 105)
-    sd.ellipse([c[0] - 24, c[1] - 24, c[0] + 24, c[1] + 24], outline=red, width=4)
-    sd.line([(c[0] - 32, c[1]), (c[0] + 32, c[1])], fill=red, width=3)
-    sd.line([(c[0], c[1] - 32), (c[0], c[1] + 32)], fill=red, width=3)
-    for bx, by in ((92, 80), (160, 128), (98, 130)):  # blips: targets on the scope
-        sd.rectangle([bx, by, bx + 6, by + 6], fill=(120, 255, 150, 255))
+    for rr in (14, 28):
+        sd.ellipse([c[0] - rr, c[1] - rr, c[0] + rr, c[1] + rr], outline=phosphor[:3] + (150,), width=2)
+    sd.line([(c[0] - 36, c[1]), (c[0] + 36, c[1])], fill=phosphor[:3] + (120,), width=2)
+    sd.line([(c[0], c[1] - 36), (c[0], c[1] + 36)], fill=phosphor[:3] + (120,), width=2)
+    sd.polygon([c, (c[0] + 30, c[1] - 26), (c[0] + 36, c[1] - 12)], fill=phosphor[:3] + (110,))  # sweep
+    for bx, by in ((150, 84), (98, 124)):
+        sd.line([(bx - 6, by - 6), (bx + 6, by + 6)], fill=red, width=3)
+        sd.line([(bx - 6, by + 6), (bx + 6, by - 6)], fill=red, width=3)
     img.alpha_composite(glow_layer(scr, 4))
     d = ImageDraw.Draw(img)
-    # control deck: wider than the cabinet, jutting toward the operator
-    d.rounded_rectangle([30, 160, S - 30, 222], radius=min(r, 10), fill=rgba(st["plate_lo"]), outline=o, width=ow)
-    d.line([(36, 168), (S - 36, 168)], fill=rgba(st["plate_hi"]), width=3)
-    # joystick: base plate, shaft, red ball top
-    jx, jy = 82, 192
-    d.ellipse([jx - 18, jy - 12, jx + 18, jy + 12], fill=rgba(st["metal_dark"]), outline=o, width=3)
-    d.line([(jx, jy), (jx + 4, jy - 22)], fill=(40, 40, 44, 255), width=7)
-    ball = blank(); bd = ImageDraw.Draw(ball)
-    bd.ellipse([jx - 11, jy - 36, jx + 17, jy - 8], fill=(225, 40, 35, 255), outline=o, width=3)
-    bd.ellipse([jx - 3, jy - 31, jx + 5, jy - 23], fill=(255, 190, 180, 255))
-    img.alpha_composite(ball)
+    # armoured control deck, bolted at the corners
+    d.rectangle([30, 160, S - 30, 222], fill=lo, outline=o, width=ow)
+    d.line([(36, 168), (S - 36, 168)], fill=hi, width=3)
+    for x, y in ((38, 176), (S - 38, 176), (38, 214), (S - 38, 214)):
+        d.ellipse([x - 3, y - 3, x + 3, y + 3], fill=hi, outline=o, width=1)
+    # flight-stick grip: boot, shaft, black grip with a red thumb button and a trigger
+    jx, jy = 80, 196
+    d.ellipse([jx - 18, jy - 11, jx + 18, jy + 11], fill=(30, 30, 32, 255), outline=o, width=3)
+    d.line([(jx, jy), (jx + 2, jy - 18)], fill=(55, 55, 58, 255), width=8)
+    d.rounded_rectangle([jx - 10, jy - 40, jx + 12, jy - 12], radius=7, fill=(36, 38, 36, 255), outline=o, width=3)
+    d.rectangle([jx - 4, jy - 18, jx + 6, jy - 13], fill=(70, 70, 70, 255))  # trigger
+    thumb = blank(); ImageDraw.Draw(thumb).ellipse([jx - 3, jy - 36, jx + 5, jy - 28], fill=red)
+    img.alpha_composite(glow_layer(thumb, 3))
     d = ImageDraw.Draw(img)
-    # three fire buttons
-    for (bx, by), col in zip(((140, 196), (168, 186), (196, 196)), ((255, 60, 50), (255, 200, 40), (70, 210, 255))):
-        d.ellipse([bx - 12, by - 12, bx + 12, by + 12], fill=(30, 30, 34, 255), outline=o, width=2)
-        btn = blank(); ImageDraw.Draw(btn).ellipse([bx - 8, by - 9, bx + 8, by + 7], fill=col + (255,))
-        img.alpha_composite(glow_layer(btn, 3))
+    # guarded fire button: red, under a flip-up cover in yellow/black
+    fx, fy = 182, 194
+    d.rectangle([fx - 20, fy - 18, fx + 20, fy + 18], fill=(230, 180, 30, 255), outline=o, width=3)
+    for i in range(-20, 21, 10):
+        d.line([(fx + i - 6, fy + 18), (fx + i + 6, fy - 18)], fill=(30, 30, 30, 255), width=3)
+    d.rectangle([fx - 13, fy - 11, fx + 13, fy + 11], fill=(30, 30, 34, 255), outline=o, width=2)
+    btn = blank(); ImageDraw.Draw(btn).ellipse([fx - 9, fy - 9, fx + 9, fy + 9], fill=red)
+    img.alpha_composite(glow_layer(btn, 3))
     d = ImageDraw.Draw(img)
-    # coin slots on the front
-    for x in (S // 2 - 24, S // 2 + 12):
-        d.rounded_rectangle([x, 228, x + 12, 238], radius=2, fill=(255, 150, 40, 255), outline=o, width=2)
-        d.line([(x + 6, 230), (x + 6, 236)], fill=(40, 20, 10, 255), width=2)
-    if st["deco"] == "strips":
-        strip = blank(); ImageDraw.Draw(strip).rounded_rectangle([60, 154, S - 60, 158], radius=2, fill=rgba(st["glass"]))
+    # arming toggle switches
+    for x in (122, 140):
+        d.rectangle([x - 5, 182, x + 5, 208], fill=(30, 30, 34, 255), outline=o, width=2)
+        d.rectangle([x - 2, 184, x + 2, 196], fill=(200, 200, 205, 255))
+    # stencilled unit plate on the front instead of coin slots
+    d.rectangle([S // 2 - 34, 228, S // 2 + 34, 240], fill=dark, outline=o, width=2)
+    for i, x in enumerate(range(S // 2 - 28, S // 2 + 28, 10)):
+        d.rectangle([x, 231, x + 6, 237], fill=hi if i % 3 else (230, 180, 30, 255))
+    if st["deco"] == "hazard":
+        for i in range(44, S - 44, 16):
+            d.line([(i, S - 16), (i + 8, S - 24)], fill=rgba(st["accents"][NODE]), width=4)
+    elif st["deco"] == "strips":
+        strip = blank(); ImageDraw.Draw(strip).rectangle([60, 154, S - 60, 157], fill=rgba(st["glass"]))
         img.alpha_composite(glow_layer(strip, 5))
     return img
 
