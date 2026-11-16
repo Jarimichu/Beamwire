@@ -4,7 +4,7 @@
   <ThingDef ParentName="BuildingBase">
     <defName>JLC_LaserCannon</defName>
     <label>laser cannon</label>
-    <description>A twin-barrelled defensive laser turret. It locks two continuous red beams onto the nearest hostile it can see within 26 tiles and burns it, with a chance of setting it alight. It holds fire while a colonist, ally, guest, prisoner or tame animal is on the line of fire.\n\nIt works on its own, and a colonist manning it adds 6 tiles of range and half again as much damage. It draws up to 1,000 W from its power grid only while it has a target, and does less damage on less power. With Jarimichus Beamwire installed, power beams can feed it too. In vacuum its beams do half again as much damage.</description>
+    <description>A twin-barrelled defensive laser turret. It locks two continuous red beams onto the nearest hostile it can see within 28 tiles and burns it, with a chance of setting it alight. It holds fire while a colonist, ally, guest, prisoner or tame animal is on the line of fire.\n\nIt works on its own, and a colonist manning it adds 6 tiles of range and half again as much damage. It draws up to 1,000 W from its power grid only while it has a target, and does less damage on less power. With Jarimichus Beamwire installed, power beams can feed it too. In vacuum its beams do half again as much damage and reach a quarter further.</description>
     <thingClass>JarimichusLaserCannon.Building_LaserCannon</thingClass>
     <category>Building</category>
     <graphicData>
@@ -61,12 +61,13 @@
       <li Class="CompProperties_Breakdownable"/>
       <li Class="JarimichusLaserCannon.CompProperties_LaserCannon">
         <maxIntake>1000</maxIntake>
-        <range>26</range>
+        <range>28</range>
         <mannedRangeBonus>6</mannedRangeBonus>
         <damagePerKw>9</damagePerKw>
         <pulseInterval>30</pulseInterval>
         <mannedDamageMultiplier>1.5</mannedDamageMultiplier>
         <vacuumBonus>1.5</vacuumBonus>
+        <vacuumRangeMultiplier>1.25</vacuumRangeMultiplier>
         <igniteChance>0.06</igniteChance>
       </li>
     </comps>

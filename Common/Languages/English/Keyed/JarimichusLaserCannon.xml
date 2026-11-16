@@ -8,7 +8,7 @@
   <JLC_InspectHoldFire>Hold fire is on.</JLC_InspectHoldFire>
   <JLC_InspectForced>Forced target.</JLC_InspectForced>
   <JLC_InspectManned>Manned by {0}: +{1} range, damage ×{2}.</JLC_InspectManned>
-  <JLC_InspectVacuum>In vacuum: damage ×{0}.</JLC_InspectVacuum>
+  <JLC_InspectVacuum>In vacuum: damage ×{0}, longer range.</JLC_InspectVacuum>
 
   <JLC_ForceTarget>Force target</JLC_ForceTarget>
   <JLC_ForceTargetDesc>Lock the cannon onto a chosen target, as long as it is in range and in sight. It still won't fire through friendlies.</JLC_ForceTargetDesc>

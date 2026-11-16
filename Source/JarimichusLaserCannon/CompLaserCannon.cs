@@ -11,7 +11,7 @@ namespace JarimichusLaserCannon
     public class CompProperties_LaserCannon : CompProperties
     {
         public float maxIntake = 1000f;
-        public float range = 26f;
+        public float range = 28f;
         public float mannedRangeBonus = 6f;
 
         /// <summary>Burn damage per pulse (every <see cref="pulseInterval"/> ticks) per kW.</summary>
@@ -20,6 +20,9 @@ namespace JarimichusLaserCannon
         public int pulseInterval = 30;
         public float mannedDamageMultiplier = 1.5f;
         public float vacuumBonus = 1.5f;
+
+        /// <summary>Range multiplier while the cannon stands in vacuum: nothing scatters the beam (Odyssey).</summary>
+        public float vacuumRangeMultiplier = 1.25f;
         public float igniteChance = 0.06f;
 
         public CompProperties_LaserCannon()
@@ -62,7 +65,21 @@ namespace JarimichusLaserCannon
 
         public bool MannedNow => Find.TickManager.TicksGame - lastMannedTick <= 1 && lastManningPawn != null && lastManningPawn.Spawned;
 
-        public float Range => Props.range + (MannedNow ? Props.mannedRangeBonus : 0f);
+        public float Range =>
+            (Props.range + (MannedNow ? Props.mannedRangeBonus : 0f)) * (CannonInVacuum ? Props.vacuumRangeMultiplier : 1f);
+
+        /// <summary>True when the cannon itself stands in vacuum (Odyssey): its beam reaches further.</summary>
+        private bool CannonInVacuum
+        {
+            get
+            {
+#if RW16
+                return parent.Spawned && ModsConfig.OdysseyActive && VacuumUtility.GetVacuum(parent.Position, parent.Map) >= 0.5f;
+#else
+                return false;
+#endif
+            }
+        }
 
         public float HeadAngle => float.IsNaN(headAngle) ? RestAngle : headAngle;
 
