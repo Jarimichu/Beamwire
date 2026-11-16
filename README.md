@@ -16,6 +16,15 @@ A three-barrelled mining laser for RimWorld 1.4, 1.5 and 1.6.
 - **Jarimichus Beamwire** (optional): `Mods/Beamwire` loads automatically and makes the laser a beam-powered device. Power beams feed it first and the grid tops up. Auto-aim routes beams to it while it has work, and a closed safety shutter on its line pauses it.
 - **Odyssey** (optional): built on a gravship's substructure it switches to a flush hull-mounted look that blends into the deck (same stats); and in vacuum it cuts ×1.5 faster and its range grows ×1.25 (30 → 37.5 tiles).
 
+## Laser control console
+
+A 1x1 fire-control station (Security tab; research Microelectronics basics; 80 steel, 3 components; 100 W). Use **Link laser** to connect up to **3** laser cannons or mining lasers within **20 tiles**. While a colonist mans the console, every linked laser counts as manned:
+
+- **Laser cannon:** +6 range and x1.5 damage.
+- **Mining laser:** cuts x1.5 faster, and the **Choose rock** button picks which marked rock it cuts next.
+
+This lets you crew hull-mounted turrets from inside a gravship. On substructure the console takes the gravship look. Both Jarimichus laser mods include the console. If both are installed, only one copy loads.
+
 ## Building
 
 ```bash

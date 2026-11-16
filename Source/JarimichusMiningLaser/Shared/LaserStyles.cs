@@ -105,10 +105,33 @@ namespace JarimichusMiningLaser
 #endif
         }
 
+        /// <summary>A material for another building of this mod's family (e.g. the laser console) in the current style.</summary>
+        public static Material StyleMat(string node, string part) => CachedMat($"JarimichusMiningLaser/Styles/{Current}/Things/{node}_{part}");
+
+        /// <summary>The gravship look for another building of this mod's family.</summary>
+        public static Material ShipMatFor(string node, string part) => CachedMat($"JarimichusMiningLaser/Ship/{node}_Ship{part}");
+
+        private static Material CachedMat(string path)
+        {
+            if (!Materials.TryGetValue(path, out Material mat))
+            {
+                mat = MaterialPool.MatFrom(path, ShaderDatabase.Cutout);
+                Materials[path] = mat;
+            }
+            return mat;
+        }
+
         /// <summary>Points the architect icon and build ghost at the current style.</summary>
         public static void Apply()
         {
             cachedFrame = -1;
+            ThingDef console = DefDatabase<ThingDef>.GetNamedSilentFail("JLX_LaserConsole");
+            if (console != null)
+            {
+                console.uiIconPath = $"JarimichusMiningLaser/Styles/{Current}/Things/LaserConsole_Icon";
+                Texture2D consoleIcon = ContentFinder<Texture2D>.Get(console.uiIconPath, false);
+                if (consoleIcon != null) console.uiIcon = consoleIcon;
+            }
             ThingDef def = DefDatabase<ThingDef>.GetNamedSilentFail("JML_MiningLaser");
             if (def == null) return;
             def.uiIconPath = TexPath("Icon");

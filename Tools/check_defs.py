@@ -7,7 +7,7 @@
 import glob, os, sys, xml.etree.ElementTree as ET
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VANILLA_RESEARCH = {"Electricity", "DeepDrilling"}
+VANILLA_RESEARCH = {"MicroelectronicsBasics", "Electricity", "DeepDrilling"}
 OWN_DEF = "JML_MiningLaser"
 # Beamwire classes the integration patch may use (part of Beamwire's beam-powered devices API).
 BEAMWIRE_API = {"Beamwire.CompProperties_BeamNode", "Beamwire.CompProperties_BeamPowered"}

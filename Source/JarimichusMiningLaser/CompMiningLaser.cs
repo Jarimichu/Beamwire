@@ -25,6 +25,9 @@ namespace JarimichusMiningLaser
         /// <summary>Range multiplier while the laser stands in vacuum: nothing scatters the beam (Odyssey).</summary>
         public float vacuumRangeMultiplier = 1.25f;
 
+        /// <summary>Cutting speed multiplier while a colonist mans it from a laser control console.</summary>
+        public float mannedSpeedBonus = 1.5f;
+
         public CompProperties_MiningLaser()
         {
             compClass = typeof(CompMiningLaser);
@@ -51,6 +54,9 @@ namespace JarimichusMiningLaser
         private Sustainer sound;
         private readonly List<IntVec3> lineCells = new List<IntVec3>();
         private readonly List<Pawn> tmpPawns = new List<Pawn>();
+        private IntVec3 chosenTarget = IntVec3.Invalid;
+        private int lastMannedTick = -9999;
+        private Pawn lastManningPawn;
 
         public CompProperties_MiningLaser Props => (CompProperties_MiningLaser)props;
 
@@ -73,6 +79,19 @@ namespace JarimichusMiningLaser
 
         /// <summary>Where the head points when not in use: the rotation it was placed with.</summary>
         public float RestAngle => parent.Rotation.AsAngle;
+
+        // ---- Manning (called every tick by a laser control console's operator) ----
+
+        public void ManForATick(Pawn pawn)
+        {
+            lastMannedTick = Find.TickManager.TicksGame;
+            lastManningPawn = pawn;
+        }
+
+        public bool MannedNow => parent.Spawned && Find.TickManager.TicksGame - lastMannedTick <= 1 && lastManningPawn != null;
+
+        /// <summary>The rock the operator chose to cut next, if any.</summary>
+        public IntVec3 ChosenTarget => chosenTarget;
 
         // ---- Beam-powered devices API (used by Jarimichus Beamwire, found by name) ----
 
@@ -133,6 +152,7 @@ namespace JarimichusMiningLaser
             Scribe_Values.Look(ref target, "jmlTarget", IntVec3.Invalid);
             Scribe_Values.Look(ref headAngle, "jmlHeadAngle", float.NaN);
             Scribe_Values.Look(ref beamWatts, "jmlBeamWatts", 0f);
+            Scribe_Values.Look(ref chosenTarget, "jmlChosenTarget", IntVec3.Invalid);
         }
 
         public override void ReceiveCompSignal(string signal)
@@ -146,7 +166,7 @@ namespace JarimichusMiningLaser
             base.CompTick();
             if (!parent.Spawned) return;
 
-            if (parent.IsHashIntervalTick(SearchInterval) || (target.IsValid && !StillValid(target)))
+            if (parent.IsHashIntervalTick(SearchInterval) || (target.IsValid && !StillValid(target)) || (chosenTarget.IsValid && target != chosenTarget))
             {
                 FindTarget();
             }
@@ -168,7 +188,7 @@ namespace JarimichusMiningLaser
                 }
                 if (parent.IsHashIntervalTick(CutInterval))
                 {
-                    float hp = TotalWatts * Props.hpPerWattSecond * (InVacuum ? Props.vacuumBonus : 1f);
+                    float hp = TotalWatts * Props.hpPerWattSecond * (InVacuum ? Props.vacuumBonus : 1f) * (MannedNow ? Props.mannedSpeedBonus : 1f);
                     BurnPawnsOnLine();
                     Cut(Mathf.Max(1, Mathf.RoundToInt(hp)));
                 }
@@ -195,6 +215,11 @@ namespace JarimichusMiningLaser
             candidates.Sort((a, b) => (a - from).LengthHorizontalSquared.CompareTo((b - from).LengthHorizontalSquared));
 
             IntVec3 best = IntVec3.Invalid;
+            if (chosenTarget.IsValid)
+            {
+                if (CanChoose(chosenTarget).Accepted) candidates.Insert(0, chosenTarget);
+                else chosenTarget = IntVec3.Invalid;
+            }
             foreach (IntVec3 c in candidates)
             {
                 if (IsMarkedRock(c, map) && LaserLine.LineClear(from, c, map))
@@ -224,6 +249,62 @@ namespace JarimichusMiningLaser
             LaserLine.CellsBetween(parent.Position, target, lineCells);
             IntVec3 d = target - parent.Position;
             targetAngle = LaserMath.AngleTo(d.x, d.z);
+        }
+
+        /// <summary>Whether the operator may point the laser at this cell.</summary>
+        public AcceptanceReport CanChoose(IntVec3 c)
+        {
+            if (!parent.Spawned || !c.IsValid || !c.InBounds(parent.Map) || !IsMarkedRock(c, parent.Map)) return "JML_ChooseNotMarked".Translate();
+            if ((c - parent.Position).LengthHorizontalSquared > Range * Range) return "JML_ChooseTooFar".Translate(Range.ToString("0.#"));
+            if (!LaserLine.LineClear(parent.Position, c, parent.Map)) return "JML_ChooseNoLine".Translate();
+            return true;
+        }
+
+        public override IEnumerable<Gizmo> CompGetGizmosExtra()
+        {
+            foreach (Gizmo g in base.CompGetGizmosExtra()) yield return g;
+            if (parent.Faction != Faction.OfPlayer) yield break;
+            var choose = new Command_Target
+            {
+                defaultLabel = "JML_Choose".Translate(),
+                defaultDesc = "JML_ChooseDesc".Translate(Props.mannedSpeedBonus.ToString("0.#")),
+                icon = ContentFinder<Texture2D>.Get("UI/Designators/Mine", false) ?? BaseContent.BadTex,
+                targetingParams = new TargetingParameters
+                {
+                    canTargetLocations = true,
+                    canTargetBuildings = true,
+                    canTargetPawns = false,
+                    canTargetItems = false,
+                    validator = t => CanChoose(t.Cell).Accepted,
+                },
+                action = t =>
+                {
+                    AcceptanceReport ok = CanChoose(t.Cell);
+                    if (!ok.Accepted)
+                    {
+                        Messages.Message(ok.Reason, parent, MessageTypeDefOf.RejectInput, false);
+                        return;
+                    }
+                    chosenTarget = t.Cell;
+                    FindTarget();
+                },
+            };
+            if (!MannedNow) choose.Disable("JML_ChooseNeedsOperator".Translate());
+            yield return choose;
+            if (chosenTarget.IsValid)
+            {
+                yield return new Command_Action
+                {
+                    defaultLabel = "JML_ChooseClear".Translate(),
+                    defaultDesc = "JML_ChooseClearDesc".Translate(),
+                    icon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", false) ?? BaseContent.BadTex,
+                    action = () =>
+                    {
+                        chosenTarget = IntVec3.Invalid;
+                        FindTarget();
+                    },
+                };
+            }
         }
 
         private bool StillValid(IntVec3 c) => c.IsValid && parent.Spawned && IsMarkedRock(c, parent.Map);
@@ -314,6 +395,8 @@ namespace JarimichusMiningLaser
                 : LaserLine.AnyClosedShutter(lineCells, parent.Map) ? "JML_Shuttered".Translate(what)
                 : "JML_NeedsPower".Translate(what, target.x, target.z);
             if (InVacuum) line += " " + "JML_Vacuum".Translate(Props.vacuumBonus.ToString("0.#"));
+            if (MannedNow) line += "\n" + "JML_Manned".Translate(lastManningPawn.LabelShort, Props.mannedSpeedBonus.ToString("0.#"));
+            if (chosenTarget.IsValid && target == chosenTarget) line += "\n" + "JML_ChosenRock".Translate();
             return line;
         }
     }

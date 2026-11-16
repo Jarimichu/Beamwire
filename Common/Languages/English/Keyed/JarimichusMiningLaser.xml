@@ -15,4 +15,14 @@
   <JML_Setting_Burn>Cutting beam burns creatures</JML_Setting_Burn>
   <JML_Setting_Burn_Desc>Anyone standing in the cutting beam takes burn damage that grows with the laser's power.</JML_Setting_Burn_Desc>
   <JML_Setting_BurnMult>Burn damage: {0}</JML_Setting_BurnMult>
+  <JML_Choose>Choose rock</JML_Choose>
+  <JML_ChooseDesc>Pick which marked rock the laser cuts next. Only while a colonist mans it from a laser control console, which also makes it cut x{0} faster.</JML_ChooseDesc>
+  <JML_ChooseNeedsOperator>Needs a colonist manning a linked laser control console.</JML_ChooseNeedsOperator>
+  <JML_ChooseNotMarked>Choose a rock or ore that is marked for mining.</JML_ChooseNotMarked>
+  <JML_ChooseTooFar>Out of range ({0} tiles).</JML_ChooseTooFar>
+  <JML_ChooseNoLine>The laser can't see that rock in a straight line.</JML_ChooseNoLine>
+  <JML_ChooseClear>Forget chosen rock</JML_ChooseClear>
+  <JML_ChooseClearDesc>Go back to cutting the nearest marked rock.</JML_ChooseClearDesc>
+  <JML_Manned>Manned by {0}: cutting x{1} faster.</JML_Manned>
+  <JML_ChosenRock>Cutting the rock the operator chose.</JML_ChosenRock>
 </LanguageData>
