@@ -151,11 +151,11 @@ def beam_glow():
 
 
 def top(st):
-    """Heavy twin-barrelled turret head: two long barrels with green lenses, an armoured shroud and a targeting sensor."""
+    """Heavy twin-barrelled turret head: two long barrels with red lenses, an armoured shroud and a targeting sensor."""
     img = blank(); d = ImageDraw.Draw(img); o = rgba(st["outline"]); ow = max(3, st["ow"] - 2)
     sharp = st["deco"] in ("vents", "engrave", "hazard")
     r = 6 if sharp else 20
-    green_hot, green_core = (60, 255, 90, 255), (215, 255, 215, 255)
+    hot, hot_core = (255, 40, 30, 255), (255, 215, 205, 255)
     # armoured shroud
     d.polygon([(60, 230), (196, 230), (214, 150), (176, 104), (80, 104), (42, 150)], fill=rgba(st["metal"]), outline=o)
     d.line([(60, 230), (196, 230), (214, 150), (176, 104), (80, 104), (42, 150), (60, 230)], fill=o, width=ow)
@@ -167,11 +167,11 @@ def top(st):
         d.rectangle([bx - 13, 8, bx + 13, 112], fill=rgba(st["metal"]), outline=o, width=max(3, ow - 3))
         for y in (34, 62, 88):
             d.rectangle([bx - 16, y, bx + 16, y + 8], fill=rgba(st["metal_dark"]), outline=o, width=2)
-        heat = blank(); ImageDraw.Draw(heat).ellipse([bx - 13, -5, bx + 13, 21], fill=green_hot)
+        heat = blank(); ImageDraw.Draw(heat).ellipse([bx - 13, -5, bx + 13, 21], fill=hot)
         img.alpha_composite(glow_layer(heat, 6))
-        d.ellipse([bx - 6, 2, bx + 6, 14], fill=green_core)
+        d.ellipse([bx - 6, 2, bx + 6, 14], fill=hot_core)
     # targeting sensor
-    sensor = blank(); ImageDraw.Draw(sensor).ellipse([196, 118, 222, 144], fill=green_hot)
+    sensor = blank(); ImageDraw.Draw(sensor).ellipse([196, 118, 222, 144], fill=hot)
     img.alpha_composite(glow_layer(sensor, 5))
     d.ellipse([194, 116, 224, 146], outline=o, width=3)
     if st["deco"] == "hazard":
@@ -207,10 +207,10 @@ def preview():
         img.alpha_composite(t.resize((150, 150), Image.LANCZOS), (40 + i * 200, 150))
     beams = Image.new("RGBA", (w, h), (0, 0, 0, 0)); bd = ImageDraw.Draw(beams)
     for dx in (-6, 6):
-        bd.line([(130 + dx, 180), (230 + dx, 50)], fill=(60, 255, 90, 255), width=4)
+        bd.line([(130 + dx, 180), (230 + dx, 50)], fill=(255, 40, 30, 255), width=4)
     img.alpha_composite(beams.filter(ImageFilter.GaussianBlur(4)))
     d.text((20, 20), "JARIMICHUS LASER CANNON", fill=(240, 240, 235, 255))
-    d.text((20, 38), "auto or manned - burns hostiles, never fires through friendlies", fill=(120, 255, 140, 255))
+    d.text((20, 38), "auto or manned - burns hostiles, never fires through friendlies", fill=(255, 120, 100, 255))
     return img.convert("RGB")
 
 
