@@ -261,6 +261,48 @@ def ship_art():
     save(down(ship_top()), "Ship", f"{NODE}_ShipTop.png")
 
 
+
+# ---------------------------------------------------------------- laser control console
+def console_art(st):
+    """A fire-control desk seen from above: monitor at the back (north), keyboard toward the operator (south)."""
+    img = blank()
+    d = ImageDraw.Draw(img); o = rgba(st["outline"]); ow = max(3, st["ow"] - 2)
+    r = 6 if st["deco"] in ("vents", "engrave", "hazard") else 18
+    d.rounded_rectangle([18, 30, S - 18, S - 26], radius=r, fill=rgba(st["metal"]), outline=o, width=ow)
+    # monitor with a red targeting reticle
+    d.rounded_rectangle([40, 40, S - 40, 132], radius=min(r, 10), fill=rgba(st["metal_dark"]), outline=o, width=ow)
+    scr = blank(); sd = ImageDraw.Draw(scr)
+    sd.rectangle([52, 50, S - 52, 122], fill=(30, 50, 40, 255))
+    img.alpha_composite(scr)
+    ret = blank(); rd = ImageDraw.Draw(ret); c = (S // 2, 86)
+    rd.ellipse([c[0] - 26, c[1] - 26, c[0] + 26, c[1] + 26], outline=(255, 70, 50, 255), width=4)
+    rd.line([(c[0] - 34, c[1]), (c[0] + 34, c[1])], fill=(255, 70, 50, 255), width=3)
+    rd.line([(c[0], c[1] - 34), (c[0], c[1] + 34)], fill=(255, 70, 50, 255), width=3)
+    img.alpha_composite(glow_layer(ret, 4))
+    # keyboard and controls
+    d.rounded_rectangle([46, 150, S - 46, 196], radius=6, fill=rgba(st["plate_lo"]), outline=o, width=3)
+    for y in (158, 172, 186):
+        for x in range(56, S - 56, 16):
+            d.rectangle([x, y, x + 10, y + 7], fill=rgba(st["plate_hi"]))
+    for i, x in enumerate((60, 196)):
+        knob = blank(); ImageDraw.Draw(knob).ellipse([x - 9, 206, x + 9, 224], fill=(255, 120, 40, 255) if i else (90, 220, 110, 255))
+        img.alpha_composite(glow_layer(knob, 4))
+    if st["deco"] == "hazard":
+        d.rectangle([18, S - 40, S - 18, S - 28], fill=rgba(st["accents"][NODE]), outline=o, width=2)
+    elif st["deco"] == "strips":
+        strip = blank(); ImageDraw.Draw(strip).rounded_rectangle([90, S - 40, S - 90, S - 32], radius=3, fill=rgba(st["glass"]))
+        img.alpha_composite(glow_layer(strip, 5))
+    return img
+
+
+def console_files():
+    for folder, st in STYLES.items():
+        c = console_art(st)
+        save(down(c), "Styles", folder, "Things", "LaserConsole_Base.png")
+        save(down(c), "Styles", folder, "Things", "LaserConsole_Icon.png")
+    save(down(console_art(SHIP)), "Ship", "LaserConsole_ShipBase.png")
+
+
 def main():
     for folder, st in STYLES.items():
         save(down(base(st, NODE)), "Styles", folder, "Things", f"{NODE}_Base.png")
@@ -270,6 +312,7 @@ def main():
     save(beam_core(), "Effects", "BeamCore.png")
     save(beam_glow(), "Effects", "BeamGlow.png")
     ship_art()
+    console_files()
     preview().save(os.path.join(ROOT, "About", "Preview.png"))
     buzz(os.path.join(ROOT, "Common", "Sounds", "JarimichusLaserCannon", "LaserBuzz.wav"))
     print("Art and sound generated.")

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <JLX_Link>Link laser</JLX_Link>
+  <JLX_LinkDesc>Link a laser cannon or mining laser to this console (up to {0}, within {1} tiles). While a colonist mans the console, every linked laser counts as manned.</JLX_LinkDesc>
+  <JLX_Unlink>Unlink all</JLX_Unlink>
+  <JLX_UnlinkDesc>Disconnect every laser from this console.</JLX_UnlinkDesc>
+  <JLX_NotALaser>That isn't a Jarimichus laser.</JLX_NotALaser>
+  <JLX_AlreadyLinked>That laser is already linked.</JLX_AlreadyLinked>
+  <JLX_TooFar>Too far: lasers must be within {0} tiles of the console.</JLX_TooFar>
+  <JLX_TooMany>A console can run at most {0} lasers.</JLX_TooMany>
+  <JLX_InspectLinks>Linked lasers: {0} / {1}</JLX_InspectLinks>
+  <JLX_InspectNoPower>No power: linked lasers aren't manned.</JLX_InspectNoPower>
+  <JLX_InspectManned>Manned by {0}: linked lasers are manned.</JLX_InspectManned>
+  <JLX_Man>Man {0}</JLX_Man>
+  <JLX_CannotManViolent>Cannot man: {0} is incapable of violence</JLX_CannotManViolent>
+  <JLX_CannotManNoPower>Cannot man: the console has no power</JLX_CannotManNoPower>
+  <JLX_CannotManNoPath>Cannot man: no path, or someone else is using it</JLX_CannotManNoPath>
+</LanguageData>

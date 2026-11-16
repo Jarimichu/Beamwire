@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The laser control console. Shipped by both Jarimichus laser mods; LoadFolders makes sure only one copy loads. -->
+<Defs>
+
+  <ThingDef ParentName="BuildingBase">
+    <defName>JLX_LaserConsole</defName>
+    <label>laser control console</label>
+    <description>A fire-control station for Jarimichus lasers. Link up to three laser cannons or mining lasers within 20 tiles, then have a colonist man the console: every linked laser counts as manned. Laser cannons gain range and damage, and mining lasers cut faster and let you choose their next rock.\n\nUse it to crew turrets mounted on a gravship's hull from the safety of the ship's interior.</description>
+    <thingClass>JarimichusLaserCannon.Building_LaserConsole</thingClass>
+    <category>Building</category>
+    <graphicData>
+      <texPath>JarimichusLaserCannon/Styles/Standard/Things/LaserConsole_Base</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(1,1)</drawSize>
+    </graphicData>
+    <uiIconPath>JarimichusLaserCannon/Styles/Standard/Things/LaserConsole_Icon</uiIconPath>
+    <drawerType>RealtimeOnly</drawerType>
+    <altitudeLayer>Building</altitudeLayer>
+    <passability>PassThroughOnly</passability>
+    <pathCost>42</pathCost>
+    <fillPercent>0.5</fillPercent>
+    <rotatable>true</rotatable>
+    <tickerType>Normal</tickerType>
+    <size>(1,1)</size>
+    <hasInteractionCell>true</hasInteractionCell>
+    <interactionCellOffset>(0,0,-1)</interactionCellOffset>
+    <minifiedDef>MinifiedThing</minifiedDef>
+    <thingCategories>
+      <li>BuildingsSecurity</li>
+    </thingCategories>
+    <designationCategory>Security</designationCategory>
+    <costList>
+      <Steel>80</Steel>
+      <ComponentIndustrial>3</ComponentIndustrial>
+    </costList>
+    <statBases>
+      <MaxHitPoints>150</MaxHitPoints>
+      <WorkToBuild>3000</WorkToBuild>
+      <Flammability>0.5</Flammability>
+      <Mass>15</Mass>
+    </statBases>
+    <building>
+      <ai_chillDestination>false</ai_chillDestination>
+    </building>
+    <researchPrerequisites>
+      <li>MicroelectronicsBasics</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="CompProperties_Power">
+        <compClass>CompPowerTrader</compClass>
+        <basePowerConsumption>100</basePowerConsumption>
+        <shortCircuitInRain>false</shortCircuitInRain>
+      </li>
+      <li Class="CompProperties_Flickable"/>
+      <li Class="JarimichusLaserCannon.CompProperties_LaserConsole">
+        <maxLinks>3</maxLinks>
+        <linkRange>20</linkRange>
+      </li>
+    </comps>
+  </ThingDef>
+
+  <JobDef>
+    <defName>JLX_ManLaserConsole</defName>
+    <driverClass>JarimichusLaserCannon.JobDriver_ManLaserConsole</driverClass>
+    <reportString>manning TargetA.</reportString>
+    <casualInterruptible>false</casualInterruptible>
+    <playerInterruptible>true</playerInterruptible>
+  </JobDef>
+
+</Defs>
