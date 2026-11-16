@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <ThingDef ParentName="BuildingBase">
+    <defName>JLC_LaserCannon</defName>
+    <label>laser cannon</label>
+    <description>A three-barrelled defensive laser turret. It locks three continuous red beams onto the nearest hostile it can see within 26 tiles and burns it, with a chance of setting it alight. It holds fire while a colonist, ally, guest, prisoner or tame animal is on the line of fire.\n\nIt works on its own, and a colonist manning it adds 6 tiles of range and half again as much damage. It draws up to 2,000 W from its power grid only while it has a target. With Jarimichus Beamwire installed, power beams can feed it too. In vacuum its beams do half again as much damage.</description>
+    <thingClass>JarimichusLaserCannon.Building_LaserCannon</thingClass>
+    <category>Building</category>
+    <graphicData>
+      <texPath>JarimichusLaserCannon/Styles/Standard/Things/LaserCannon_Base</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(1,1)</drawSize>
+      <shadowData>
+        <volume>(0.7, 0.35, 0.7)</volume>
+      </shadowData>
+    </graphicData>
+    <uiIconPath>JarimichusLaserCannon/Styles/Standard/Things/LaserCannon_Icon</uiIconPath>
+    <drawerType>RealtimeOnly</drawerType>
+    <altitudeLayer>Building</altitudeLayer>
+    <passability>PassThroughOnly</passability>
+    <pathCost>50</pathCost>
+    <fillPercent>0.5</fillPercent>
+    <rotatable>true</rotatable>
+    <tickerType>Normal</tickerType>
+    <size>(1,1)</size>
+    <hasInteractionCell>true</hasInteractionCell>
+    <interactionCellOffset>(0,0,-1)</interactionCellOffset>
+    <minifiedDef>MinifiedThing</minifiedDef>
+    <thingCategories>
+      <li>BuildingsSecurity</li>
+    </thingCategories>
+    <designationCategory>Security</designationCategory>
+    <constructionSkillPrerequisite>6</constructionSkillPrerequisite>
+    <costList>
+      <Steel>150</Steel>
+      <Plasteel>40</Plasteel>
+      <ComponentIndustrial>6</ComponentIndustrial>
+    </costList>
+    <statBases>
+      <MaxHitPoints>250</MaxHitPoints>
+      <WorkToBuild>4000</WorkToBuild>
+      <Flammability>0.4</Flammability>
+      <Mass>40</Mass>
+      <Beauty>-10</Beauty>
+    </statBases>
+    <building>
+      <ai_combatDangerous>true</ai_combatDangerous>
+      <ai_chillDestination>false</ai_chillDestination>
+    </building>
+    <researchPrerequisites>
+      <li>JLC_LaserCannon</li>
+    </researchPrerequisites>
+    <comps>
+      <li Class="CompProperties_Power">
+        <compClass>JarimichusLaserCannon.CompPowerTrader_Laser</compClass>
+        <basePowerConsumption>50</basePowerConsumption>
+        <shortCircuitInRain>false</shortCircuitInRain>
+      </li>
+      <li Class="CompProperties_Flickable"/>
+      <li Class="CompProperties_Breakdownable"/>
+      <li Class="JarimichusLaserCannon.CompProperties_LaserCannon">
+        <maxIntake>2000</maxIntake>
+        <range>26</range>
+        <mannedRangeBonus>6</mannedRangeBonus>
+        <damagePerKw>9</damagePerKw>
+        <pulseInterval>30</pulseInterval>
+        <mannedDamageMultiplier>1.5</mannedDamageMultiplier>
+        <vacuumBonus>1.5</vacuumBonus>
+        <igniteChance>0.06</igniteChance>
+      </li>
+    </comps>
+  </ThingDef>
+
+  <ResearchProjectDef>
+    <defName>JLC_LaserCannon</defName>
+    <label>laser cannon</label>
+    <description>Turn electrical power into a three-barrelled defensive laser that burns enemies with continuous beams. Unlocks the laser cannon.</description>
+    <baseCost>2000</baseCost>
+    <techLevel>Industrial</techLevel>
+    <prerequisites>
+      <li>GunTurrets</li>
+      <li>MicroelectronicsBasics</li>
+    </prerequisites>
+    <requiredResearchBuilding>HiTechResearchBench</requiredResearchBuilding>
+    <!-- Placed at load time one column right of its rightmost prerequisite (see ResearchPlacer); fallback only. -->
+    <researchViewX>10</researchViewX>
+    <researchViewY>4</researchViewY>
+  </ResearchProjectDef>
+
+  <DamageDef>
+    <defName>JLC_LaserBurn</defName>
+    <label>laser burn</label>
+    <workerClass>DamageWorker_AddInjury</workerClass>
+    <externalViolence>true</externalViolence>
+    <deathMessage>{0} was burned down by a laser cannon.</deathMessage>
+    <hediff>Burn</hediff>
+    <armorCategory>Heat</armorCategory>
+    <minDamageToFragment>15</minDamageToFragment>
+    <defaultDamage>9</defaultDamage>
+    <defaultArmorPenetration>0.25</defaultArmorPenetration>
+    <makesBlood>false</makesBlood>
+  </DamageDef>
+
+  <JobDef>
+    <defName>JLC_ManLaserCannon</defName>
+    <driverClass>JarimichusLaserCannon.JobDriver_ManLaserCannon</driverClass>
+    <reportString>manning TargetA.</reportString>
+    <casualInterruptible>false</casualInterruptible>
+    <playerInterruptible>true</playerInterruptible>
+  </JobDef>
+
+  <SoundDef>
+    <defName>JLC_LaserBuzz</defName>
+    <context>MapOnly</context>
+    <sustain>true</sustain>
+    <maxSimultaneous>4</maxSimultaneous>
+    <priorityMode>PrioritizeNearest</priorityMode>
+    <subSounds>
+      <li>
+        <grains>
+          <li Class="AudioGrain_Clip">
+            <clipPath>JarimichusLaserCannon/LaserBuzz</clipPath>
+          </li>
+        </grains>
+        <volumeRange>14~14</volumeRange>
+        <distRange>6~30</distRange>
+        <sustainAttack>0.15</sustainAttack>
+        <sustainRelease>0.3</sustainRelease>
+      </li>
+    </subSounds>
+  </SoundDef>
+
+</Defs>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <JLC_InspectNoTarget>No hostiles in sight within {0} tiles.</JLC_InspectNoTarget>
+  <JLC_InspectFiring>Burning {0}: {1} W from beams + {2} W from grid.</JLC_InspectFiring>
+  <JLC_InspectFriendly>Holding fire: someone friendly is in the line of fire to {0}.</JLC_InspectFriendly>
+  <JLC_InspectShuttered>Holding fire: a safety shutter on the line to {0} is closed.</JLC_InspectShuttered>
+  <JLC_InspectNeedsPower>Waiting for power to fire at {0}.</JLC_InspectNeedsPower>
+  <JLC_InspectHoldFire>Hold fire is on.</JLC_InspectHoldFire>
+  <JLC_InspectForced>Forced target.</JLC_InspectForced>
+  <JLC_InspectManned>Manned by {0}: +{1} range, damage ×{2}.</JLC_InspectManned>
+  <JLC_InspectVacuum>In vacuum: damage ×{0}.</JLC_InspectVacuum>
+
+  <JLC_ForceTarget>Force target</JLC_ForceTarget>
+  <JLC_ForceTargetDesc>Lock the cannon onto a chosen target, as long as it is in range and in sight. It still won't fire through friendlies.</JLC_ForceTargetDesc>
+  <JLC_CannotTarget>The cannon can't see that target from here.</JLC_CannotTarget>
+  <JLC_ClearTarget>Clear target</JLC_ClearTarget>
+  <JLC_ClearTargetDesc>Go back to picking the nearest hostile automatically.</JLC_ClearTargetDesc>
+  <JLC_HoldFire>Hold fire</JLC_HoldFire>
+  <JLC_HoldFireDesc>Stop firing and turn back to rest until this is switched off again.</JLC_HoldFireDesc>
+  <JLC_Man>Man {0}</JLC_Man>
+  <JLC_CannotManViolent>Cannot man: {0} is incapable of violence</JLC_CannotManViolent>
+  <JLC_CannotManNoPath>Cannot man: no path</JLC_CannotManNoPath>
+  <JLC_CannotManReserved>Cannot man: someone else is using it</JLC_CannotManReserved>
+
+  <JLC_Setting_ArtStyle>Art style</JLC_Setting_ArtStyle>
+  <JLC_Style_Standard>Rim Standard</JLC_Style_Standard>
+  <JLC_Style_Industrial>Hazard Industrial</JLC_Style_Industrial>
+  <JLC_Style_Spacer>Glitterworld Spacer</JLC_Style_Spacer>
+  <JLC_Setting_FollowBeamwire>Follow Jarimichus Beamwire's art style</JLC_Setting_FollowBeamwire>
+  <JLC_Setting_FollowBeamwire_Desc>Use whatever art style is chosen in Jarimichus Beamwire's settings, so the whole series matches.</JLC_Setting_FollowBeamwire_Desc>
+  <JLC_Setting_DamageMult>Laser cannon damage: {0}</JLC_Setting_DamageMult>
+  <JLC_Setting_Animals>Attack hostile animals</JLC_Setting_Animals>
+  <JLC_Setting_Animals_Desc>Target manhunting and other hostile animals, not just hostile people and mechanoids.</JLC_Setting_Animals_Desc>
+</LanguageData>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Jarimichus Laser Cannon</name>
+  <author>Jarimichu</author>
+  <packageId>jarimichu.lasercannon</packageId>
+  <url>https://github.com/jarimichu/laser-cannon</url>
+  <supportedVersions>
+    <li>1.4</li>
+    <li>1.5</li>
+    <li>1.6</li>
+  </supportedVersions>
+  <loadAfter>
+    <li>jarimichu.beamwire</li>
+  </loadAfter>
+  <description>A three-barrelled defensive laser turret. It locks three continuous red beams onto the nearest hostile in sight and burns it, with a chance to set it alight. It holds fire while anyone friendly is on the line of fire.
+
+Part of the Jarimichus series. Works on its own on grid power. With Jarimichus Beamwire installed, power beams can feed it too, and Beamwire's safety shutters can guard its line of fire. With Odyssey, its beams do half again as much damage in vacuum.
+
+- Automatic, or manned by a colonist for +6 range and ×1.5 damage
+- Force target, clear target and hold fire controls
+- Draws up to 2,000 W only while it has a target; the head swings back to rest when idle
+- Three art styles: Rim Standard, Hazard Industrial and Glitterworld Spacer, or follow Beamwire's choice
+- Research: Laser cannon (after Gun turrets and Microelectronics, hi-tech bench)</description>
+</ModMetaData>

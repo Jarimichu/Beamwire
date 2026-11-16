@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Build for a given RimWorld version with:  dotnet build -c Release -p:RimWorldVersion=1.5
+    Supported: 1.4, 1.5, 1.6 (default). Output goes to <repo>/<version>/Assemblies/JarimichusLaserCannon.dll
+  -->
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <RootNamespace>JarimichusLaserCannon</RootNamespace>
+    <AssemblyName>JarimichusLaserCannon</AssemblyName>
+    <Nullable>disable</Nullable>
+    <DebugType>none</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <OutputPath>..\..\$(RimWorldVersion)\Assemblies\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(RimWorldVersion)' == '1.4'">
+    <DefineConstants>$(DefineConstants);RW14</DefineConstants>
+    <RimWorldRefVersion>1.4.3901</RimWorldRefVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(RimWorldVersion)' == '1.5'">
+    <DefineConstants>$(DefineConstants);RW15</DefineConstants>
+    <RimWorldRefVersion>1.5.4409</RimWorldRefVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(RimWorldVersion)' == '1.6'">
+    <DefineConstants>$(DefineConstants);RW16</DefineConstants>
+    <RimWorldRefVersion>1.6.4871</RimWorldRefVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="$(RimWorldRefVersion)" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\JarimichusLaserCannon.Core\**\*.cs" Exclude="..\JarimichusLaserCannon.Core\obj\**;..\JarimichusLaserCannon.Core\bin\**" LinkBase="Core" />
+    <Compile Remove="obj\**" />
+  </ItemGroup>
+</Project>
