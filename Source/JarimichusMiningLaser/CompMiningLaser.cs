@@ -22,6 +22,9 @@ namespace JarimichusMiningLaser
         /// <summary>Cutting speed multiplier while the laser stands in vacuum (Odyssey).</summary>
         public float vacuumBonus = 1.5f;
 
+        /// <summary>Range multiplier while the laser stands in vacuum: nothing scatters the beam (Odyssey).</summary>
+        public float vacuumRangeMultiplier = 1.25f;
+
         public CompProperties_MiningLaser()
         {
             compClass = typeof(CompMiningLaser);
@@ -94,6 +97,9 @@ namespace JarimichusMiningLaser
                 return (flick == null || flick.SwitchIsOn) && (breakdown == null || !breakdown.BrokenDown);
             }
         }
+
+        /// <summary>Its reach right now: longer in vacuum.</summary>
+        public float Range => Props.range * (InVacuum ? Props.vacuumRangeMultiplier : 1f);
 
         public bool InVacuum
         {
@@ -180,7 +186,7 @@ namespace JarimichusMiningLaser
             bool hadWork = HasWork;
             Map map = parent.Map;
             IntVec3 from = parent.Position;
-            float rangeSq = Props.range * Props.range;
+            float rangeSq = Range * Range;
             var candidates = new List<IntVec3>();
             AddMarked(map, DesignationDefOf.Mine, from, rangeSq, candidates);
 #if RW16
@@ -300,7 +306,7 @@ namespace JarimichusMiningLaser
 
         public override string CompInspectStringExtra()
         {
-            if (!HasWork) return "JML_Idle".Translate(Props.range.ToString("0"));
+            if (!HasWork) return "JML_Idle".Translate(Range.ToString("0.#"));
             Building rock = target.GetEdifice(parent.Map);
             string what = rock != null ? rock.LabelShort : "?";
             string line = inUse

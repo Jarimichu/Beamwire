@@ -4,7 +4,7 @@
   <JML_Cutting>Cutting {0} at ({1}, {2}): {3} W from beams + {4} W from grid.</JML_Cutting>
   <JML_NeedsPower>Waiting for power to cut {0} at ({1}, {2}).</JML_NeedsPower>
   <JML_Shuttered>Paused: a safety shutter on the line to {0} is closed.</JML_Shuttered>
-  <JML_Vacuum>In vacuum: cutting ×{0}.</JML_Vacuum>
+  <JML_Vacuum>In vacuum: cutting ×{0}, longer range.</JML_Vacuum>
 
   <JML_Setting_ArtStyle>Art style</JML_Setting_ArtStyle>
   <JML_Style_Standard>Rim Standard</JML_Style_Standard>

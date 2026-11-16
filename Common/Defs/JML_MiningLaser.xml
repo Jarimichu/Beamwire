@@ -4,7 +4,7 @@
   <ThingDef ParentName="BuildingBase">
     <defName>JML_MiningLaser</defName>
     <label>mining laser</label>
-    <description>A three-barrelled cutting laser. It slices through the nearest rock or ore marked for mining that it can see in a straight line, at any angle, within 30 tiles, and leaves the same yield a colonist would. At full power it cuts about as fast as a good miner: a granite block in about 18 seconds, a steel ore block in about 30. The less power it gets, the slower it cuts, and in vacuum it cuts half again as fast.\n\nIt runs on its power grid, drawing up to 1,500 W only while it has something to cut (20 W idle). With Jarimichus Beamwire installed, power beams can feed it too: it uses beam power first and the grid makes up the rest.\n\nIts cutting beam burns anyone who walks through it.</description>
+    <description>A three-barrelled cutting laser. It slices through the nearest rock or ore marked for mining that it can see in a straight line, at any angle, within 30 tiles, and leaves the same yield a colonist would. At full power it cuts about as fast as a good miner: a granite block in about 18 seconds, a steel ore block in about 30. The less power it gets, the slower it cuts, and in vacuum it cuts half again as fast and reaches 37.5 tiles.\n\nIt runs on its power grid, drawing up to 1,500 W only while it has something to cut (20 W idle). With Jarimichus Beamwire installed, power beams can feed it too: it uses beam power first and the grid makes up the rest.\n\nIts cutting beam burns anyone who walks through it.</description>
     <thingClass>JarimichusMiningLaser.Building_MiningLaser</thingClass>
     <category>Building</category>
     <graphicData>
@@ -61,6 +61,7 @@
         <range>30</range>
         <hpPerWattSecond>0.0333</hpPerWattSecond>
         <vacuumBonus>1.5</vacuumBonus>
+        <vacuumRangeMultiplier>1.25</vacuumRangeMultiplier>
       </li>
     </comps>
   </ThingDef>
