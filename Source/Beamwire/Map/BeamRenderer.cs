@@ -66,53 +66,6 @@ namespace Beamwire
             }
         }
 
-        // Mining laser cutting beams are always red, whatever the art style.
-        private static readonly Color CutCore = new Color(1f, 0.55f, 0.48f);
-        private static readonly Color CutGlow = new Color(1f, 0.16f, 0.10f);
-        private static readonly float[] BarrelOffsets = { -0.17f, 0f, 0.17f };
-        private static readonly float[] FaceOffsets = { -0.06f, 0f, 0.06f };
-        private static readonly float[] PulseFreqs = { 9.1f, 13.3f, 17.2f };
-
-        /// <summary>
-        /// A mining laser's trigun: three thin red beams from its three barrels converging on the rock face.
-        /// Each pulses on its own rhythm but never fades out (looks only; the cutting rate is steady).
-        /// </summary>
-        public static void DrawCut(IntVec3 from, IntVec3 to, float watts, int seed)
-        {
-            Vector3 a0 = from.ToVector3Shifted();
-            Vector3 b0 = to.ToVector3Shifted();
-            Vector3 dir = (b0 - a0).normalized;
-            Vector3 side = new Vector3(dir.z, 0f, -dir.x); // perpendicular, in the ground plane
-            float altitude = AltitudeLayer.Projectile.AltitudeFor();
-            float frac = Mathf.Clamp01(watts / FullBrightnessWatts);
-            float time = Time.realtimeSinceStartup;
-            Quaternion rot = Quaternion.LookRotation(dir);
-
-            for (int i = 0; i < 3; i++)
-            {
-                float phase = (seed * 0.618f + i * 2.1f) % (Mathf.PI * 2f);
-                // Each beam swells and dims on its own rhythm but never fades out: brightness stays between 40% and 100%.
-                float pulse = 0.4f + 0.6f * (0.5f + 0.5f * Mathf.Sin(time * PulseFreqs[i] + phase));
-
-                Vector3 a = a0 + dir * 0.42f + side * BarrelOffsets[i];
-                Vector3 b = b0 - dir * 0.45f + side * FaceOffsets[i];
-                a.y = b.y = altitude + i * 0.0005f;
-                float length = (b - a).magnitude;
-                if (length < 0.05f) continue;
-
-                Vector3 mid = (a + b) * 0.5f;
-                Quaternion beamRot = Quaternion.LookRotation((b - a).normalized);
-                float core = Mathf.Lerp(0.035f, 0.05f, frac) * (0.85f + 0.3f * pulse);
-
-                Block.SetColor(ColorId, new Color(CutGlow.r, CutGlow.g, CutGlow.b, Mathf.Lerp(0.3f, 0.6f, frac) * pulse));
-                Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid, beamRot, new Vector3(core * 3f, 1f, length + core)),
-                    BeamwireTex.BeamGlow, 0, null, 0, Block);
-                Block.SetColor(ColorId, new Color(CutCore.r, CutCore.g, CutCore.b, Mathf.Lerp(0.7f, 1f, pulse)));
-                Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid + new Vector3(0f, 0.001f, 0f), beamRot, new Vector3(core, 1f, length)),
-                    BeamwireTex.BeamCore, 0, null, 0, Block);
-            }
-        }
-
         public static Vector3 StartPoint(BeamSegment s)
         {
             return MapBeamGrid.ToCell(s.From.Pos).ToVector3Shifted() + DirVector(s.Dir) * NodeLensInset;

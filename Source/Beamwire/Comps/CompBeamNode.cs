@@ -38,7 +38,7 @@ namespace Beamwire
         private CompFlickable flickable;
         private CompBreakdownable breakdownable;
         private CompOpticalDust dust;
-        private CompMiningLaser laser;
+        private CompBeamPowered beamPowered;
         private Sustainer hum;
 
         // Latest solver results, for the inspect pane and the hum sound.
@@ -85,8 +85,14 @@ namespace Beamwire
 
         public CompBeamReceiver Receiver => receiverPower;
 
-        /// <summary>Set when this node is a mining laser (Odyssey).</summary>
-        public CompMiningLaser Laser => laser;
+        /// <summary>Set when this node is another mod's beam-powered device (see <see cref="CompBeamPowered"/>).</summary>
+        public CompBeamPowered BeamPowered => beamPowered != null && beamPowered.Bound ? beamPowered : null;
+
+        /// <summary>
+        /// Part of the beam-powered devices API: other mods' lasers treat this node as solid while it is true
+        /// (a closed safety shutter).
+        /// </summary>
+        public bool BlocksLasers => ShutterClosed;
 
         public float MaxThroughput
         {
@@ -105,7 +111,7 @@ namespace Beamwire
                 if (flickable != null && !flickable.SwitchIsOn) return false;
                 if (breakdownable != null && breakdownable.BrokenDown) return false;
                 if (Kind == NodeKind.Emitter) return emitterPower != null && emitterPower.PowerOn;
-                if (laser != null) return laser.HasWork;
+                if (BeamPowered != null) return BeamPowered.WantedWatts > 0f;
                 if (Kind == NodeKind.Receiver) return receiverPower != null && receiverPower.PowerNet != null;
                 return true;
             }
@@ -132,7 +138,7 @@ namespace Beamwire
             flickable = parent.GetComp<CompFlickable>();
             breakdownable = parent.GetComp<CompBreakdownable>();
             dust = parent.GetComp<CompOpticalDust>();
-            laser = parent.GetComp<CompMiningLaser>();
+            beamPowered = parent.GetComp<CompBeamPowered>();
             if (throughputIndex < 0)
             {
                 throughputIndex = Props.defaultThroughputIndex;
@@ -196,7 +202,7 @@ namespace Beamwire
                 case NodeKind.Receiver:
                     LastWatts = solved.DeliveredWatts;
                     receiverPower?.SetDelivered(solved.DeliveredWatts);
-                    laser?.SetDelivered(solved.DeliveredWatts);
+                    BeamPowered?.SetBeamWatts(solved.DeliveredWatts);
                     break;
                 case NodeKind.Capacitor:
                     LastWatts = solved.InputWatts;

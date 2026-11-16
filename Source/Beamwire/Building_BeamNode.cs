@@ -38,7 +38,7 @@ namespace Beamwire
             topPos.y += Altitudes.AltInc;
             string topPart = Node.ShutterClosed ? "TopClosed" : "Top";
             Graphics.DrawMesh(MeshPool.plane10,
-                Matrix4x4.TRS(topPos, Quaternion.AngleAxis(Node.Laser != null ? Node.Laser.HeadAngle : Node.AngleDegrees, Vector3.up), scale),
+                Matrix4x4.TRS(topPos, Quaternion.AngleAxis(Node.AngleDegrees, Vector3.up), scale),
                 BeamwireStyles.Mat(Ext.node, topPart), 0);
 
             if (Node.Kind == Core.NodeKind.Capacitor)

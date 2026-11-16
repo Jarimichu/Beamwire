@@ -17,7 +17,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Vanilla Core defNames Beamwire depends on. MicroelectronicsBasics is referenced by the game's own
 # ResearchProjectDefOf; the rest are used as research prerequisites by many published mods for 1.4-1.6.
-VANILLA_RESEARCH = {"Electricity", "SolarPanels", "Autodoors", "MicroelectronicsBasics", "Fabrication", "Batteries", "DeepDrilling"}
+VANILLA_RESEARCH = {"Electricity", "SolarPanels", "Autodoors", "MicroelectronicsBasics", "Fabrication", "Batteries"}
 VANILLA_BENCHES = {"HiTechResearchBench", "SimpleResearchBench"}
 
 problems = []
@@ -26,7 +26,6 @@ buildings = {}  # defName -> [researchPrerequisites]
 benches = {}
 
 for path in sorted(glob.glob(os.path.join(ROOT, "Common", "**", "*.xml"), recursive=True) +
-                   glob.glob(os.path.join(ROOT, "Odyssey", "**", "*.xml"), recursive=True) +
                    glob.glob(os.path.join(ROOT, "About", "*.xml"))):
     try:
         tree = ET.parse(path)

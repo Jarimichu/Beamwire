@@ -1,4 +1,6 @@
-# Beamwire
+# Jarimichus Beamwire
+
+*Part of the Jarimichus mod series, with [Jarimichus Mining Laser](https://github.com/jarimichu/mining-laser) and [Jarimichus Laser Cannon](https://github.com/jarimichu/laser-cannon).*
 
 Wireless power over laser beams for RimWorld 1.4, 1.5 and 1.6.
 
@@ -35,14 +37,36 @@ Put a **beam emitter** on one power grid and a **beam receiver** on another, and
   | Coherent relays | Relay | Beam splitting, Fabrication | hi-tech |
   | Beam capacitors | Capacitor | Coherent relays, Batteries | hi-tech |
 
-## Odyssey content
+## Odyssey
 
-When the Odyssey expansion is active (RimWorld 1.6), the `Odyssey/` folder loads automatically through `LoadFolders.xml`:
+With Odyssey active (RimWorld 1.6), Beamwire nodes standing in vacuum never gather dust. Nothing else needs Odyssey.
 
-- **Beam mining laser** (research *Beam mining laser*: Beam optics + Deep drilling). A three-barrelled cutting laser (three thin red beams that pulse independently and never go dark) that mines the nearest rock or ore marked for mining that it can see in a straight line at any angle, within 30 tiles, for full yield. It cuts about 60 HP per second per kW, ×1.5 in vacuum. It uses beam power first and tops up from a power conduit, so it also runs on the grid alone. It only asks for beams while it has work, so auto-aim routes them to it as needed. Its cutting beam burns like other beams, and a safety shutter on the line pauses it.
-- **Vacuum optics:** nodes standing in vacuum never gather dust.
+## Beam-powered devices API
 
-Without Odyssey these don't appear, and nothing else changes.
+Other mods can let Beamwire beams power their buildings, with no compile-time reference either way. The Jarimichus Mining Laser and Laser Cannon use this.
+
+1. Give one of your building's comps these public members (found by name):
+   - `float BeamWantedWatts { get; }`: watts wanted from beams right now (0 = nothing to do).
+   - `void SetBeamWatts(float watts)`: called after every solve with the watts beams deliver.
+   - optional `IEnumerable<IntVec3> BeamGuardLine { get; }`: cells of a dangerous line your device fires along; safety shutters on it guard the stretch beyond them.
+2. Ship a patch that loads only when Beamwire is active (`LoadFolders.xml`: `<li IfModActive="jarimichu.beamwire">Mods/Beamwire</li>`) and adds two comps to your building:
+
+```xml
+<Operation Class="PatchOperationAdd">
+  <xpath>Defs/ThingDef[defName="YourBuilding"]/comps</xpath>
+  <value>
+    <li Class="Beamwire.CompProperties_BeamNode">
+      <kind>Receiver</kind>
+      <rotatable>false</rotatable>
+    </li>
+    <li Class="Beamwire.CompProperties_BeamPowered" />
+  </value>
+</Operation>
+```
+
+Auto-aim then routes beams to your building whenever it wants power. To respect Beamwire from your side:
+- a closed safety shutter has a comp whose `bool BlocksLasers` is true;
+- beam windows' defs carry the mod extension `Beamwire.BeamTransparentExtension`.
 
 ## Art styles
 

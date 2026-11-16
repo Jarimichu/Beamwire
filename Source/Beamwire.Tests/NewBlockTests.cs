@@ -343,9 +343,9 @@ namespace Beamwire.Tests
     public class IdleSinkTests
     {
         [Fact]
-        public void IdleMiningLaser_IsIgnoredByPlanner_AndDrawsNothing()
+        public void IdleBeamPoweredDevice_IsIgnoredByPlanner_AndDrawsNothing()
         {
-            // A mining laser with nothing to cut is passed in as a non-operational receiver with no demand.
+            // A beam-powered device (e.g. another mod's laser) that wants nothing is passed in as a non-operational receiver.
             var s = new BeamSettings { NodeLoss = 0f, LossPerTile = 0f, MaxRange = 60f };
             var e = new BeamNode(1, NodeKind.Emitter, new GridPos(0, 5), Dir8.North) { AutoAim = true, MaxThroughput = 2000f };
             var laser = new BeamNode(2, NodeKind.Receiver, new GridPos(6, 5), Dir8.North) { Operational = false, Demand = 0f };
@@ -361,7 +361,7 @@ namespace Beamwire.Tests
         }
 
         [Fact]
-        public void BusyMiningLaser_GetsItsFullIntake()
+        public void BusyBeamPoweredDevice_GetsItsFullIntake()
         {
             var s = new BeamSettings { NodeLoss = 0f, LossPerTile = 0f, MaxRange = 60f };
             var e = new BeamNode(1, NodeKind.Emitter, new GridPos(0, 5), Dir8.North) { AutoAim = true, MaxThroughput = 4000f };

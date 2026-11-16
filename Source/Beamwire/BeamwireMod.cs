@@ -13,7 +13,7 @@ namespace Beamwire
         public BeamwireMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<BeamwireSettings>();
-            new Harmony("beamwire.mod").PatchAll();
+            new Harmony("jarimichu.beamwire").PatchAll();
         }
 
         public override string SettingsCategory() => "Beamwire";

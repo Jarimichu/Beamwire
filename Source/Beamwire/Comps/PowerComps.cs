@@ -33,38 +33,6 @@ namespace Beamwire
     }
 
     /// <summary>
-    /// Mining laser power comp. It uses beam power first and draws whatever is still missing from its own power
-    /// grid, plus a small idle draw.
-    /// </summary>
-    public class CompPowerTrader_MiningLaser : CompPowerTrader
-    {
-        private float gridDraw;
-
-        /// <summary>Watts the laser is asking its grid for right now (not counting the idle draw).</summary>
-        public float GridDraw => gridDraw;
-
-        /// <summary>Watts actually arriving from the grid: nothing if it isn't connected or the grid is out of power.</summary>
-        public float GridSupply => PowerNet != null && PowerOn ? gridDraw : 0f;
-
-        public void SetGridDraw(float watts)
-        {
-            gridDraw = watts;
-            ApplyOutput();
-        }
-
-        public override void SetUpPowerVars()
-        {
-            base.SetUpPowerVars();
-            ApplyOutput();
-        }
-
-        private void ApplyOutput()
-        {
-            PowerOutput = -(Props.PowerConsumption + gridDraw);
-        }
-    }
-
-    /// <summary>
     /// Receiver power comp. It works like a generator whose output is whatever the beams deliver.
     /// </summary>
     public class CompBeamReceiver : CompPowerPlant

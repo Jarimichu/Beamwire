@@ -20,7 +20,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEX = os.path.join(ROOT, "Common", "Textures", "Beamwire")
 S = 256          # working resolution
 FINAL = 128      # saved resolution
-NODES = ["Emitter", "Receiver", "Mirror", "Splitter", "Relay", "Prism", "Shutter", "Capacitor", "MiningLaser"]
+NODES = ["Emitter", "Receiver", "Mirror", "Splitter", "Relay", "Prism", "Shutter", "Capacitor"]
 
 # Folder name -> style. The folder names must match BeamwireStyles.All in Source/Beamwire/BeamwireStyles.cs.
 STYLES = {
@@ -28,7 +28,7 @@ STYLES = {
     beam=(255, 214, 120), outline=(28, 26, 24), ow=10, radius=18,
     plate=(118, 112, 104), plate_hi=(146, 140, 131), plate_lo=(92, 87, 81),
     metal=(160, 156, 148), metal_dark=(84, 80, 75), glass=(255, 214, 120), mirror=(214, 222, 228),
-    accents={"Emitter": (196, 120, 52), "Receiver": (110, 150, 92), "Mirror": (150, 150, 150), "Splitter": (190, 170, 90), "Relay": (130, 110, 150), "Prism": (110, 160, 190), "Shutter": (196, 72, 60), "Capacitor": (96, 160, 110), "MiningLaser": (214, 120, 40)},
+    accents={"Emitter": (196, 120, 52), "Receiver": (110, 150, 92), "Mirror": (150, 150, 150), "Splitter": (190, 170, 90), "Relay": (130, 110, 150), "Prism": (110, 160, 190), "Shutter": (196, 72, 60), "Capacitor": (96, 160, 110)},
     deco="bolts", ground="dirt"),
   "Industrial": dict(
     beam=(255, 150, 40), outline=(22, 20, 18), ow=8, radius=6,
@@ -252,28 +252,6 @@ def top(st, kind):
             img.alpha_composite(glow_layer(cell, 4))
         d.rectangle([108, 22, 148, 56], fill=rgba(st["metal_dark"]), outline=o, width=ow)
         img.alpha_composite(lens(st, [114, 10, 142, 38]))
-    elif kind == "MiningLaser":
-        # A trigun turret head: three short parallel barrels with hot red lenses, on a finned heat-sink block,
-        # pointing North.
-        r = 8 if sharp else 22
-        for i, y in enumerate(range(150, 214, 14)):
-            d.rounded_rectangle([54, y, 202, y + 8], radius=3, fill=rgba(st["metal_dark"]), outline=o, width=2)
-        d.rounded_rectangle([66, 112, 190, 220], radius=r, fill=rgba(st["metal"]), outline=o, width=ow)
-        d.rounded_rectangle([58, 92, 198, 128], radius=min(r, 10), fill=rgba(st["metal_dark"]), outline=o, width=ow)
-        for bx in (84, 128, 172):
-            d.rectangle([bx - 11, 26, bx + 11, 100], fill=rgba(st["metal"]), outline=o, width=max(3, ow - 3))
-            d.rectangle([bx - 14, 54, bx + 14, 64], fill=rgba(st["metal_dark"]), outline=o, width=2)
-            heat = blank(); ImageDraw.Draw(heat).ellipse([bx - 12, 10, bx + 12, 34], fill=(255, 70, 50, 255))
-            img.alpha_composite(glow_layer(heat, 6))
-            d.ellipse([bx - 6, 16, bx + 6, 28], fill=(255, 220, 210, 255))
-        if st["deco"] == "hazard":
-            d.rectangle([66, 170, 190, 184], fill=rgba(st["accents"]["MiningLaser"]), outline=o, width=3)
-        elif st["deco"] == "strips":
-            strip = blank(); ImageDraw.Draw(strip).rounded_rectangle([96, 176, 160, 184], radius=3, fill=rgba(st["glass"]))
-            img.alpha_composite(glow_layer(strip, 5))
-        elif st["deco"] == "bolts":
-            for x in (80, 176):
-                d.ellipse([x - 6, 196, x + 6, 208], fill=rgba(st["metal"]), outline=o, width=2)
     return img
 
 

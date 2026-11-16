@@ -113,14 +113,17 @@ namespace Beamwire
                     tmpGuarded.Add(c);
                 }
             }
-            // A mining laser's cutting beam that passes through this shutter: guard the stretch beyond it.
+            // A beam-powered device's firing line (e.g. another mod's laser) through this shutter: guard beyond it.
             foreach (CompBeamNode n in nodes)
             {
-                CompMiningLaser laser = n.Laser;
-                if (laser == null || !laser.HasWork) continue;
-                int at = laser.LineCells.IndexOf(shutter.parent.Position);
-                if (at < 0) continue;
-                for (int i = at + 1; i < laser.LineCells.Count; i++) tmpGuarded.Add(laser.LineCells[i]);
+                CompBeamPowered device = n.BeamPowered;
+                if (device == null) continue;
+                bool past = false;
+                foreach (IntVec3 c in device.GuardLine)
+                {
+                    if (past) tmpGuarded.Add(c);
+                    else if (c == shutter.parent.Position) past = true;
+                }
             }
 
             if (tmpGuarded.Count == 0) return false;
@@ -208,8 +211,8 @@ namespace Beamwire
                 {
                     // Plan with what the player controls: switched on and not broken down. Emitters that
                     // have merely lost power stay in the plan, so a brownout doesn't re-aim everything.
-                    // Mining lasers only want a route while they have rock to cut.
-                    Operational = c.PlannableNow && (c.Laser == null || c.Laser.HasWork),
+                    // Beam-powered devices only want a route while they want power.
+                    Operational = c.PlannableNow && (c.BeamPowered == null || c.BeamPowered.WantedWatts > 0f),
                     AutoAim = c.AutoAimActive,
                 });
             }
@@ -269,7 +272,7 @@ namespace Beamwire
                 };
                 if (c.Kind == NodeKind.Receiver)
                 {
-                    n.Demand = c.Laser != null ? c.Laser.WantedWatts : ReceiverDemand(c);
+                    n.Demand = c.BeamPowered != null ? c.BeamPowered.WantedWatts : ReceiverDemand(c);
                     c.LastDemand = n.Demand;
                 }
                 snapshot.Add(n);
@@ -359,19 +362,6 @@ namespace Beamwire
             float mult = BeamwireMod.Settings.damageMultiplier;
             DamageDef def = BeamwireDefOf.Beamwire_BeamBurn;
 
-            // Mining lasers' cutting beams burn too.
-            foreach (CompBeamNode n in nodes)
-            {
-                CompMiningLaser laser = n.Laser;
-                if (laser == null || !laser.Cutting || laser.TotalWatts < DamageMinWatts) continue;
-                float amount = Mathf.Clamp(laser.TotalWatts / 250f * mult, 1f, 40f);
-                float pen = def.defaultArmorPenetration * (1f + laser.TotalWatts / 2000f);
-                foreach (IntVec3 c in laser.LineCells)
-                {
-                    BurnPawnsAt(c, def, amount, pen);
-                }
-            }
-
             foreach (BeamSegment s in graph.Segments)
             {
                 if (s.Watts < DamageMinWatts) continue;
@@ -432,14 +422,6 @@ namespace Beamwire
             if (BeamwireMod.Settings.showBeams || AnyNodeSelected())
             {
                 BeamRenderer.Draw(graph);
-                foreach (CompBeamNode n in nodes)
-                {
-                    CompMiningLaser laser = n.Laser;
-                    if (laser != null && laser.Cutting)
-                    {
-                        BeamRenderer.DrawCut(n.parent.Position, laser.Target, laser.TotalWatts, n.parent.thingIDNumber);
-                    }
-                }
             }
         }
 
