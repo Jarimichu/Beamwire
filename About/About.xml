@@ -12,7 +12,7 @@
   <loadAfter>
     <li>jarimichu.beamwire</li>
   </loadAfter>
-  <description>A three-barrelled defensive laser turret. It locks three continuous red beams onto the nearest hostile in sight and burns it, with a chance to set it alight. It holds fire while anyone friendly is on the line of fire.
+  <description>A twin-barrelled defensive laser turret. It locks two continuous green beams onto the nearest hostile in sight and burns it, with a chance to set it alight. It holds fire while anyone friendly is on the line of fire.
 
 Part of the Jarimichus series. Works on its own on grid power. With Jarimichus Beamwire installed, power beams can feed it too, and Beamwire's safety shutters can guard its line of fire. With Odyssey, its beams do half again as much damage in vacuum.
 

@@ -151,26 +151,27 @@ def beam_glow():
 
 
 def top(st):
-    """Heavy trigun turret head: three long barrels with red lenses, an armoured shroud and a targeting sensor."""
+    """Heavy twin-barrelled turret head: two long barrels with green lenses, an armoured shroud and a targeting sensor."""
     img = blank(); d = ImageDraw.Draw(img); o = rgba(st["outline"]); ow = max(3, st["ow"] - 2)
     sharp = st["deco"] in ("vents", "engrave", "hazard")
     r = 6 if sharp else 20
+    green_hot, green_core = (60, 255, 90, 255), (215, 255, 215, 255)
     # armoured shroud
     d.polygon([(60, 230), (196, 230), (214, 150), (176, 104), (80, 104), (42, 150)], fill=rgba(st["metal"]), outline=o)
     d.line([(60, 230), (196, 230), (214, 150), (176, 104), (80, 104), (42, 150), (60, 230)], fill=o, width=ow)
     d.rounded_rectangle([86, 140, 170, 210], radius=r, fill=rgba(st["metal_dark"]), outline=o, width=3)
     for y in range(152, 206, 12):
         d.line([(96, y), (160, y)], fill=rgba(st["plate_lo"]), width=4)
-    # long barrels
-    for bx in (92, 128, 164):
-        d.rectangle([bx - 10, 8, bx + 10, 112], fill=rgba(st["metal"]), outline=o, width=max(3, ow - 3))
-        for y in (36, 64):
-            d.rectangle([bx - 13, y, bx + 13, y + 8], fill=rgba(st["metal_dark"]), outline=o, width=2)
-        heat = blank(); ImageDraw.Draw(heat).ellipse([bx - 11, -4, bx + 11, 18], fill=(255, 60, 40, 255))
+    # twin long barrels, a little thicker than the mining laser's
+    for bx in (104, 152):
+        d.rectangle([bx - 13, 8, bx + 13, 112], fill=rgba(st["metal"]), outline=o, width=max(3, ow - 3))
+        for y in (34, 62, 88):
+            d.rectangle([bx - 16, y, bx + 16, y + 8], fill=rgba(st["metal_dark"]), outline=o, width=2)
+        heat = blank(); ImageDraw.Draw(heat).ellipse([bx - 13, -5, bx + 13, 21], fill=green_hot)
         img.alpha_composite(glow_layer(heat, 6))
-        d.ellipse([bx - 5, 2, bx + 5, 12], fill=(255, 225, 215, 255))
+        d.ellipse([bx - 6, 2, bx + 6, 14], fill=green_core)
     # targeting sensor
-    sensor = blank(); ImageDraw.Draw(sensor).ellipse([196, 118, 222, 144], fill=(255, 80, 60, 255))
+    sensor = blank(); ImageDraw.Draw(sensor).ellipse([196, 118, 222, 144], fill=green_hot)
     img.alpha_composite(glow_layer(sensor, 5))
     d.ellipse([194, 116, 224, 146], outline=o, width=3)
     if st["deco"] == "hazard":
@@ -205,11 +206,11 @@ def preview():
         t = base(st, NODE); t.alpha_composite(top(st).rotate(-20, resample=Image.BICUBIC))
         img.alpha_composite(t.resize((150, 150), Image.LANCZOS), (40 + i * 200, 150))
     beams = Image.new("RGBA", (w, h), (0, 0, 0, 0)); bd = ImageDraw.Draw(beams)
-    for dx in (-8, 0, 8):
-        bd.line([(130 + dx, 180), (230 + dx, 50)], fill=(255, 60, 40, 255), width=4)
+    for dx in (-6, 6):
+        bd.line([(130 + dx, 180), (230 + dx, 50)], fill=(60, 255, 90, 255), width=4)
     img.alpha_composite(beams.filter(ImageFilter.GaussianBlur(4)))
     d.text((20, 20), "JARIMICHUS LASER CANNON", fill=(240, 240, 235, 255))
-    d.text((20, 38), "auto or manned - burns hostiles, never fires through friendlies", fill=(255, 120, 100, 255))
+    d.text((20, 38), "auto or manned - burns hostiles, never fires through friendlies", fill=(120, 255, 140, 255))
     return img.convert("RGB")
 
 

@@ -29,7 +29,7 @@ namespace JarimichusLaserCannon
     }
 
     /// <summary>
-    /// The laser cannon: an automatic turret that locks three continuous red beams onto the nearest hostile it can
+    /// The laser cannon: an automatic turret that locks two continuous green beams onto the nearest hostile it can
     /// see, burning it. It holds fire while anyone non-hostile stands on the line of fire. A colonist manning it
     /// adds range and damage. It runs on its power grid; with Jarimichus Beamwire installed, beams power it first.
     /// </summary>

@@ -5,20 +5,20 @@ using Verse;
 namespace JarimichusLaserCannon
 {
     /// <summary>
-    /// Draws the trigun's three thin red beams from its three barrels, converging on a point. Each pulses on its own
-    /// rhythm but never fades out. Red in every art style.
+    /// Draws the cannon's two thin green beams from its two barrels, converging on a point. Each pulses on its own
+    /// rhythm but never fades out. Green in every art style.
     /// </summary>
     [StaticConstructorOnStartup]
-    public static class TrigunRenderer
+    public static class TwinBeamRenderer
     {
         private static readonly Material Core = MaterialPool.MatFrom("JarimichusLaserCannon/Effects/BeamCore", ShaderDatabase.Transparent);
         private static readonly Material Glow = MaterialPool.MatFrom("JarimichusLaserCannon/Effects/BeamGlow", ShaderDatabase.MoteGlow);
         private static readonly MaterialPropertyBlock Block = new MaterialPropertyBlock();
         private static readonly int ColorId = Shader.PropertyToID("_Color");
-        private static readonly Color CoreColor = new Color(1f, 0.55f, 0.48f);
-        private static readonly Color GlowColor = new Color(1f, 0.16f, 0.10f);
-        private static readonly float[] BarrelOffsets = { -0.17f, 0f, 0.17f };
-        private static readonly float[] EndOffsets = { -0.06f, 0f, 0.06f };
+        private static readonly Color CoreColor = new Color(0.62f, 1f, 0.62f);
+        private static readonly Color GlowColor = new Color(0.15f, 1f, 0.28f);
+        private static readonly float[] BarrelOffsets = { -0.12f, 0.12f };
+        private static readonly float[] EndOffsets = { -0.04f, 0.04f };
 
         /// <param name="from">The turret's centre.</param>
         /// <param name="to">The point the beams converge on.</param>
@@ -34,7 +34,7 @@ namespace JarimichusLaserCannon
             float frac = Mathf.Clamp01(watts / 2000f);
             double time = Time.realtimeSinceStartup;
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < BarrelOffsets.Length; i++)
             {
                 float pulse = LaserMath.Pulse(time, i, seed);
                 Vector3 a = from + dir * muzzle + side * BarrelOffsets[i];

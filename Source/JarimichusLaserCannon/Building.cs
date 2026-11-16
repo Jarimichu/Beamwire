@@ -28,7 +28,7 @@ namespace JarimichusLaserCannon
 
             if (Cannon != null && Cannon.Firing && Cannon.Target != null)
             {
-                TrigunRenderer.Draw(Position.ToVector3Shifted(), Cannon.Target.DrawPos, Cannon.TotalWatts, thingIDNumber, 0.15f, 0.48f);
+                TwinBeamRenderer.Draw(Position.ToVector3Shifted(), Cannon.Target.DrawPos, Cannon.TotalWatts, thingIDNumber, 0.15f, 0.48f);
             }
         }
 
