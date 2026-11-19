@@ -252,84 +252,105 @@ def ship_art():
     save(down(ship_top()), "Ship", f"{NODE}_ShipTop.png")
 
 
-
 # ---------------------------------------------------------------- laser control console
-def console_art(st):
-    """A military fire-control station built like an arcade cabinet, seen from above and in front: an armoured
-    hood with warning lamps at the back (north), a green radar scope with red target marks, and an armoured
-    control deck toward the operator (south) with a flight-stick grip, a guarded fire button and toggle switches."""
-    img = blank()
-    d = ImageDraw.Draw(img); o = rgba(st["outline"]); ow = max(3, st["ow"] - 2)
-    r = 4 if st["deco"] in ("vents", "engrave", "hazard") else 10
-    red = (255, 60, 45, 255); phosphor = (110, 255, 140, 255)
-    metal, dark, lo, hi = rgba(st["metal"]), rgba(st["metal_dark"]), rgba(st["plate_lo"]), rgba(st["plate_hi"])
-    # armoured cabinet with chamfered top corners and bolted side plates
-    d.polygon([(58, 14), (S - 58, 14), (S - 44, 28), (S - 44, S - 14), (44, S - 14), (44, 28)], fill=metal, outline=o)
-    d.line([(58, 14), (S - 58, 14), (S - 44, 28), (S - 44, S - 14), (44, S - 14), (44, 28), (58, 14)], fill=o, width=ow, joint="curve")
-    for x0 in (50, S - 60):
-        d.rectangle([x0, 64, x0 + 10, 152], fill=dark, outline=o, width=2)
-        for y in (70, 108, 146):
-            d.ellipse([x0 + 3, y - 2, x0 + 7, y + 2], fill=hi)
-    # hood: an armoured visor over the scope, with amber and red status lamps instead of a lit marquee
-    d.rectangle([58, 22, S - 58, 50], fill=dark, outline=o, width=3)
-    for x in range(66, S - 66, 12):
-        d.line([(x, 26), (x, 46)], fill=lo, width=3)  # vent slots
-    lamps = blank(); ld = ImageDraw.Draw(lamps)
-    for x, col in ((78, (255, 170, 40, 255)), (S - 78, red)):
-        ld.ellipse([x - 7, 29, x + 7, 43], fill=col)
-    img.alpha_composite(glow_layer(lamps, 5))
-    d = ImageDraw.Draw(img)
-    # radar scope: green phosphor, range rings, a sweep and red target marks
-    d.rectangle([62, 58, S - 62, 152], fill=dark, outline=o, width=ow)
-    d.rectangle([72, 66, S - 72, 144], fill=(10, 26, 16, 255))
-    scr = blank(); sd = ImageDraw.Draw(scr); c = (S // 2, 105)
-    for rr in (14, 28):
-        sd.ellipse([c[0] - rr, c[1] - rr, c[0] + rr, c[1] + rr], outline=phosphor[:3] + (150,), width=2)
-    sd.line([(c[0] - 36, c[1]), (c[0] + 36, c[1])], fill=phosphor[:3] + (120,), width=2)
-    sd.line([(c[0], c[1] - 36), (c[0], c[1] + 36)], fill=phosphor[:3] + (120,), width=2)
-    sd.polygon([c, (c[0] + 30, c[1] - 26), (c[0] + 36, c[1] - 12)], fill=phosphor[:3] + (110,))  # sweep
-    for bx, by in ((150, 84), (98, 124)):
-        sd.line([(bx - 6, by - 6), (bx + 6, by + 6)], fill=red, width=3)
-        sd.line([(bx - 6, by + 6), (bx + 6, by - 6)], fill=red, width=3)
-    img.alpha_composite(glow_layer(scr, 4))
-    d = ImageDraw.Draw(img)
-    # armoured control deck, bolted at the corners
-    d.rectangle([30, 160, S - 30, 222], fill=lo, outline=o, width=ow)
-    d.line([(36, 168), (S - 36, 168)], fill=hi, width=3)
-    for x, y in ((38, 176), (S - 38, 176), (38, 214), (S - 38, 214)):
-        d.ellipse([x - 3, y - 3, x + 3, y + 3], fill=hi, outline=o, width=1)
-    # flight-stick grip: boot, shaft, black grip with a red thumb button and a trigger
-    jx, jy = S - 78, 196  # on the right-hand side
+_RED = (255, 60, 45, 255); _TEAL = (90, 240, 220, 255); _AMBER = (255, 170, 40, 255)
+_PHOS = (110, 255, 140)
+
+
+def _console_pal(st):
+    return dict(o=rgba(st["outline"]), ow=max(3, st["ow"] - 2), metal=rgba(st["metal"]), dark=rgba(st["metal_dark"]),
+                lo=rgba(st["plate_lo"]), hi=rgba(st["plate_hi"]), glass=rgba(st["glass"]), ship=st["deco"] == "vents")
+
+
+def _console_glow(img, draw_fn, radius=4):
+    layer = blank(); draw_fn(ImageDraw.Draw(layer)); img.alpha_composite(glow_layer(layer, radius))
+
+
+def _console_joystick(img, p, jx, jy):
+    d = ImageDraw.Draw(img); o = p["o"]
     d.ellipse([jx - 18, jy - 11, jx + 18, jy + 11], fill=(30, 30, 32, 255), outline=o, width=3)
     d.line([(jx, jy), (jx + 2, jy - 18)], fill=(55, 55, 58, 255), width=8)
     d.rounded_rectangle([jx - 10, jy - 40, jx + 12, jy - 12], radius=7, fill=(36, 38, 36, 255), outline=o, width=3)
-    d.rectangle([jx - 4, jy - 18, jx + 6, jy - 13], fill=(70, 70, 70, 255))  # trigger
-    thumb = blank(); ImageDraw.Draw(thumb).ellipse([jx - 3, jy - 36, jx + 5, jy - 28], fill=red)
-    img.alpha_composite(glow_layer(thumb, 3))
+    d.rectangle([jx - 4, jy - 18, jx + 6, jy - 13], fill=(70, 70, 70, 255))
+    _console_glow(img, lambda g: g.ellipse([jx - 3, jy - 36, jx + 5, jy - 28], fill=_RED), 3)
+
+
+def _console_fire_button(img, p, fx, fy, size=20):
+    d = ImageDraw.Draw(img); o = p["o"]
+    d.rectangle([fx - size, fy - size + 2, fx + size, fy + size - 2], fill=(230, 180, 30, 255), outline=o, width=3)
+    for i in range(-size, size + 1, 10):
+        d.line([(fx + i - 6, fy + size - 2), (fx + i + 6, fy - size + 2)], fill=(30, 30, 30, 255), width=3)
+    d.rectangle([fx - size + 7, fy - size + 9, fx + size - 7, fy + size - 9], fill=(30, 30, 34, 255), outline=o, width=2)
+    _console_glow(img, lambda g: g.ellipse([fx - 9, fy - 9, fx + 9, fy + 9], fill=_RED), 3)
+
+
+def _console_toggles(img, p, xs, y):
     d = ImageDraw.Draw(img)
-    # guarded fire button: red, under a flip-up cover in yellow/black
-    fx, fy = 76, 194
-    d.rectangle([fx - 20, fy - 18, fx + 20, fy + 18], fill=(230, 180, 30, 255), outline=o, width=3)
-    for i in range(-20, 21, 10):
-        d.line([(fx + i - 6, fy + 18), (fx + i + 6, fy - 18)], fill=(30, 30, 30, 255), width=3)
-    d.rectangle([fx - 13, fy - 11, fx + 13, fy + 11], fill=(30, 30, 34, 255), outline=o, width=2)
-    btn = blank(); ImageDraw.Draw(btn).ellipse([fx - 9, fy - 9, fx + 9, fy + 9], fill=red)
-    img.alpha_composite(glow_layer(btn, 3))
+    for x in xs:
+        d.rectangle([x - 5, y - 13, x + 5, y + 13], fill=(30, 30, 34, 255), outline=p["o"], width=2)
+        d.rectangle([x - 2, y - 11, x + 2, y + 1], fill=(200, 200, 205, 255))
+
+
+def _console_radar(img, c, r, contacts=((0.55, -0.4), (-0.45, 0.5)), colour=_PHOS, rings=2):
+    def fn(g):
+        for k in range(1, rings + 1):
+            rr = r * k / rings
+            g.ellipse([c[0] - rr, c[1] - rr, c[0] + rr, c[1] + rr], outline=colour + (150,), width=2)
+        g.line([(c[0] - r, c[1]), (c[0] + r, c[1])], fill=colour + (110,), width=2)
+        g.line([(c[0], c[1] - r), (c[0], c[1] + r)], fill=colour + (110,), width=2)
+        g.pieslice([c[0] - r, c[1] - r, c[0] + r, c[1] + r], -60, -20, fill=colour + (90,))
+        for ux, uy in contacts:
+            bx, by = c[0] + ux * r, c[1] + uy * r
+            g.line([(bx - 6, by - 6), (bx + 6, by + 6)], fill=_RED, width=3)
+            g.line([(bx - 6, by + 6), (bx + 6, by - 6)], fill=_RED, width=3)
+    _console_glow(img, fn, 4)
+
+
+def _console_deck(img, p, box, bolts=True):
     d = ImageDraw.Draw(img)
-    # arming toggle switches
-    for x in (118, 136):
-        d.rectangle([x - 5, 182, x + 5, 208], fill=(30, 30, 34, 255), outline=o, width=2)
-        d.rectangle([x - 2, 184, x + 2, 196], fill=(200, 200, 205, 255))
-    # stencilled unit plate on the front instead of coin slots
-    d.rectangle([S // 2 - 34, 228, S // 2 + 34, 240], fill=dark, outline=o, width=2)
-    for i, x in enumerate(range(S // 2 - 28, S // 2 + 28, 10)):
-        d.rectangle([x, 231, x + 6, 237], fill=hi if i % 3 else (230, 180, 30, 255))
-    if st["deco"] == "hazard":
-        for i in range(44, S - 44, 16):
-            d.line([(i, S - 16), (i + 8, S - 24)], fill=rgba(st["accents"][NODE]), width=4)
-    elif st["deco"] == "strips":
-        strip = blank(); ImageDraw.Draw(strip).rectangle([60, 154, S - 60, 157], fill=rgba(st["glass"]))
-        img.alpha_composite(glow_layer(strip, 5))
+    d.rectangle(box, fill=p["lo"], outline=p["o"], width=p["ow"])
+    d.line([(box[0] + 6, box[1] + 8), (box[2] - 6, box[1] + 8)], fill=p["hi"], width=3)
+    if bolts:
+        for x, y in ((box[0] + 8, box[1] + 16), (box[2] - 8, box[1] + 16), (box[0] + 8, box[3] - 8), (box[2] - 8, box[3] - 8)):
+            d.ellipse([x - 3, y - 3, x + 3, y + 3], fill=p["hi"], outline=p["o"], width=1)
+
+
+def _console_strip(img, p, box):
+    if not p["ship"]:
+        _console_glow(img, lambda g: g.rectangle(box, fill=_TEAL), 5)
+
+
+def console_art(st):
+    """A cockpit-style fire-control station seen from above and in front: an angled radar scope between two
+    angled status screens at the back (north), then a deck toward the operator (south) with a throttle lever on
+    the left, a guarded fire button and arming switches in the middle, and a flight stick on the right."""
+    p = _console_pal(st); img = blank(); d = ImageDraw.Draw(img); o = p["o"]
+    d.polygon([(40, 18), (S - 40, 18), (S - 16, 60), (S - 16, S - 22), (16, S - 22), (16, 60)], fill=p["metal"])
+    d.line([(40, 18), (S - 40, 18), (S - 16, 60), (S - 16, S - 22), (16, S - 22), (16, 60), (40, 18)], fill=o, width=p["ow"], joint="curve")
+    # side screens, angled in
+    for side in (-1, 1):
+        x0 = 28 if side < 0 else S - 72
+        pts = [(x0, 64), (x0 + 44, 52), (x0 + 44, 140), (x0, 136)] if side < 0 else [(x0, 52), (x0 + 44, 64), (x0 + 44, 136), (x0, 140)]
+        d.polygon(pts, fill=p["dark"], outline=o)
+        inner = [(x + (6 if i in (0, 3) else -6) * (1 if side < 0 else 1), y + (6 if i < 2 else -6)) for i, (x, y) in enumerate(pts)]
+        d.polygon(inner, fill=(10, 26, 16, 255))
+        def bars(g, x0=x0):
+            for k, w in enumerate((26, 18, 30, 12)):
+                g.rectangle([x0 + 9, 74 + k * 14, x0 + 9 + w, 80 + k * 14], fill=_PHOS + (200,))
+        _console_glow(img, bars, 2)
+    d = ImageDraw.Draw(img)
+    d.rectangle([76, 40, S - 76, 146], fill=p["dark"], outline=o, width=p["ow"])
+    d.rectangle([84, 48, S - 84, 138], fill=(10, 26, 16, 255))
+    _console_radar(img, (S // 2, 93), 36)
+    _console_deck(img, p, [28, 156, S - 28, 222])
+    # throttle lever on the left
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([56, 172, 76, 214], radius=6, fill=(30, 30, 34, 255), outline=o, width=2)
+    d.rounded_rectangle([50, 178, 82, 194], radius=6, fill=(60, 62, 66, 255), outline=o, width=3)
+    _console_fire_button(img, p, 118, 192, size=16)
+    _console_toggles(img, p, (150, 164), 192)
+    _console_joystick(img, p, S - 64, 200)
+    _console_strip(img, p, [40, 150, S - 40, 153])
     return img
 
 

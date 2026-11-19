@@ -68,7 +68,7 @@ Put a **beam emitter** on one power grid and a **beam receiver** on another, and
 
 ## Laser control console
 
-A 1x1 fire-control station built like an arcade cabinet: armoured hood, radar scope, guarded fire button, arming switches and a flight-stick on the right (Security tab; research Microelectronics basics; 80 steel, 3 components; 100 W).
+A 1x1 cockpit-style fire-control station: a radar scope flanked by two angled status screens, a throttle, a guarded fire button, arming switches and a flight stick on the right (Security tab; research Microelectronics basics; 80 steel, 3 components; 100 W).
 
 - Use **Link laser** to connect up to **3** laser cannons or mining lasers within **20 tiles**. Selecting it shows its reach and its links.
 - While a colonist mans it, every linked laser counts as manned: cannons get +6 range and ×1.5 damage; mining lasers cut ×1.5 faster, and their **Choose rock** button picks which marked rock they cut next.
