@@ -6,6 +6,10 @@
   <JLG_InspectBarrier>Barrier mode: opens only for colonists and allies.</JLG_InspectBarrier>
   <JLG_InspectBurn>Burn mode: burns hostiles that walk through.</JLG_InspectBurn>
   <JLG_InspectLinks>Linked to {0} other post(s).</JLG_InspectLinks>
-  <JLG_InspectNoLinks>No link: build another post in line within {0} tiles.</JLG_InspectNoLinks>
+  <JLG_InspectNoLinks>No link: build another post in line within {0} tiles. Beamwire mirrors can turn the fence, and beam windows let it through walls.</JLG_InspectNoLinks>
   <JLG_InspectOff>No power: the fence is down.</JLG_InspectOff>
+  <JLG_Power>Power: {0} W</JLG_Power>
+  <JLG_PowerDesc>Set how much power each post of the whole connected fence draws. More power burns harder in Burn mode. Per post: {0}.</JLG_PowerDesc>
+  <JLG_PowerRow>{0} W ({1} burn)</JLG_PowerRow>
+  <JLG_InspectPower>Power: {0} W per post, {1} burn per second in Burn mode.</JLG_InspectPower>
 </LanguageData>

@@ -20,7 +20,7 @@
   <ThingDef ParentName="BuildingBase">
     <defName>JLG_LaserGatePost</defName>
     <label>laser fence post</label>
-    <description>An emitter post for laser fences. Posts link up with the nearest other post in line to the north, east, south and west, across up to 5 empty tiles, and fill the gap with a curtain of laser light while both have power. Build them in a row for a fence, or across a doorway for a gate.\n\nBarrier mode: the curtain blocks the way like a locked door. Colonists and allies pass as if it were open; hostiles have to break through, and whatever hits the curtain lands on its posts. Burn mode: anyone can walk through, but hostiles in the curtain are burned. The curtain switches off while a colonist, guest or tame animal is in it.</description>
+    <description>An emitter post for laser fences. Posts link up with the nearest other post in line to the north, east, south and west, across up to 5 empty tiles, and fill the gap with a curtain of laser light while both have power. Build them in a row for a fence, or across a doorway for a gate. With Beamwire, a fence can bend off mirrors and pass through beam windows, so the posts can sit safely inside your walls.\n\nBarrier mode: the curtain blocks the way like a locked door. Colonists and allies pass as if it were open; hostiles have to break through, and whatever hits the curtain lands on the nearest post or mirror. Burn mode: anyone can walk through, but hostiles in the curtain are burned. The curtain switches off while a colonist, guest or tame animal is in it.\n\nThe power setting (150 W to 1,200 W per post) sets how hard Burn mode burns.</description>
     <thingClass>JarimichusLasers.Building_LaserGatePost</thingClass>
     <category>Building</category>
     <graphicData>
@@ -74,7 +74,14 @@
       <li Class="CompProperties_Breakdownable"/>
       <li Class="JarimichusLasers.CompProperties_LaserGate">
         <maxSpan>5</maxSpan>
+        <maxMirrors>4</maxMirrors>
         <burnDamage>12</burnDamage>
+        <powerLevels>
+          <li>150</li>
+          <li>300</li>
+          <li>600</li>
+          <li>1200</li>
+        </powerLevels>
         <burnInterval>60</burnInterval>
       </li>
     </comps>

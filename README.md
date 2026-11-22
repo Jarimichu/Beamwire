@@ -97,11 +97,13 @@ Crew your turrets from somewhere safe.
 
 Seal a gateway with light.
 
-- Build **laser fence posts** in a line. Each post links with the nearest post in line to the north, east, south and west, across up to **5 empty tiles**, and fills the gap with a red laser curtain. Build a row for a fence, corners and all, or a pair across a doorway for a gate.
-- **Barrier mode:** the curtain blocks the way like a locked door. Colonists and allies walk through; hostiles have to break through, and whatever hits the curtain lands on its posts (300 HP each).
-- **Burn mode:** anyone can walk through, but hostiles in the curtain are burned (12 per second). It switches off while a colonist, guest or tame animal is in it.
-- One button switches the whole connected fence between modes. While placing a post, the gaps it would fence off are outlined.
-- Each post uses 150 W. No power, no fence.
+- Build **laser fence posts** in a line. Each post links with the nearest post in line to the north, east, south and west, across up to **5 tiles**, and fills the gap with a red laser curtain. Build a row for a fence, corners and all, or a pair across a doorway for a gate.
+- **Tuck the posts away** with Beamwire: a fence bends off **mirrors** (up to 4, each leg up to 5 tiles) and passes through **beam windows**, so the posts can sit inside your walls with only mirrors or windows in the wall line. Rotate those mirrors by hand so auto-aim leaves them alone.
+- **Barrier mode:** the curtain blocks the way like a locked door. Colonists and allies walk through; hostiles have to break through, and whatever hits the curtain lands on the nearest post (300 HP) or mirror of that stretch.
+- **Burn mode:** anyone can walk through, but hostiles in the curtain are burned every second. Each mirror on the way costs 5% of the burn. It switches off while a colonist, guest or tame animal is in it.
+- **Power setting:** 150, 300, 600 or 1,200 W per post, for 12, 17, 24 or 34 burn per second.
+- One button switches the whole connected fence between modes, another sets its power. While placing a post, the straight gaps it would close are outlined.
+- No power, no fence.
 - **Cost:** 50 steel, 15 plasteel, 2 components per post. **Research:** Laser fences (Autodoors + Microelectronics).
 
 ---
