@@ -37,6 +37,13 @@
     </operation>
   </Operation>
 
+  <Operation Class="JarimichusLasers.PatchOperationIfParts">
+    <disabled><li>LaserGate</li></disabled>
+    <operation Class="PatchOperationRemove">
+      <xpath>Defs/*[self::ThingDef or self::ResearchProjectDef][starts-with(defName, "JLG_")]</xpath>
+    </operation>
+  </Operation>
+
   <!-- The laser control console goes when there is no laser left for it to run. -->
   <Operation Class="JarimichusLasers.PatchOperationIfParts">
     <disabled><li>MiningLaser</li><li>LaserCannon</li></disabled>

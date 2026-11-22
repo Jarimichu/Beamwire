@@ -34,11 +34,12 @@ namespace JarimichusLasers
             // ---- parts
             Header(l, "JLS_Header_Parts");
             l.Label("JLS_Parts_Desc".Translate());
-            bool bw = s.beamwireEnabled, ml = s.miningLaserEnabled, lc = s.laserCannonEnabled;
+            bool bw = s.beamwireEnabled, ml = s.miningLaserEnabled, lc = s.laserCannonEnabled, lg = s.laserGateEnabled;
             l.CheckboxLabeled("JLS_Part_Beamwire".Translate(), ref s.beamwireEnabled, "JLS_Part_Beamwire_Desc".Translate());
             l.CheckboxLabeled("JLS_Part_MiningLaser".Translate(), ref s.miningLaserEnabled, "JLS_Part_MiningLaser_Desc".Translate());
             l.CheckboxLabeled("JLS_Part_LaserCannon".Translate(), ref s.laserCannonEnabled, "JLS_Part_LaserCannon_Desc".Translate());
-            if (bw != s.beamwireEnabled || ml != s.miningLaserEnabled || lc != s.laserCannonEnabled) s.partsChanged = true;
+            l.CheckboxLabeled("JLS_Part_LaserGate".Translate(), ref s.laserGateEnabled, "JLS_Part_LaserGate_Desc".Translate());
+            if (bw != s.beamwireEnabled || ml != s.miningLaserEnabled || lc != s.laserCannonEnabled || lg != s.laserGateEnabled) s.partsChanged = true;
             if (s.partsChanged)
             {
                 GUI.color = ColorLibrary.RedReadable;
@@ -123,6 +124,7 @@ namespace JarimichusLasers
         public bool beamwireEnabled = true;
         public bool miningLaserEnabled = true;
         public bool laserCannonEnabled = true;
+        public bool laserGateEnabled = true;
 
         /// <summary>Set when a part toggle changed this session, to show the restart notice.</summary>
         public bool partsChanged;
@@ -142,6 +144,7 @@ namespace JarimichusLasers
                 case "Beamwire": return beamwireEnabled;
                 case "MiningLaser": return miningLaserEnabled;
                 case "LaserCannon": return laserCannonEnabled;
+                case "LaserGate": return laserGateEnabled;
                 default:
                     Log.Error($"[Jarimichus Lasers] Unknown part '{part}' in a patch.");
                     return true;
@@ -164,6 +167,7 @@ namespace JarimichusLasers
             Scribe_Values.Look(ref beamwireEnabled, "beamwireEnabled", true);
             Scribe_Values.Look(ref miningLaserEnabled, "miningLaserEnabled", true);
             Scribe_Values.Look(ref laserCannonEnabled, "laserCannonEnabled", true);
+            Scribe_Values.Look(ref laserGateEnabled, "laserGateEnabled", true);
             Scribe_Deep.Look(ref beamwire, "beamwire");
             Scribe_Values.Look(ref miningBurn, "miningBurn", true);
             Scribe_Values.Look(ref miningBurnMultiplier, "miningBurnMultiplier", 1f);
@@ -212,6 +216,10 @@ namespace JarimichusLasers
 
         public static DamageDef JML_LaserBurn => miningBurn ?? (miningBurn = DefDatabase<DamageDef>.GetNamedSilentFail("JML_LaserBurn"));
         public static DamageDef JLC_LaserBurn => cannonBurn ?? (cannonBurn = DefDatabase<DamageDef>.GetNamedSilentFail("JLC_LaserBurn"));
+        private static ThingDef curtain;
+        private static DamageDef gateBurn;
+        public static ThingDef JLG_LaserCurtain => curtain ?? (curtain = DefDatabase<ThingDef>.GetNamedSilentFail("JLG_LaserCurtain"));
+        public static DamageDef JLG_GateBurn => gateBurn ?? (gateBurn = DefDatabase<DamageDef>.GetNamedSilentFail("JLG_GateBurn"));
         public static JobDef JLC_ManLaserCannon => manCannon ?? (manCannon = DefDatabase<JobDef>.GetNamedSilentFail("JLC_ManLaserCannon"));
         public static JobDef JLX_ManLaserConsole => manConsole ?? (manConsole = DefDatabase<JobDef>.GetNamedSilentFail("JLX_ManLaserConsole"));
         public static SoundDef JLC_LaserBuzz => buzz ?? (buzz = DefDatabase<SoundDef>.GetNamedSilentFail("JLC_LaserBuzz"));

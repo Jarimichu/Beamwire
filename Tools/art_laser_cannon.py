@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates the laser cannon's and the laser control console's art in the mod's high-tech look (the same as Beamwire's), plus the cannon's buzz.
+"""Generates the laser cannon's, the laser control console's and the laser fence post's art in the mod's high-tech look (the same as Beamwire's), plus the cannon's buzz.
 
 Run from the repo root:  python3 Tools/art_laser_cannon.py   (needs Pillow)
 """
@@ -362,6 +362,41 @@ def console_files():
     save(down(console_art(SHIP)), "Ship", "LaserConsole_ShipBase.png")
 
 
+
+# ---------------------------------------------------------------- laser fence post
+def gate_post_art(st):
+    """A laser fence post seen from above: a square footing, a rounded pillar, and a red emitter lens on each of its
+    four sides, since a post links in every direction."""
+    img = blank(); d = ImageDraw.Draw(img)
+    o = rgba(st["outline"]); ow = max(3, st["ow"] - 1)
+    d.rounded_rectangle([16, 16, S - 16, S - 16], radius=30, fill=rgba(st["plate_lo"]), outline=o, width=ow)
+    for x, y in ((36, 36), (S - 36, 36), (36, S - 36), (S - 36, S - 36)):
+        d.ellipse([x - 6, y - 6, x + 6, y + 6], fill=rgba(st["plate_hi"]), outline=o, width=2)
+    # emitter housings on all four sides
+    c = S // 2
+    for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
+        hx, hy = c + dx * 84, c + dy * 84
+        w, h = (40, 24) if dy else (24, 40)
+        d.rounded_rectangle([hx - w, hy - h, hx + w, hy + h], radius=8, fill=rgba(st["metal_dark"]), outline=o, width=3)
+        lens = blank(); ImageDraw.Draw(lens).ellipse([hx + dx * 10 - 13, hy + dy * 10 - 13, hx + dx * 10 + 13, hy + dy * 10 + 13], fill=(255, 50, 40, 255))
+        img.alpha_composite(glow_layer(lens, 5))
+        d = ImageDraw.Draw(img)
+    # the pillar
+    d.ellipse([c - 58, c - 58, c + 58, c + 58], fill=rgba(st["metal"]), outline=o, width=ow)
+    d.ellipse([c - 38, c - 38, c + 38, c + 38], fill=rgba(st["plate_hi"]), outline=rgba(st["metal_dark"]), width=4)
+    if st["deco"] == "strips":
+        ring = blank(); ImageDraw.Draw(ring).ellipse([c - 48, c - 48, c + 48, c + 48], outline=rgba(st["glass"]), width=4)
+        img.alpha_composite(glow_layer(ring, 4))
+    core = blank(); ImageDraw.Draw(core).ellipse([c - 13, c - 13, c + 13, c + 13], fill=(255, 90, 70, 255))
+    img.alpha_composite(glow_layer(core, 4))
+    return img
+
+
+def gate_post_files():
+    a = gate_post_art(STYLE)
+    save(down(a), "Things", "LaserGatePost_Base.png")
+    save(down(a), "Things", "LaserGatePost_Icon.png")
+
 def main():
     for folder, st in STYLES.items():
         save(down(base(st, NODE)), "Things", f"{NODE}_Base.png")
@@ -372,6 +407,7 @@ def main():
     save(beam_glow(), "Effects", "BeamGlow.png")
     ship_art()
     console_files()
+    gate_post_files()
     os.makedirs(os.path.join(ROOT, "Tools", "previews"), exist_ok=True)
     preview().save(os.path.join(ROOT, "Tools", "previews", NODE + ".png"))
     buzz(os.path.join(ROOT, "Common", "Sounds", "JarimichusLasers", "LaserBuzz.wav"))

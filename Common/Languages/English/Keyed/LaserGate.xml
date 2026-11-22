@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <JLG_ModeBarrier>Mode: barrier</JLG_ModeBarrier>
+  <JLG_ModeBurn>Mode: burn</JLG_ModeBurn>
+  <JLG_ModeDesc>Switch the whole connected fence between Barrier (a locked door that opens only for colonists and allies; hostiles must destroy a post) and Burn (anyone can walk through, hostiles are burned; it switches off while a non-hostile passes).</JLG_ModeDesc>
+  <JLG_InspectBarrier>Barrier mode: opens only for colonists and allies.</JLG_InspectBarrier>
+  <JLG_InspectBurn>Burn mode: burns hostiles that walk through.</JLG_InspectBurn>
+  <JLG_InspectLinks>Linked to {0} other post(s).</JLG_InspectLinks>
+  <JLG_InspectNoLinks>No link: build another post in line within {0} tiles.</JLG_InspectNoLinks>
+  <JLG_InspectOff>No power: the fence is down.</JLG_InspectOff>
+</LanguageData>

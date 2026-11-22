@@ -10,7 +10,7 @@
 import glob, os, re, sys, xml.etree.ElementTree as ET
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PARTS = {"Beamwire", "MiningLaser", "LaserCannon"}
+PARTS = {"Beamwire", "MiningLaser", "LaserCannon", "LaserGate"}
 NAMESPACES = ("Beamwire.", "JarimichusLasers.")
 problems = []
 

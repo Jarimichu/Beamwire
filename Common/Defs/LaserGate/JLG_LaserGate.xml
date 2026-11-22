@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Laser fence posts: posts in line link up and fill the gaps between them with a laser curtain. -->
+<Defs>
+
+  <ResearchProjectDef>
+    <defName>JLG_LaserGate</defName>
+    <label>laser fences</label>
+    <description>Pairs of emitter posts that fill the space between them with a curtain of laser light: a wall that opens for your people and stays shut, or burns, for everyone else.</description>
+    <baseCost>1500</baseCost>
+    <techLevel>Industrial</techLevel>
+    <prerequisites>
+      <li>Autodoors</li>
+      <li>MicroelectronicsBasics</li>
+    </prerequisites>
+    <tab>Main</tab>
+    <researchViewX>0</researchViewX>
+    <researchViewY>0</researchViewY>
+  </ResearchProjectDef>
+
+  <ThingDef ParentName="BuildingBase">
+    <defName>JLG_LaserGatePost</defName>
+    <label>laser fence post</label>
+    <description>An emitter post for laser fences. Posts link up with the nearest other post in line to the north, east, south and west, across up to 5 empty tiles, and fill the gap with a curtain of laser light while both have power. Build them in a row for a fence, or across a doorway for a gate.\n\nBarrier mode: the curtain blocks the way like a locked door. Colonists and allies pass as if it were open; hostiles have to break through, and whatever hits the curtain lands on its posts. Burn mode: anyone can walk through, but hostiles in the curtain are burned. The curtain switches off while a colonist, guest or tame animal is in it.</description>
+    <thingClass>JarimichusLasers.Building_LaserGatePost</thingClass>
+    <category>Building</category>
+    <graphicData>
+      <texPath>JarimichusLasers/Things/LaserGatePost_Base</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(1,1)</drawSize>
+    </graphicData>
+    <uiIconPath>JarimichusLasers/Things/LaserGatePost_Icon</uiIconPath>
+    <drawerType>RealtimeOnly</drawerType>
+    <altitudeLayer>Building</altitudeLayer>
+    <passability>Impassable</passability>
+    <fillPercent>0.75</fillPercent>
+    <blockWind>true</blockWind>
+    <castEdgeShadows>true</castEdgeShadows>
+    <rotatable>false</rotatable>
+    <tickerType>Normal</tickerType>
+    <size>(1,1)</size>
+    <minifiedDef>MinifiedThing</minifiedDef>
+    <thingCategories>
+      <li>BuildingsSecurity</li>
+    </thingCategories>
+    <designationCategory>Security</designationCategory>
+    <costList>
+      <Steel>50</Steel>
+      <Plasteel>15</Plasteel>
+      <ComponentIndustrial>2</ComponentIndustrial>
+    </costList>
+    <statBases>
+      <MaxHitPoints>300</MaxHitPoints>
+      <WorkToBuild>2500</WorkToBuild>
+      <Flammability>0</Flammability>
+      <Mass>12</Mass>
+      <Beauty>-2</Beauty>
+    </statBases>
+    <building>
+      <ai_chillDestination>false</ai_chillDestination>
+    </building>
+    <researchPrerequisites>
+      <li>JLG_LaserGate</li>
+    </researchPrerequisites>
+    <placeWorkers>
+      <li>JarimichusLasers.PlaceWorker_LaserGate</li>
+    </placeWorkers>
+    <comps>
+      <li Class="CompProperties_Power">
+        <compClass>CompPowerTrader</compClass>
+        <basePowerConsumption>150</basePowerConsumption>
+        <shortCircuitInRain>false</shortCircuitInRain>
+      </li>
+      <li Class="CompProperties_Flickable"/>
+      <li Class="CompProperties_Breakdownable"/>
+      <li Class="JarimichusLasers.CompProperties_LaserGate">
+        <maxSpan>5</maxSpan>
+        <burnDamage>12</burnDamage>
+        <burnInterval>60</burnInterval>
+      </li>
+    </comps>
+  </ThingDef>
+
+  <!-- One cell of a fence in Barrier mode: spawned and removed by the posts, never built by hand. A door that only
+       colonists and allies can open; damage to it lands on its posts. -->
+  <ThingDef ParentName="BuildingBase">
+    <defName>JLG_LaserCurtain</defName>
+    <label>laser curtain</label>
+    <description>A curtain of laser light between two laser fence posts. Colonists and allies pass through it; anyone else has to destroy one of its posts.</description>
+    <thingClass>JarimichusLasers.Building_LaserCurtain</thingClass>
+    <category>Building</category>
+    <graphicData>
+      <texPath>JarimichusLasers/Effects/BeamGlow</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(1,1)</drawSize>
+    </graphicData>
+    <drawerType>RealtimeOnly</drawerType>
+    <altitudeLayer>DoorMoveable</altitudeLayer>
+    <passability>PassThroughOnly</passability>
+    <pathCost>0</pathCost>
+    <fillPercent>1</fillPercent>
+    <blockLight>false</blockLight>
+    <blockWind>false</blockWind>
+    <holdsRoof>false</holdsRoof>
+    <rotatable>false</rotatable>
+    <selectable>false</selectable>
+    <tickerType>Normal</tickerType>
+    <size>(1,1)</size>
+    <statBases>
+      <MaxHitPoints>1000</MaxHitPoints>
+      <Flammability>0</Flammability>
+      <DoorOpenSpeed>10</DoorOpenSpeed>
+    </statBases>
+    <building>
+      <isInert>true</isInert>
+      <soundDoorOpenPowered>Door_OpenPowered</soundDoorOpenPowered>
+      <soundDoorClosePowered>Door_ClosePowered</soundDoorClosePowered>
+      <soundDoorOpenManual>Door_OpenPowered</soundDoorOpenManual>
+      <soundDoorCloseManual>Door_ClosePowered</soundDoorCloseManual>
+      <ai_chillDestination>false</ai_chillDestination>
+    </building>
+  </ThingDef>
+
+  <DamageDef>
+    <defName>JLG_GateBurn</defName>
+    <label>laser fence burn</label>
+    <workerClass>DamageWorker_AddInjury</workerClass>
+    <externalViolence>true</externalViolence>
+    <deathMessage>{0} was burned down by a laser fence.</deathMessage>
+    <hediff>Burn</hediff>
+    <armorCategory>Heat</armorCategory>
+    <minDamageToFragment>15</minDamageToFragment>
+    <defaultDamage>12</defaultDamage>
+    <defaultArmorPenetration>0.2</defaultArmorPenetration>
+    <makesBlood>false</makesBlood>
+  </DamageDef>
+
+</Defs>

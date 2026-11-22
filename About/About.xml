@@ -20,7 +20,7 @@
   <loadAfter>
     <li>brrainz.harmony</li>
   </loadAfter>
-  <description>Lasers for RimWorld: wireless power over laser beams, a mining laser, a laser cannon, and a control console to crew them. Every part can be switched off in the mod settings.
+  <description>Lasers for RimWorld: wireless power over laser beams, a mining laser, a laser cannon, a control console to crew them, and laser fences. Every part can be switched off in the mod settings.
 
 Beamwire: wireless power
 Build a beam emitter on one grid and a beam receiver on another, and the power flows between them through the air. Bend beams with mirrors in 8 directions, split them with splitters and prisms, carry them across the map with relays, store them in capacitors, and guard them with safety shutters. The network aims itself as you build. Beams power the lasers too.
@@ -33,6 +33,9 @@ A twin-barrelled defence turret with continuous red beams: 18 DPS, 27 when manne
 
 Laser control console
 A military fire-control station with a wraparound cockpit-style display. Link up to 3 lasers and one colonist mans them all: cannons hit harder and reach further, mining lasers cut faster and let you choose their rock.
+
+Laser fences
+Posts that link up in lines and fill the gaps with a curtain of laser light. In barrier mode it opens only for your people; in burn mode it burns hostiles who walk through.
 
 Also
 - Optional Odyssey support: gravship hull-mounted looks, bonuses in vacuum, and no dust on optics in vacuum.

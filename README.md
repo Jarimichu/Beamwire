@@ -4,7 +4,7 @@
 
 Power your colony with light. Jarimichus Lasers brings high-tech laser technology to RimWorld 1.4, 1.5 and 1.6: wireless power beamed across the map, a laser that mines rock for you, a laser cannon that burns raiders, and a fire-control console to crew them.
 
-The mod comes in four parts. Use them together, or switch off the ones you don't want in the mod settings.
+The mod comes in five parts. Use them together, or switch off the ones you don't want in the mod settings.
 
 | Part | In short |
 |---|---|
@@ -12,6 +12,7 @@ The mod comes in four parts. Use them together, or switch off the ones you don't
 | **Mining laser** | A three-barrelled turret that cuts marked rock and ore for full yield. |
 | **Laser cannon** | A twin-barrelled defence turret that locks two burning red beams onto hostiles. |
 | **Laser control console** | A cockpit-style station where one colonist mans up to three lasers. |
+| **Laser fences** | Posts that link up in lines and fill the gaps with a curtain of laser light that only your people can pass. |
 
 Beamwire beams can power the lasers too: they use beam power first, and their own grid tops them up.
 
@@ -92,6 +93,19 @@ Crew your turrets from somewhere safe.
 
 ---
 
+## Laser fences
+
+Seal a gateway with light.
+
+- Build **laser fence posts** in a line. Each post links with the nearest post in line to the north, east, south and west, across up to **5 empty tiles**, and fills the gap with a red laser curtain. Build a row for a fence, corners and all, or a pair across a doorway for a gate.
+- **Barrier mode:** the curtain blocks the way like a locked door. Colonists and allies walk through; hostiles have to break through, and whatever hits the curtain lands on its posts (300 HP each).
+- **Burn mode:** anyone can walk through, but hostiles in the curtain are burned (12 per second). It switches off while a colonist, guest or tame animal is in it.
+- One button switches the whole connected fence between modes. While placing a post, the gaps it would fence off are outlined.
+- Each post uses 150 W. No power, no fence.
+- **Cost:** 50 steel, 15 plasteel, 2 components per post. **Research:** Laser fences (Autodoors + Microelectronics).
+
+---
+
 ## Odyssey
 
 Odyssey is optional. With it:
@@ -104,7 +118,7 @@ Odyssey is optional. With it:
 
 ## Mod settings
 
-- **Parts:** switch Beamwire, the mining laser or the laser cannon off. Their buildings and research disappear after a restart. The console stays while either laser is on.
+- **Parts:** switch Beamwire, the mining laser, the laser cannon or the laser fences off. Their buildings and research disappear after a restart. The console stays while either laser is on.
 - **Beamwire:** auto-aim, beam burns, power losses, range, weather, roofs, dust and beam visibility.
 - **Mining laser:** whether its cutting beam burns, and how hard.
 - **Laser cannon:** damage, and whether it attacks hostile animals.

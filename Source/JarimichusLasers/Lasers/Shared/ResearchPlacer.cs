@@ -16,6 +16,7 @@ namespace JarimichusLasers
         {
             Place("JML_MiningLaser");
             Place("JLC_LaserCannon");
+            Place("JLG_LaserGate");
         }
 
         private static void Place(string defName)
