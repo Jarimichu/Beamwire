@@ -240,6 +240,27 @@ namespace Beamwire.Core
                 }
             }
 
+            // Finally, every auto capacitor that no emitter route runs through is aimed, as backup power, at the
+            // cheapest receiver no emitter reaches. Its charge plays no part, so charging and draining never re-aim
+            // anything.
+            var dark = new HashSet<BeamNode>();
+            foreach (BeamNode n in allReceivers)
+            {
+                if (plan.UnreachedReceivers.Contains(n.Id)) dark.Add(n);
+            }
+            foreach (BeamNode cap in nodes)
+            {
+                if (dark.Count == 0) break;
+                if (cap.Kind != NodeKind.Capacitor || !IsAuto(cap) || commits.ContainsKey(cap)) continue;
+                Arrival found = Search(nodes, rays, fixedFacing, commits, dark, settings, cap);
+                if (found != null && TryCommit(found, commits))
+                {
+                    totalCost += found.Cost;
+                    if (plan.UnreachedReceivers.Remove(found.Node.Id)) plan.ReachedReceivers.Add(found.Node.Id);
+                    dark.Remove(found.Node);
+                }
+            }
+
             foreach (BeamNode n in nodes)
             {
                 if (IsAuto(n))
@@ -268,13 +289,16 @@ namespace Beamwire.Core
             var settled = new HashSet<long>();
             var outputs = new List<Dir8>(2);
 
-            // Seeds: every working emitter, plus charged capacitors (which cost a bounce, so emitter routes win).
+            // Seeds: every working emitter. A capacitor is aimed only as part of an emitter's route, never as a source
+            // of its own, so how full it is can't change the plan (charging and draining used to flip the aim back
+            // and forth). A charged capacitor still fires its stored power along whatever facing it has.
             // Manual or already-committed sources fire one way; free auto sources may fire any way.
             foreach (BeamNode e in nodes)
             {
                 bool emitter = e.Kind == NodeKind.Emitter;
-                bool charged = e.Kind == NodeKind.Capacitor && e.HasCharge;
-                if (!(emitter || charged) || !e.Operational) continue;
+                // A capacitor seeds only its own backup search (see Attempt), whatever its charge.
+                bool backup = e.Kind == NodeKind.Capacitor && e == onlySource;
+                if (!(emitter || backup) || !e.Operational) continue;
                 if (onlySource != null && e != onlySource) continue;
                 float baseCost = emitter ? 0f : NodeCost;
                 if (fixedFacing.TryGetValue(e, out Dir8 f))

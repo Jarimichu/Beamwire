@@ -255,5 +255,41 @@ namespace Beamwire.Tests
                 Assert.True(Get(applied, r).InputWatts > 0f, $"receiver {r} was planned but gets no beam");
             }
         }
-    }
+    
+        /// <summary>
+        /// A capacitor's charge must not change where auto-aim points things. It used to seed routes when charged,
+        /// so a capacitor charging and draining flipped the emitters' aim back and forth. This board did exactly that.
+        /// </summary>
+        [Fact]
+        public void CapacitorCharge_DoesNotChangeThePlan()
+        {
+            AimPlan PlanWith(float stored)
+            {
+                var grid = new TestGrid { Width = 10, Height = 10 };
+                var nodes = new[]
+                {
+                    Node(1, NodeKind.Emitter, 7, 3),
+                    Node(2, NodeKind.Emitter, 0, 6),
+                    new BeamNode(3, NodeKind.Capacitor, new GridPos(7, 6), Dir8.North)
+                    {
+                        AutoAim = true, Capacity = 60f, Stored = stored, MaxCharge = 1000f, MaxDischarge = 1000f, ChargeEfficiency = 0.85f,
+                    },
+                    Node(4, NodeKind.Receiver, 2, 8),
+                    Node(5, NodeKind.Receiver, 9, 8),
+                    Node(6, NodeKind.Mirror, 1, 2),
+                };
+                return AutoAimPlanner.Plan(grid, nodes, Lossless);
+            }
+
+            AimPlan empty = PlanWith(0f), half = PlanWith(30f), full = PlanWith(60f);
+            foreach (AimPlan other in new[] { half, full })
+            {
+                Assert.Equal(empty.Facings.Count, other.Facings.Count);
+                foreach (var kv in empty.Facings)
+                {
+                    Assert.True(other.Facings.TryGetValue(kv.Key, out Dir8 f) && f == kv.Value, $"node {kv.Key} aims differently");
+                }
+            }
+        }
+}
 }
