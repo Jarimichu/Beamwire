@@ -9,6 +9,7 @@ Node art lives in Common/Textures/Beamwire/Things/ as <Node>_Base.png (fixed pla
 (rotating part, drawn pointing North) and <Node>_Icon.png.
 """
 import math
+import random
 import os
 import struct
 import wave
@@ -284,23 +285,46 @@ def top_closed(st, kind):
 UP, RIGHT, DOWN, LEFT = 1, 2, 4, 8
 
 
-def window_tile(st, mask):
-    """One beam-window tile for the given link mask: a ceramic wall block with a glass channel that runs toward
-    every linked side (walls or other windows). The channel reaches the tile edge, unframed, on linked sides, so
-    windows side by side form one continuous pane, and a window in a north-south wall gets a vertical channel."""
+def window_tile(st, mask, part="all"):
+    """One beam-window tile for the given link mask: a wall block with a glass channel that runs toward every
+    linked side (walls, smoothed rock or other windows). The channel reaches the tile edge, unframed, on linked
+    sides, so windows side by side form one continuous pane, and a window in a north-south wall gets a vertical
+    channel.
+    part: "all" = the high-tech window; "stone" = only the stone block, near-white so the game tints it with the
+    stone it is built from (its glass channel left as a dark slot); "glass" = only the glass, drawn over the stone."""
     img = blank(); d = ImageDraw.Draw(img)
     o = rgba(st["outline"]); ow = max(6, st["ow"] + 1)
-    d.rectangle([0, 0, S, S], fill=rgba(st["plate_lo"]))
-    # wall-top lip and outline only on sides that don't continue into a neighbour
-    if not mask & UP:
-        d.rectangle([0, 0, S, 26], fill=rgba(st["plate_hi"]))
-        d.line([(0, ow // 2), (S, ow // 2)], fill=o, width=ow)
-    if not mask & DOWN:
-        d.line([(0, S - ow // 2 - 1), (S, S - ow // 2 - 1)], fill=o, width=ow)
-    if not mask & LEFT:
-        d.line([(ow // 2, 0), (ow // 2, S)], fill=o, width=ow)
-    if not mask & RIGHT:
-        d.line([(S - ow // 2 - 1, 0), (S - ow // 2 - 1, S)], fill=o, width=ow)
+    if part == "all":
+        d.rectangle([0, 0, S, S], fill=rgba(st["plate_lo"]))
+        # wall-top lip and outline only on sides that don't continue into a neighbour
+        if not mask & UP:
+            d.rectangle([0, 0, S, 26], fill=rgba(st["plate_hi"]))
+            d.line([(0, ow // 2), (S, ow // 2)], fill=o, width=ow)
+        if not mask & DOWN:
+            d.line([(0, S - ow // 2 - 1), (S, S - ow // 2 - 1)], fill=o, width=ow)
+        if not mask & LEFT:
+            d.line([(ow // 2, 0), (ow // 2, S)], fill=o, width=ow)
+        if not mask & RIGHT:
+            d.line([(S - ow // 2 - 1, 0), (S - ow // 2 - 1, S)], fill=o, width=ow)
+    elif part == "stone":
+        # a smooth dressed-stone block, pale so the stone's own colour shows through the tint
+        d.rectangle([0, 0, S, S], fill=(244, 242, 238, 255))
+        rnd = random.Random(1000 + mask)
+        for _ in range(260):                      # faint grain, like polished rock
+            x, y, r = rnd.randrange(S), rnd.randrange(S), rnd.choice((1, 1, 2, 3))
+            v = rnd.choice((226, 232, 250, 254))
+            d.ellipse([x - r, y - r, x + r, y + r], fill=(v, v - 2, v - 6, 255))
+        so = (150, 148, 144, 255)
+        if not mask & UP:
+            d.rectangle([0, 0, S, 22], fill=(255, 255, 252, 255))
+            d.line([(0, 3), (S, 3)], fill=so, width=6)
+        if not mask & DOWN:
+            d.rectangle([0, S - 18, S, S], fill=(212, 210, 204, 255))
+            d.line([(0, S - 4), (S, S - 4)], fill=so, width=6)
+        if not mask & LEFT:
+            d.line([(3, 0), (3, S)], fill=so, width=6)
+        if not mask & RIGHT:
+            d.line([(S - 4, 0), (S - 4, S)], fill=so, width=6)
 
     has_h, has_v = bool(mask & (LEFT | RIGHT)), bool(mask & (UP | DOWN))
     c, half, inset = S // 2, 34, 28          # channel centre, half-width, end inset when a side is open
@@ -321,6 +345,11 @@ def window_tile(st, mask):
         md.rectangle([x0, y0, x1, y1], fill=255)
     fw = 7
     rim = ImageChops.subtract(shape_mask.filter(ImageFilter.MaxFilter(2 * fw + 1)), shape_mask)
+    if part == "stone":
+        # the slot the glass sits in: dark, so it stays dark whatever the stone's tint
+        slot = blank(); slot.paste((58, 60, 62, 255), (0, 0), shape_mask)
+        img.alpha_composite(slot)
+        return img
     glass = blank(); glass.paste(rgba(st["beam"], 150), (0, 0), shape_mask)
     img.alpha_composite(glow_layer(glass, 6))
     frame = blank(); frame.paste(rgba(st["metal_dark"]), (0, 0), rim)
@@ -340,13 +369,13 @@ ATLAS_INNER = ATLAS_CELL * 3 // 4             # 96 px of real art per tile
 ATLAS_PAD = (ATLAS_CELL - ATLAS_INNER) // 2   # 16 px bleed on every side
 
 
-def window_atlas(st):
+def window_atlas(st, part="all"):
     """A 4 x 4 linked-graphic atlas, laid out as RimWorld's MaterialAtlasPool reads it: tile i sits in column
     i % 4 and row i // 4 counted from the BOTTOM of the image (texture V runs upward). Each tile's edge pixels
     are repeated into its bleed margin so texture filtering never pulls in a neighbour."""
     atlas = Image.new("RGBA", (ATLAS_CELL * 4, ATLAS_CELL * 4), (0, 0, 0, 0))
     for i in range(16):
-        tile = window_tile(st, i).resize((ATLAS_INNER, ATLAS_INNER), Image.LANCZOS)
+        tile = window_tile(st, i, part).resize((ATLAS_INNER, ATLAS_INNER), Image.LANCZOS)
         padded = Image.new("RGBA", (ATLAS_CELL, ATLAS_CELL))
         padded.paste(tile.resize((ATLAS_CELL, ATLAS_CELL), Image.NEAREST).resize((ATLAS_CELL, ATLAS_CELL)), (0, 0))
         # bleed: stretch the edge rows and columns outward
@@ -517,6 +546,8 @@ def main():
         closed_icon.alpha_composite(top_closed(st, "Shutter"))
         save(down(top_closed(st, "Shutter")), "Things", "Shutter_TopClosed.png")
         save(window_atlas(st), "Things", "Window_Atlas.png")
+        save(window_atlas(st, "stone"), "Things", "Window_StoneAtlas.png")
+        save(window_atlas(st, "glass"), "Things", "Window_GlassAtlas.png")
         save(down(window_tile(st, 0)), "Things", "Window_Icon.png")
         save(down(icon(st, "Shutter")), "UI", "ShutterOpen.png")
         save(down(closed_icon), "UI", "ShutterClosed.png")

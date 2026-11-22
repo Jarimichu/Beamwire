@@ -341,7 +341,7 @@ Place it just past an emitter or mirror, on the stretch of beam you want to guar
   <ThingDef ParentName="BuildingBase">
     <defName>Beamwire_Window</defName>
     <label>beam window</label>
-    <description>A wall with a thick glass channel. It keeps out people, gas and weather, holds up the roof and seals rooms like any wall, but power beams pass straight through it. Use it to bring beams into your base without leaving a door open. It joins up with walls and other beam windows, so a row of them forms one long pane, in either direction.</description>
+    <description>A wall with a thick glass channel. It keeps out people, gas and weather, holds up the roof and seals rooms like any wall, but power beams pass straight through it. Use it to bring beams into your base without leaving a door open. It joins up with walls, rock and other beam windows, so a row of them forms one long pane, in either direction. Built from stone, it takes on that stone's look so it blends into stone walls and smoothed rock; a button switches the look.</description>
     <thingClass>Beamwire.Building_BeamWindow</thingClass>
     <category>Building</category>
     <graphicData>
@@ -354,6 +354,7 @@ Place it just past an emitter or mirror, on the stretch of beam you want to guar
       <linkType>Basic</linkType>
       <linkFlags>
         <li>Wall</li>
+        <li>Rock</li>
       </linkFlags>
     </graphicData>
     <drawerType>MapMeshOnly</drawerType>

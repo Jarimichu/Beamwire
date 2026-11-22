@@ -54,4 +54,8 @@
   <Beamwire_Setting_NodeLoss>Loss per mirror, splitter or relay: {0}%</Beamwire_Setting_NodeLoss>
   <Beamwire_Setting_DistanceLoss>Loss per 10 tiles: {0}%</Beamwire_Setting_DistanceLoss>
   <Beamwire_Setting_Range>Beam range from an emitter or relay: {0} tiles</Beamwire_Setting_Range>
+  <Beamwire_WindowLook_Auto>Look: automatic</Beamwire_WindowLook_Auto>
+  <Beamwire_WindowLook_HighTech>Look: high-tech</Beamwire_WindowLook_HighTech>
+  <Beamwire_WindowLook_Stone>Look: stone</Beamwire_WindowLook_Stone>
+  <Beamwire_WindowLookDesc>Switch this window's look. Automatic: stone when it's built from stone (taking that stone's colour, to blend into stone walls and smoothed rock), high-tech otherwise. The glass stays the same.</Beamwire_WindowLookDesc>
 </LanguageData>
