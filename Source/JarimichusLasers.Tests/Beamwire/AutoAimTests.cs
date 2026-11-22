@@ -291,5 +291,37 @@ namespace Beamwire.Tests
                 }
             }
         }
+
+        /// <summary>
+        /// The user's board: E1 can hit R1 directly, or fire east through a shutter and a prism, which feeds R1, and
+        /// through a beam window into a capacitor that feeds R3. R2 is cut off by rock. The plan must feed the
+        /// capacitor (E1 east), whether the capacitor is empty or full, instead of leaving it to drain dry.
+        /// </summary>
+        [Theory]
+        [InlineData(0f)]
+        [InlineData(300f)]
+        [InlineData(600f)]
+        public void EmitterFeedsTheCapacitor_WhateverItsCharge(float stored)
+        {
+            var grid = new TestGrid { Width = 10, Height = 10 };
+            grid.Walls.Add(new GridPos(4, 2));                                   // rock between the prism and R2
+            for (int z = 2; z <= 8; z++) if (z != 5) grid.Walls.Add(new GridPos(6, z)); // a wall with a beam window at z=5
+            var e1 = Node(1, NodeKind.Emitter, 0, 5, Dir8.NorthEast);
+            var g1 = Node(2, NodeKind.Shutter, 2, 5);
+            var p1 = Node(3, NodeKind.Prism, 4, 5);
+            var c1 = new BeamNode(4, NodeKind.Capacitor, new GridPos(8, 5), Dir8.South)
+            {
+                AutoAim = true, Capacity = 600f, Stored = stored, MaxCharge = 1000f, MaxDischarge = 1000f, ChargeEfficiency = 0.85f,
+            };
+            var r1 = Node(5, NodeKind.Receiver, 4, 9);
+            var r2 = Node(6, NodeKind.Receiver, 4, 1);
+            var r3 = Node(7, NodeKind.Receiver, 8, 1);
+            AimPlan plan = AutoAimPlanner.Plan(grid, new[] { e1, g1, p1, c1, r1, r2, r3 }, Lossless);
+            Assert.Equal(Dir8.East, plan.Facings[1]);
+            Assert.Equal(Dir8.South, plan.Facings[4]);
+            Assert.Contains(5, plan.ReachedReceivers);
+            Assert.Contains(7, plan.ReachedReceivers);
+            Assert.Contains(6, plan.UnreachedReceivers);
+        }
 }
 }

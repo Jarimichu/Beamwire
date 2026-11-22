@@ -92,7 +92,11 @@ namespace Beamwire.Core
             // Greedy planning can paint itself into a corner (for example by spending an emitter's only beam on
             // the nearest receiver). If receivers are left dark, retry with those receivers served first, and
             // keep the attempt that reaches the most receivers, then the one with the lowest total cost.
-            AimPlan best = Attempt(nodes, rays, settings, new List<int>(), null, out float bestCost);
+            // Plans are compared on emitter routes only: a capacitor's backup aim (which doesn't depend on its charge,
+            // and may have nothing to give) must never make a plan look better than one that keeps it fed.
+            List<int> bestPriority = new List<int>();
+            Dictionary<BeamNode, Dir8> bestForced = null;
+            AimPlan best = Attempt(nodes, rays, settings, bestPriority, null, false, out float bestCost);
             var tried = new HashSet<string>();
             for (int i = 0; i < MaxRetries && best.UnreachedReceivers.Count > 0; i++)
             {
@@ -106,12 +110,13 @@ namespace Beamwire.Core
                 }
                 if (!tried.Add(string.Join(",", priority))) break;
 
-                AimPlan candidate = Attempt(nodes, rays, settings, priority, null, out float cost);
+                AimPlan candidate = Attempt(nodes, rays, settings, priority, null, false, out float cost);
                 if (candidate.ReachedReceivers.Count > best.ReachedReceivers.Count ||
                     (candidate.ReachedReceivers.Count == best.ReachedReceivers.Count && cost < bestCost - 1e-3f))
                 {
                     best = candidate;
                     bestCost = cost;
+                    bestPriority = priority;
                 }
                 else
                 {
@@ -132,14 +137,19 @@ namespace Beamwire.Core
                     if (best.Facings.TryGetValue(e.Id, out Dir8 current) && (int)current == d) continue;
                     budget--;
                     var forced = new Dictionary<BeamNode, Dir8> { [e] = (Dir8)d };
-                    AimPlan candidate = Attempt(nodes, rays, settings, new List<int>(), forced, out float cost);
+                    AimPlan candidate = Attempt(nodes, rays, settings, new List<int>(), forced, false, out float cost);
                     if (candidate.ReachedReceivers.Count > best.ReachedReceivers.Count)
                     {
                         best = candidate;
                         bestCost = cost;
+                        bestPriority = new List<int>();
+                        bestForced = forced;
                     }
                 }
             }
+
+            // The chosen plan again, now with spare capacitors aimed as backup at receivers it leaves dark.
+            best = Attempt(nodes, rays, settings, bestPriority, bestForced, true, out bestCost);
 
             foreach (GridPos p in watched) best.WatchedCells.Add(p);
             return best;
@@ -151,6 +161,7 @@ namespace Beamwire.Core
             BeamSettings settings,
             List<int> priority,
             Dictionary<BeamNode, Dir8> forced,
+            bool backup,
             out float totalCost)
         {
             var plan = new AimPlan();
@@ -250,7 +261,7 @@ namespace Beamwire.Core
             }
             foreach (BeamNode cap in nodes)
             {
-                if (dark.Count == 0) break;
+                if (!backup || dark.Count == 0) break;
                 if (cap.Kind != NodeKind.Capacitor || !IsAuto(cap) || commits.ContainsKey(cap)) continue;
                 Arrival found = Search(nodes, rays, fixedFacing, commits, dark, settings, cap);
                 if (found != null && TryCommit(found, commits))
