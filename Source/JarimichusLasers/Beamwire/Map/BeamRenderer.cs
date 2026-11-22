@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Beamwire.Core;
 using UnityEngine;
 using Verse;
@@ -7,7 +8,8 @@ namespace Beamwire
     /// <summary>
     /// Draws beams as thin, Portal-style lasers: a narrow white-hot core over a faint additive glow.
     /// As in MiningCo DrillTurret, each beam is a plane mesh stretched along its path at projectile altitude.
-    /// More power makes a beam brighter; its width hardly changes.
+    /// More power makes a beam brighter; its width hardly changes. Inside a beam window a beam shows only
+    /// across the glass channel (see <see cref="WindowOcclusion"/>).
     /// </summary>
     [StaticConstructorOnStartup]
     public static class BeamRenderer
@@ -21,7 +23,9 @@ namespace Beamwire
         private static readonly MaterialPropertyBlock Block = new MaterialPropertyBlock();
         private static readonly int ColorId = Shader.PropertyToID("_Color");
 
-        public static void Draw(BeamGraph graph)
+        private static readonly List<IntVec3> TmpCells = new List<IntVec3>();
+
+        public static void Draw(BeamGraph graph, Map map)
         {
             float altitude = AltitudeLayer.Projectile.AltitudeFor();
             Color beam = BeamwireArt.BeamColor;
@@ -50,19 +54,32 @@ namespace Beamwire
                 float coreAlpha = powered ? Mathf.Lerp(0.75f, 1f, frac) : 0.35f;
                 float glowAlpha = powered ? Mathf.Lerp(0.25f, 0.6f, frac) * flicker : 0.08f;
 
-                Vector3 mid = (a + b) * 0.5f;
                 Quaternion rot = Quaternion.AngleAxis((int)s.Dir * 45f, Vector3.up);
+                Vector3 unit = delta / length;
 
-                // Glow first, then the core on top.
-                Block.SetColor(ColorId, new Color(beam.r, beam.g, beam.b, glowAlpha));
-                Graphics.DrawMesh(MeshPool.plane10,
-                    Matrix4x4.TRS(mid, rot, new Vector3(coreWidth * GlowWidthFactor, 1f, length + coreWidth)),
-                    BeamwireTex.BeamGlow, 0, null, 0, Block);
+                // Draw only what isn't hidden inside a beam window's wall block.
+                TmpCells.Clear();
+                foreach (GridPos p in s.Cells) TmpCells.Add(MapBeamGrid.ToCell(p));
+                foreach (Vector2 span in WindowOcclusion.VisibleSpans(map, a, b, TmpCells))
+                {
+                    float spanLength = span.y - span.x;
+                    if (spanLength < 0.01f) continue;
+                    Vector3 mid = a + unit * ((span.x + span.y) * 0.5f);
+                    bool cutStart = span.x > 0.001f, cutEnd = span.y < length - 0.001f;
+                    // The glow overhangs a free end a little, but not into a window's wall.
+                    float glowLength = spanLength + ((cutStart || cutEnd) ? 0f : coreWidth);
 
-                Block.SetColor(ColorId, new Color(coreTint.r, coreTint.g, coreTint.b, coreAlpha));
-                Graphics.DrawMesh(MeshPool.plane10,
-                    Matrix4x4.TRS(mid + new Vector3(0f, 0.001f, 0f), rot, new Vector3(coreWidth, 1f, length)),
-                    BeamwireTex.BeamCore, 0, null, 0, Block);
+                    // Glow first, then the core on top.
+                    Block.SetColor(ColorId, new Color(beam.r, beam.g, beam.b, glowAlpha));
+                    Graphics.DrawMesh(MeshPool.plane10,
+                        Matrix4x4.TRS(mid, rot, new Vector3(coreWidth * GlowWidthFactor, 1f, glowLength)),
+                        BeamwireTex.BeamGlow, 0, null, 0, Block);
+
+                    Block.SetColor(ColorId, new Color(coreTint.r, coreTint.g, coreTint.b, coreAlpha));
+                    Graphics.DrawMesh(MeshPool.plane10,
+                        Matrix4x4.TRS(mid + new Vector3(0f, 0.001f, 0f), rot, new Vector3(coreWidth, 1f, spanLength)),
+                        BeamwireTex.BeamCore, 0, null, 0, Block);
+                }
             }
         }
 

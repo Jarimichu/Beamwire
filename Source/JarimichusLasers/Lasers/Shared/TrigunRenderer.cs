@@ -42,14 +42,24 @@ namespace JarimichusLasers
                 a.y = b.y = altitude + i * 0.0005f;
                 float length = (b - a).magnitude;
                 if (length < 0.05f) continue;
-                Vector3 mid = (a + b) * 0.5f;
                 Quaternion rot = Quaternion.LookRotation((b - a).normalized);
                 float core = Mathf.Lerp(0.035f, 0.05f, frac) * (0.85f + 0.3f * pulse);
+                Vector3 unit = (b - a) / length;
+                Color glow = new Color(GlowColor.r, GlowColor.g, GlowColor.b, Mathf.Lerp(0.3f, 0.6f, frac) * pulse);
+                Color coreColor = new Color(CoreColor.r, CoreColor.g, CoreColor.b, pulse);
 
-                Block.SetColor(ColorId, new Color(GlowColor.r, GlowColor.g, GlowColor.b, Mathf.Lerp(0.3f, 0.6f, frac) * pulse));
-                Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid, rot, new Vector3(core * 3f, 1f, length + core)), Glow, 0, null, 0, Block);
-                Block.SetColor(ColorId, new Color(CoreColor.r, CoreColor.g, CoreColor.b, pulse));
-                Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid + new Vector3(0f, 0.001f, 0f), rot, new Vector3(core, 1f, length)), Core, 0, null, 0, Block);
+                // Only the stretches not hidden inside a beam window's wall block (see Beamwire.WindowOcclusion).
+                foreach (Vector2 span in Beamwire.WindowOcclusion.VisibleSpans(Find.CurrentMap, a, b))
+                {
+                    float spanLength = span.y - span.x;
+                    if (spanLength < 0.01f) continue;
+                    Vector3 mid = a + unit * ((span.x + span.y) * 0.5f);
+                    bool cut = span.x > 0.001f || span.y < length - 0.001f;
+                    Block.SetColor(ColorId, glow);
+                    Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid, rot, new Vector3(core * 3f, 1f, spanLength + (cut ? 0f : core))), Glow, 0, null, 0, Block);
+                    Block.SetColor(ColorId, coreColor);
+                    Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(mid + new Vector3(0f, 0.001f, 0f), rot, new Vector3(core, 1f, spanLength)), Core, 0, null, 0, Block);
+                }
             }
         }
     }

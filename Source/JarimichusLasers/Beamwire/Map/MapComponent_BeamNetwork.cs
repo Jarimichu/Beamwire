@@ -421,7 +421,7 @@ namespace Beamwire
             }
             if (BeamwireMod.Settings.showBeams || AnyNodeSelected())
             {
-                BeamRenderer.Draw(graph);
+                BeamRenderer.Draw(graph, map);
             }
         }
 
