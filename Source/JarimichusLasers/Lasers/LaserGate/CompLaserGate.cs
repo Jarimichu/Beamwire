@@ -9,7 +9,7 @@ namespace JarimichusLasers
 {
     public enum LaserGateMode
     {
-        /// <summary>The fence blocks the way like a door that opens only for colonists and allies.</summary>
+        /// <summary>The fence is a wall of light nobody can pass or damage, until it's opened with the gate button.</summary>
         Barrier,
 
         /// <summary>The fence can be walked through, but burns hostiles. It switches off while a non-hostile passes.</summary>
@@ -18,7 +18,7 @@ namespace JarimichusLasers
 
     public class CompProperties_LaserGate : CompProperties
     {
-        /// <summary>The longest straight stretch of fence, in tiles, between posts or mirrors.</summary>
+        /// <summary>The most open tiles (curtain) in one straight stretch of fence, between posts or mirrors. Beam windows don't count.</summary>
         public int maxSpan = 5;
 
         /// <summary>How many Beamwire mirrors one stretch of fence may bend off.</summary>
@@ -69,8 +69,8 @@ namespace JarimichusLasers
     /// <see cref="CompProperties_LaserGate.maxSpan"/> tiles per straight leg, and fill the gap with a laser curtain
     /// while both have power. The path may bend off Beamwire mirrors and pass through beam windows, so posts can sit
     /// inside the base. Of the two posts a stretch joins, the one with the lower ID owns it.
-    /// Barrier mode fills the gap with <see cref="Building_LaserCurtain"/>s, door-like blocks that only colonists and
-    /// allies can pass; attacks on them land on the posts. Burn mode leaves the gap open and burns hostiles in it.
+    /// Barrier mode fills the gap with <see cref="Building_LaserCurtain"/>s, a wall of light nobody can pass or damage
+    /// until the gate is opened. Burn mode leaves the gap open and burns hostiles in it.
     /// </summary>
     public class CompLaserGate : ThingComp
     {
@@ -79,6 +79,9 @@ namespace JarimichusLasers
 
         public LaserGateMode mode = LaserGateMode.Barrier;
         public int powerLevel;
+
+        /// <summary>Barrier mode only: the gate is held open (the fence is off) so anyone can pass.</summary>
+        public bool open;
         private readonly LaserGateLink[] owned = new LaserGateLink[4];
         private CompPowerTrader power;
         private CompBreakdownable breakdown;
@@ -137,6 +140,7 @@ namespace JarimichusLasers
             base.PostExposeData();
             Scribe_Values.Look(ref mode, "jlgMode", LaserGateMode.Barrier);
             Scribe_Values.Look(ref powerLevel, "jlgPowerLevel", 0);
+            Scribe_Values.Look(ref open, "jlgOpen", false);
         }
 
         public override void ReceiveCompSignal(string signal)
@@ -181,8 +185,10 @@ namespace JarimichusLasers
                 // The owner's mode rules the stretch; both posts normally share it (the mode gizmo sets the whole fence).
                 if (found.Active && mode == LaserGateMode.Barrier)
                 {
-                    found.Active = EnsureCurtains(found, map);
-                    found.Lit = found.Active;
+                    // Held open: no curtain, no light. Otherwise the curtain closes once nobody is standing in the line.
+                    bool closed = !open && EnsureCurtains(found, map);
+                    if (!closed) ClearCurtains(found, map);
+                    found.Lit = closed;
                 }
                 else
                 {
@@ -204,8 +210,8 @@ namespace JarimichusLasers
 
         /// <summary>
         /// Follows a fence from this post in direction <paramref name="dir"/> to the next post: across open cells (the
-        /// curtain), through beam windows, and around Beamwire mirrors that turn it 90°. Each straight leg may be up to
-        /// maxSpan tiles long. Null if it runs into anything else, off the map, or too far. Cells holding laser
+        /// curtain), through beam windows, and around Beamwire mirrors that turn it 90°. Each straight leg may have up to
+        /// maxSpan open tiles; beam windows don't count. Null if it runs into anything else, off the map, or too far. Cells holding laser
         /// curtains count as open.
         /// </summary>
         public LaserGateLink FindLink(IntVec3 dir)
@@ -218,11 +224,12 @@ namespace JarimichusLasers
             for (int guard = 0; guard < 64; guard++)
             {
                 c += dir;
-                legLength++;
-                if (legLength > Props.maxSpan + 1 || !c.InBounds(map)) return null;
+                if (!c.InBounds(map)) return null;
                 Building e = c.GetEdifice(map);
                 if (e == null || e is Building_LaserCurtain)
                 {
+                    // Only open tiles (the curtain itself) count toward a leg's span; beam windows don't.
+                    if (++legLength > Props.maxSpan) return null;
                     link.Cells.Add(c);
                     leg.Cells.Add(c);
                     continue;
@@ -287,6 +294,10 @@ namespace JarimichusLasers
             }
         }
 
+        /// <summary>
+        /// Fills the stretch with curtains. False, with nothing spawned, while anyone stands in the line (the
+        /// curtain can't close on them) or something else has been built in it.
+        /// </summary>
         private bool EnsureCurtains(LaserGateLink link, Map map)
         {
             ThingDef def = LasersDefOf.JLG_LaserCurtain;
@@ -295,7 +306,11 @@ namespace JarimichusLasers
             {
                 Building e = c.GetEdifice(map);
                 if (e is Building_LaserCurtain) continue;
-                if (e != null) return false; // something was built in the gap
+                if (e != null || c.GetFirstPawn(map) != null) return false;
+            }
+            foreach (IntVec3 c in link.Cells)
+            {
+                if (c.GetEdifice(map) is Building_LaserCurtain) continue;
                 var curtain = (Building_LaserCurtain)ThingMaker.MakeThing(def);
                 curtain.ownerPost = parent;
                 curtain.SetFaction(parent.Faction);
@@ -311,7 +326,7 @@ namespace JarimichusLasers
             {
                 if (c.InBounds(map) && c.GetEdifice(map) is Building_LaserCurtain curtain && (curtain.ownerPost == parent || curtain.ownerPost == null))
                 {
-                    curtain.Destroy(DestroyMode.Vanish);
+                    curtain.Remove();
                 }
             }
         }
@@ -399,6 +414,28 @@ namespace JarimichusLasers
                     }
                 },
             };
+            if (barrier)
+            {
+                yield return new Command_Toggle
+                {
+                    defaultLabel = "JLG_GateOpen".Translate(),
+                    defaultDesc = "JLG_GateOpenDesc".Translate(),
+                    icon = ContentFinder<Texture2D>.Get("UI/Commands/HoldOpen", false) ?? BaseContent.BadTex,
+                    isActive = () => open,
+                    toggleAction = () =>
+                    {
+                        bool next = !open;
+                        foreach (CompLaserGate g in Fence())
+                        {
+                            g.open = next;
+                        }
+                        foreach (CompLaserGate g in Fence())
+                        {
+                            g.Refresh();
+                        }
+                    },
+                };
+            }
             yield return new Command_Action
             {
                 defaultLabel = "JLG_Power".Translate(Watts.ToString("0")),
@@ -428,7 +465,7 @@ namespace JarimichusLasers
 
         public override string CompInspectStringExtra()
         {
-            var lines = new List<string> { (mode == LaserGateMode.Barrier ? "JLG_InspectBarrier" : "JLG_InspectBurn").Translate() };
+            var lines = new List<string> { (mode == LaserGateMode.Burn ? "JLG_InspectBurn" : open ? "JLG_InspectOpen" : "JLG_InspectBarrier").Translate() };
             int links = LinkCount();
             lines.Add(links == 0 ? "JLG_InspectNoLinks".Translate(Props.maxSpan) : "JLG_InspectLinks".Translate(links));
             lines.Add("JLG_InspectPower".Translate(Watts.ToString("0"), BurnDamage.ToString("0")));

@@ -37,8 +37,7 @@ namespace JarimichusLasers
 
         /// <summary>
         /// Four thin strands of laser light with a soft red haze between them, along every leg of the stretch, from this
-        /// post round any mirrors to the other. Hidden inside beam windows' wall blocks, and dark across any cell whose
-        /// curtain is open (a colonist passing).
+        /// post round any mirrors to the other, hidden inside beam windows' wall blocks.
         /// </summary>
         private void DrawCurtain(LaserGateLink link, LaserGateMode mode)
         {
@@ -55,16 +54,7 @@ namespace JarimichusLasers
                 Vector3 dir = delta / length;
                 float start = li == 0 ? 0.3f : 0f, end = li == link.Legs.Count - 1 ? length - 0.3f : length;
 
-                // Open curtains (a colonist passing) leave their cell dark.
                 var dark = new List<Vector2>();
-                foreach (IntVec3 c in leg.Cells)
-                {
-                    if (c.GetEdifice(Map) is Building_LaserCurtain curtain && curtain.Open)
-                    {
-                        float t = Vector3.Dot(c.ToVector3Shifted() - leg.From, dir);
-                        dark.Add(new Vector2(t - 0.5f, t + 0.5f));
-                    }
-                }
                 List<Vector2> visible = Beamwire.WindowOcclusion.VisibleSpans(Map, leg.From, leg.To, leg.Cells);
                 var runs = new List<Vector2>();
                 foreach (Vector2 v in visible)
@@ -106,52 +96,31 @@ namespace JarimichusLasers
     }
 
     /// <summary>
-    /// One cell of a laser fence in Barrier mode: a door that only colonists and allies can open, so hostiles have to
-    /// break through. It can't be damaged itself; whatever hits it lands on the nearest post or mirror of its stretch.
-    /// It is spawned and removed by the posts (see <see cref="CompLaserGate"/>), never built by hand.
+    /// One cell of a laser fence in Barrier mode: a wall of laser light that nothing can pass and nothing can damage.
+    /// Raiders have to go around it, through walls, windows, mirrors or the posts themselves. Shots and beams pass
+    /// through it. It is spawned and removed by the posts (see <see cref="CompLaserGate"/>), never built by hand,
+    /// and removes itself if its post is gone.
     /// </summary>
-    public class Building_LaserCurtain : Building_Door
+    public class Building_LaserCurtain : Building
     {
         public Thing ownerPost;
 
-        public override bool PawnCanOpen(Pawn p)
-        {
-            if (p.HostileTo(Faction.OfPlayer)) return false;
-            return base.PawnCanOpen(p);
-        }
-
         public override void PreApplyDamage(ref DamageInfo dinfo, out bool absorbed)
         {
-            absorbed = true;
-            Thing post = NearestPost(dinfo.Instigator);
-            if (post != null && !post.Destroyed) post.TakeDamage(dinfo);
+            absorbed = true; // light can't be broken
         }
 
-        /// <summary>
-        /// The post or Beamwire mirror of this curtain's stretch nearest to the attacker. With the posts tucked away
-        /// behind mirrors, the mirrors in the wall line take the hits.
-        /// </summary>
-        private Thing NearestPost(Thing from)
+        /// <summary>Removes the curtain. It can't be destroyed (it isn't destroyable), so it just leaves the map.</summary>
+        public void Remove()
         {
-            if (ownerPost == null || ownerPost.Destroyed) return null;
-            CompLaserGate gate = ownerPost.TryGetComp<CompLaserGate>();
-            Thing best = ownerPost;
-            if (gate == null || from == null) return best;
-            foreach (LaserGateLink l in gate.OwnedLinks)
-            {
-                if (!l.Cells.Contains(Position)) continue;
-                var candidates = new List<Thing> { ownerPost, l.Other.parent };
-                for (int i = 1; i < l.Legs.Count; i++)
-                {
-                    Building mirror = l.Legs[i].From.ToIntVec3().GetEdifice(Map);
-                    if (mirror != null) candidates.Add(mirror);
-                }
-                foreach (Thing t in candidates)
-                {
-                    if ((t.Position - from.Position).LengthHorizontalSquared < (best.Position - from.Position).LengthHorizontalSquared) best = t;
-                }
-            }
-            return best;
+            if (Spawned) DeSpawn();
+        }
+
+        public override void TickRare()
+        {
+            base.TickRare();
+            // An orphan (its post was lost while the game wasn't running) cleans itself up.
+            if (ownerPost == null || ownerPost.Destroyed || !ownerPost.Spawned) Remove();
         }
 
         public override void ExposeData()
@@ -168,7 +137,7 @@ namespace JarimichusLasers
 #endif
     }
 
-    /// <summary>While placing a post, outlines the gaps it would fence off to posts already in line.</summary>
+    /// <summary>While placing a post, outlines the straight gaps (through beam windows) it would fence off to posts already in line.</summary>
     public class PlaceWorker_LaserGate : PlaceWorker
     {
         private static readonly IntVec3[] Dirs = { IntVec3.North, IntVec3.East, IntVec3.South, IntVec3.West };
@@ -182,7 +151,8 @@ namespace JarimichusLasers
             foreach (IntVec3 d in Dirs)
             {
                 var run = new List<IntVec3>();
-                for (int i = 1; i <= span + 1; i++)
+                int open = 0;
+                for (int i = 1; i <= 64; i++)
                 {
                     IntVec3 c = center + d * i;
                     if (!c.InBounds(map)) break;
@@ -190,10 +160,12 @@ namespace JarimichusLasers
                     ThingDef there = e?.def ?? (c.GetFirstThing(map, def.blueprintDef) != null ? def : null);
                     if (there == def)
                     {
-                        if (run.Count > 0) cells.AddRange(run);
+                        if (open > 0) cells.AddRange(run);
                         break;
                     }
+                    if (e != null && e.def.HasModExtension<Beamwire.BeamTransparentExtension>() && !(e is Building_LaserCurtain)) continue; // through a beam window
                     if (e != null && !(e is Building_LaserCurtain)) break;
+                    if (++open > span) break;
                     run.Add(c);
                 }
             }
