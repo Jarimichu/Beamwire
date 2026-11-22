@@ -40,7 +40,7 @@ Build a **beam emitter** on one power grid and a **beam receiver** on another, a
 | Relay | Re-fires incoming beams as one, at full range. Uses 30 W. |
 | Safety shutter | A lossless gate that closes while a colonist is in the beam beyond it. |
 | Beam capacitor | Stores 600 Wd, charges from spare power and covers shortfalls. |
-| Beam window | A wall that beams pass through. |
+| Beam window | A wall that beams pass through. It joins up with walls and other windows, so a row of them forms one long pane, in either direction. |
 
 **Research.** Beamwire has its own research tab, tied into vanilla progression:
 

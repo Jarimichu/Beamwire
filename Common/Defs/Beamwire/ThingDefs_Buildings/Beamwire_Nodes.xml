@@ -341,14 +341,22 @@ Place it just past an emitter or mirror, on the stretch of beam you want to guar
   <ThingDef ParentName="BuildingBase">
     <defName>Beamwire_Window</defName>
     <label>beam window</label>
-    <description>A wall with a thick glass slit. It keeps out people, gas and weather, holds up the roof and seals rooms like any wall, but power beams pass straight through it. Use it to bring beams into your base without leaving a door open.</description>
+    <description>A wall with a thick glass channel. It keeps out people, gas and weather, holds up the roof and seals rooms like any wall, but power beams pass straight through it. Use it to bring beams into your base without leaving a door open. It joins up with walls and other beam windows, so a row of them forms one long pane, in either direction.</description>
     <thingClass>Beamwire.Building_BeamWindow</thingClass>
     <category>Building</category>
     <graphicData>
-      <texPath>Beamwire/Things/Window_Base</texPath>
+      <!-- A linked atlas, like vanilla walls: each window picks its tile from the walls and windows around it,
+           so a window in a north-south wall shows a vertical glass channel, and windows side by side form
+           one continuous pane. -->
+      <texPath>Beamwire/Things/Window_Atlas</texPath>
       <graphicClass>Graphic_Single</graphicClass>
       <drawSize>(1,1)</drawSize>
+      <linkType>Basic</linkType>
+      <linkFlags>
+        <li>Wall</li>
+      </linkFlags>
     </graphicData>
+    <drawerType>MapMeshOnly</drawerType>
     <uiIconPath>Beamwire/Things/Window_Icon</uiIconPath>
     <altitudeLayer>Building</altitudeLayer>
     <passability>Impassable</passability>
@@ -389,9 +397,6 @@ Place it just past an emitter or mirror, on the stretch of beam you want to guar
     </researchPrerequisites>
     <modExtensions>
       <li Class="Beamwire.BeamTransparentExtension"/>
-      <li Class="Beamwire.BeamNodeGraphicExtension">
-        <node>Window</node>
-      </li>
     </modExtensions>
   </ThingDef>
 

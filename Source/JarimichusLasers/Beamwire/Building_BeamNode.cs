@@ -61,12 +61,28 @@ namespace Beamwire
     }
 
     /// <summary>
-    /// A beam window: a wall that beams pass through, drawn with Beamwire's window art.
+    /// A beam window: a wall that beams pass through. It links with walls and other windows like a vanilla wall.
     /// </summary>
     public class Building_BeamWindow : Building
     {
-        public override Graphic Graphic =>
-            GraphicDatabase.Get<Graphic_Single>(BeamwireArt.TexPath("Window", "Base"), ShaderDatabase.Cutout, def.graphicData.drawSize, Color.white);
+        private static Graphic linked;
+
+        /// <summary>
+        /// The window's linked graphic, kept white: the stone or metal it is built from doesn't tint the glass.
+        /// It links like a wall (see the def's linkFlags), picking its atlas tile from its neighbours.
+        /// </summary>
+        public override Graphic Graphic
+        {
+            get
+            {
+                if (linked == null)
+                {
+                    Graphic single = GraphicDatabase.Get<Graphic_Single>(BeamwireArt.TexPath("Window", "Atlas"), ShaderDatabase.Cutout, def.graphicData.drawSize, Color.white);
+                    linked = GraphicUtility.WrapLinked(single, LinkDrawerType.Basic);
+                }
+                return linked;
+            }
+        }
     }
 
     /// <summary>XML: marks a building that beams pass straight through, even though it is impassable.</summary>

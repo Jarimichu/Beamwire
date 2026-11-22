@@ -13,7 +13,7 @@ import os
 import struct
 import wave
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEX = os.path.join(ROOT, "Common", "Textures", "Beamwire")
@@ -279,20 +279,85 @@ def top_closed(st, kind):
     return img
 
 
-def window(st):
-    """A wall block with a glass slit; beams pass through."""
+# ---------------------------------------------------------------- beam window (linked, like vanilla walls)
+# Bits of the link mask, as RimWorld's LinkDirections: up (north) 1, right (east) 2, down (south) 4, left (west) 8.
+UP, RIGHT, DOWN, LEFT = 1, 2, 4, 8
+
+
+def window_tile(st, mask):
+    """One beam-window tile for the given link mask: a ceramic wall block with a glass channel that runs toward
+    every linked side (walls or other windows). The channel reaches the tile edge, unframed, on linked sides, so
+    windows side by side form one continuous pane, and a window in a north-south wall gets a vertical channel."""
     img = blank(); d = ImageDraw.Draw(img)
-    d.rectangle([0, 0, S, S], fill=rgba(st["plate_lo"]), outline=rgba(st["outline"]), width=max(4, st["ow"] - 2))
-    d.rectangle([0, 0, S, 22], fill=rgba(st["plate_hi"]))
-    if st["deco"] == "hazard":
-        for x in range(-S, S * 2, 36):
-            d.polygon([(x, S - 26), (x + 18, S - 26), (x + 8, S), (x - 10, S)], fill=rgba(st["accents"]["Emitter"]))
-    slit = blank(); sd = ImageDraw.Draw(slit)
-    sd.rounded_rectangle([20, 104, S - 20, 152], radius=8, fill=rgba(st["beam"], 120))
-    img.alpha_composite(glow_layer(slit, 6))
-    d.rounded_rectangle([20, 104, S - 20, 152], radius=8, outline=rgba(st["metal_dark"]), width=6)
-    d.line([(32, 114), (S - 60, 114)], fill=(255, 255, 255, 200), width=4)
+    o = rgba(st["outline"]); ow = max(6, st["ow"] + 1)
+    d.rectangle([0, 0, S, S], fill=rgba(st["plate_lo"]))
+    # wall-top lip and outline only on sides that don't continue into a neighbour
+    if not mask & UP:
+        d.rectangle([0, 0, S, 26], fill=rgba(st["plate_hi"]))
+        d.line([(0, ow // 2), (S, ow // 2)], fill=o, width=ow)
+    if not mask & DOWN:
+        d.line([(0, S - ow // 2 - 1), (S, S - ow // 2 - 1)], fill=o, width=ow)
+    if not mask & LEFT:
+        d.line([(ow // 2, 0), (ow // 2, S)], fill=o, width=ow)
+    if not mask & RIGHT:
+        d.line([(S - ow // 2 - 1, 0), (S - ow // 2 - 1, S)], fill=o, width=ow)
+
+    has_h, has_v = bool(mask & (LEFT | RIGHT)), bool(mask & (UP | DOWN))
+    c, half, inset = S // 2, 34, 28          # channel centre, half-width, end inset when a side is open
+    bars = []                                 # (x0, y0, x1, y1, horizontal?)
+    if has_h or not has_v:
+        x0 = 0 if mask & LEFT else (c - half if has_v else inset)
+        x1 = S if mask & RIGHT else (c + half if has_v else S - inset)
+        bars.append((x0, c - half, x1, c + half, True))
+    if has_v:
+        y0 = 0 if mask & UP else (c - half if has_h else inset)
+        y1 = S if mask & DOWN else (c + half if has_h else S - inset)
+        bars.append((c - half, y0, c + half, y1, False))
+
+    # glass: one shape for all arms, so an L, T or + has no seams; framed by an outline of that shape, which
+    # never crosses a linked edge (the shape runs off the tile there), so neighbouring panes join up
+    shape_mask = Image.new("L", (S, S), 0); md = ImageDraw.Draw(shape_mask)
+    for x0, y0, x1, y1, _ in bars:
+        md.rectangle([x0, y0, x1, y1], fill=255)
+    fw = 7
+    rim = ImageChops.subtract(shape_mask.filter(ImageFilter.MaxFilter(2 * fw + 1)), shape_mask)
+    glass = blank(); glass.paste(rgba(st["beam"], 150), (0, 0), shape_mask)
+    img.alpha_composite(glow_layer(glass, 6))
+    frame = blank(); frame.paste(rgba(st["metal_dark"]), (0, 0), rim)
+    img.alpha_composite(frame)
+    d = ImageDraw.Draw(img)
+    # glint: a thin highlight along each arm, continuous across tiles
+    for x0, y0, x1, y1, horiz in bars:
+        if horiz:
+            d.line([(x0 if mask & LEFT else x0 + 10, y0 + 12), (x1 if mask & RIGHT else x1 - 10, y0 + 12)], fill=(255, 255, 255, 170), width=4)
+        else:
+            d.line([(x0 + 12, y0 if mask & UP else y0 + 10), (x0 + 12, y1 if mask & DOWN else y1 - 10)], fill=(255, 255, 255, 170), width=4)
     return img
+
+
+ATLAS_CELL = 128                              # one atlas cell; RimWorld draws its inner 3/4 (0.1875 of 0.25)
+ATLAS_INNER = ATLAS_CELL * 3 // 4             # 96 px of real art per tile
+ATLAS_PAD = (ATLAS_CELL - ATLAS_INNER) // 2   # 16 px bleed on every side
+
+
+def window_atlas(st):
+    """A 4 x 4 linked-graphic atlas, laid out as RimWorld's MaterialAtlasPool reads it: tile i sits in column
+    i % 4 and row i // 4 counted from the BOTTOM of the image (texture V runs upward). Each tile's edge pixels
+    are repeated into its bleed margin so texture filtering never pulls in a neighbour."""
+    atlas = Image.new("RGBA", (ATLAS_CELL * 4, ATLAS_CELL * 4), (0, 0, 0, 0))
+    for i in range(16):
+        tile = window_tile(st, i).resize((ATLAS_INNER, ATLAS_INNER), Image.LANCZOS)
+        padded = Image.new("RGBA", (ATLAS_CELL, ATLAS_CELL))
+        padded.paste(tile.resize((ATLAS_CELL, ATLAS_CELL), Image.NEAREST).resize((ATLAS_CELL, ATLAS_CELL)), (0, 0))
+        # bleed: stretch the edge rows and columns outward
+        px = tile.load(); pp = padded.load()
+        for y in range(ATLAS_CELL):
+            for x in range(ATLAS_CELL):
+                sx = min(ATLAS_INNER - 1, max(0, x - ATLAS_PAD)); sy = min(ATLAS_INNER - 1, max(0, y - ATLAS_PAD))
+                pp[x, y] = px[sx, sy]
+        col, row = i % 4, i // 4
+        atlas.paste(padded, (col * ATLAS_CELL, (3 - row) * ATLAS_CELL))
+    return atlas
 
 
 def icon(st, kind):
@@ -451,8 +516,8 @@ def main():
         closed_icon = base(st, "Shutter")
         closed_icon.alpha_composite(top_closed(st, "Shutter"))
         save(down(top_closed(st, "Shutter")), "Things", "Shutter_TopClosed.png")
-        save(down(window(st)), "Things", "Window_Base.png")
-        save(down(window(st)), "Things", "Window_Icon.png")
+        save(window_atlas(st), "Things", "Window_Atlas.png")
+        save(down(window_tile(st, 0)), "Things", "Window_Icon.png")
         save(down(icon(st, "Shutter")), "UI", "ShutterOpen.png")
         save(down(closed_icon), "UI", "ShutterClosed.png")
     save(beam_core(), "Effects", "BeamCore.png")
